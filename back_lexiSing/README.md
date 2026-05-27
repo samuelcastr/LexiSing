@@ -1,6 +1,6 @@
 # back_lexiSing
 
-Backend base creado con FastAPI.
+Backend base creado con Django y Django REST Framework.
 
 ## Instrucciones rápidas
 
@@ -13,10 +13,10 @@ Backend base creado con FastAPI.
    ```bash
    pip install -r requirements.txt
    ```
-3. Correr la aplicación:
+3. Ejecutar la aplicación:
    ```bash
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   python manage.py runserver 0.0.0.0:8000
    ```
 4. Abrir en el navegador:
    - http://127.0.0.1:8000
-   - http://127.0.0.1:8000/docs
+   - http://127.0.0.1:8000/api/
