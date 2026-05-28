@@ -14,8 +14,12 @@
 - `feature/<nombre>` - nuevas funcionalidades o mejoras
 - `bugfix/<nombre>` - corrección de errores
 - `hotfix/<nombre>` - arreglos urgentes en producción
+- `<cielo>` - arreglos urgentes en producción
+- `<beickert>` - arreglos urgentes en producción
+- `<juan>` - arreglos urgentes en producción
+- `<samuel>` - arreglos urgentes en producción
 
-#### Ejemplos
+#### Ejemplos`
 
 - `feature/login-usuario`
 - `bugfix/corregir-inicio-sesion`
@@ -62,6 +66,7 @@ Ejemplos:
 - Beickert Torres
 - Cielo Rodríguez
 - Juan Riveros
+- Samuel Castro
 
 ## Buenas prácticas
 
@@ -80,6 +85,7 @@ cd back_lexiSing
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 ```
 
@@ -90,3 +96,37 @@ cd front_lexiSing
 npm install
 ng serve
 ```
+
+## Verificar el proyecto
+
+Para un compañero o docente que quiera comprobar el proyecto:
+
+1. Clonar el repositorio y abrir el proyecto:
+   ```bash
+git clone <url-del-repositorio>
+cd proyecto_lexiSing
+```
+2. Correr el backend:
+   ```bash
+cd back_lexiSing
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver 0.0.0.0:8000
+```
+3. Abrir el backend en el navegador o usar `curl`:
+   ```bash
+curl -sSf http://127.0.0.1:8000/api/health/
+```
+4. Correr el frontend en otra terminal:
+   ```bash
+cd front_lexiSing
+npm install
+ng serve
+```
+5. Verificar la aplicación en el navegador:
+   - Backend: `http://127.0.0.1:8000/`
+   - Frontend: `http://localhost:4200/`
+
+> Nota: Si el servidor Django muestra migraciones pendientes, ejecutar `python manage.py migrate` antes de levantarlo.
