@@ -89,6 +89,18 @@ python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 ```
 
+#### Configuración de Firebase
+
+El archivo `firebase-key.json` es necesario para autenticarse con Firebase. Para obtenerlo:
+
+1. Ve a [Firebase Console](https://console.firebase.google.com/)
+2. Selecciona tu proyecto
+3. Ve a **Project Settings** (Configuración del proyecto)
+4. Dirígete a la pestaña **Service Accounts** (Cuentas de servicio)
+5. Haz clic en **Generate New Private Key** (Generar nueva clave privada)
+6. Guarda el archivo descargado como `firebase-key.json` en la carpeta `back_lexiSing/`
+
+
 ### Frontend
 
 ```bash
