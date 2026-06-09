@@ -1,0 +1,40 @@
+<div class="auth-container">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+    <h2>Crear cuenta</h2>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre completo</mat-label>
+      <input matInput formControlName="nombre" />
+      <mat-error *ngIf="nombre?.hasError('required')">El nombre es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput formControlName="email" type="email" />
+      <mat-error *ngIf="email?.hasError('required')">El correo es obligatorio</mat-error>
+      <mat-error *ngIf="email?.hasError('email')">Formato de correo inválido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Contraseña</mat-label>
+      <input matInput formControlName="password" type="password" />
+      <mat-error *ngIf="password?.hasError('required')">La contraseña es obligatoria</mat-error>
+      <mat-error *ngIf="password?.hasError('minlength')">Mínimo 8 caracteres</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Confirmar contraseña</mat-label>
+      <input matInput formControlName="confirmPassword" type="password" />
+      <mat-error *ngIf="confirmPassword?.hasError('required')">La confirmación es obligatoria</mat-error>
+      <mat-error *ngIf="form.hasError('passwordsMismatch')">Las contraseñas no coinciden</mat-error>
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading">Crear cuenta</button>
+    </div>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
+
+    <p class="links">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+  </form>
+</div>
