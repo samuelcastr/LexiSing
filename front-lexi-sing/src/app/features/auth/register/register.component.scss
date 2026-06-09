@@ -125,27 +125,42 @@ form{
 .social-icons{
     display:flex;
     justify-content:center;
-    gap:90px;
+    gap:25px;
     margin-top:35px;
 }
 
 .social{
-    width:50px;
-    height:50px;
+    width:60px;
+    height:60px;
     border-radius:50%;
+    border:none;
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:30px;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
+.social:hover{
+    transform:translateY(-5px);
+    box-shadow:0 8px 25px rgba(0,0,0,0.3);
+}
+
+.social svg{
+    width:32px;
+    height:32px;
 }
 
 .facebook{
     background:#1877f2;
-    color:white;
 }
 
 .google{
-    color:#ea4335;
+    background:white;
+}
+
+.apple{
     background:white;
 }
 
