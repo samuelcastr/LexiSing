@@ -1,40 +1,115 @@
 <div class="auth-container">
-  <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
-    <h2>Crear cuenta</h2>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nombre completo</mat-label>
-      <input matInput formControlName="nombre" />
-      <mat-error *ngIf="nombre?.hasError('required')">El nombre es obligatorio</mat-error>
-    </mat-form-field>
+  <div class="top-section">
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Correo electrónico</mat-label>
-      <input matInput formControlName="email" type="email" />
-      <mat-error *ngIf="email?.hasError('required')">El correo es obligatorio</mat-error>
-      <mat-error *ngIf="email?.hasError('email')">Formato de correo inválido</mat-error>
-    </mat-form-field>
+    <h1 class="title">Regístrate</h1>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Contraseña</mat-label>
-      <input matInput formControlName="password" type="password" />
-      <mat-error *ngIf="password?.hasError('required')">La contraseña es obligatoria</mat-error>
-      <mat-error *ngIf="password?.hasError('minlength')">Mínimo 8 caracteres</mat-error>
-    </mat-form-field>
+    <div class="tabs">
+      <a routerLink="/login" class="tab">
+        Iniciar Sesión
+      </a>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Confirmar contraseña</mat-label>
-      <input matInput formControlName="confirmPassword" type="password" />
-      <mat-error *ngIf="confirmPassword?.hasError('required')">La confirmación es obligatoria</mat-error>
-      <mat-error *ngIf="form.hasError('passwordsMismatch')">Las contraseñas no coinciden</mat-error>
-    </mat-form-field>
-
-    <div class="actions">
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading">Crear cuenta</button>
+      <a routerLink="/register" class="tab active">
+        Registrarse
+      </a>
     </div>
 
-    <div class="error" *ngIf="error">{{ error }}</div>
+    <form [formGroup]="form" (ngSubmit)="submit()">
 
-    <p class="links">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
-  </form>
+      <div class="input-group">
+        <span class="icon">👤</span>
+        <input
+          type="text"
+          placeholder="Nombre"
+          formControlName="nombre">
+      </div>
+
+      <div class="input-group">
+        <span class="icon">✉️</span>
+        <input
+          type="email"
+          placeholder="Correo Electrónico"
+          formControlName="email">
+      </div>
+
+      <div class="input-group">
+        <span class="icon">🔒</span>
+        <input
+          type="password"
+          placeholder="Contraseña"
+          formControlName="password">
+      </div>
+
+      <div class="input-group">
+        <span class="icon">🔒</span>
+        <input
+          type="password"
+          placeholder="Confirmar Contraseña"
+          formControlName="confirmPassword">
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="bottom-section">
+
+    <button
+      class="main-btn"
+      type="submit"
+      (click)="submit()"
+      [disabled]="loading">
+
+      Registrarse
+
+    </button>
+
+    <div class="divider">
+      <div class="line"></div>
+      <span>O inicia sesión con</span>
+      <div class="line"></div>
+    </div>
+
+    <div class="social-icons">
+
+      <!-- Facebook -->
+      <button type="button" class="social facebook">
+
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#fff"
+            d="M22.675 0h-21.35C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24H12.82v-9.294H9.692V11.31h3.128V8.413c0-3.1 1.893-4.788 4.658-4.788 1.325 0 2.464.099 2.795.143v3.24l-1.918.001c-1.504 0-1.796.716-1.796 1.765v2.314h3.587l-.467 3.396h-3.12V24h6.116C23.407 24 24 23.407 24 22.676V1.325C24 .593 23.407 0 22.675 0z"/>
+        </svg>
+
+      </button>
+
+      <!-- Google -->
+      <button type="button" class="social google">
+
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4"
+            d="M12 10.5v3.75h5.4c-.234 1.35-1.35 3.15-4.05 3.15-2.4 0-4.35-1.95-4.35-4.35s1.95-4.35 4.35-4.35c1.17 0 1.95.495 2.4 1.02l1.95-1.95C16.23 6.15 14.76 5.25 12 5.25 7.95 5.25 4.5 8.7 4.5 12.75s3.45 7.5 7.5 7.5c4.35 0 7.35-3 7.35-7.5 0-.48-.045-.9-.1-1.2H12z"/>
+          <path fill="#34A853"
+            d="M5.4 8.4l1.83 1.35C8.34 8.31 10.05 7.5 12 7.5c1.44 0 2.64.57 3.45 1.5l1.8-1.8C16.65 5.85 14.52 4.5 12 4.5c-2.64 0-4.89 1.53-6 3.9z"/>
+          <path fill="#FBBC05"
+            d="M12 19.5c-2.4 0-4.425-1.35-5.4-3.345l-1.8 1.38C5.25 19.8 8.1 21 12 21c2.85 0 5.25-.975 6.9-2.655L17.4 16.8c-1.05 1.05-2.55 1.8-5.4 1.8z"/>
+          <path fill="#EA4335"
+            d="M19.8 4.5L15.9 8.25C15.075 7.485 13.755 6.9 12 6.9c-2.55 0-4.74 1.65-5.55 3.915l-1.8-1.38C5.85 5.55 8.7 3.75 12 3.75c1.95 0 3.75.75 5.4 2.55z"/>
+        </svg>
+
+      </button>
+
+      <!-- Apple -->
+      <button type="button" class="social apple">
+
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#fff"
+            d="M16.365 1.43c-1.227.74-1.91 1.907-1.91 3.318 0 1.407.69 2.58 1.91 3.318.156.095.26.25.26.43v.19c0 .3-.24.54-.54.54-.13 0-.26-.03-.37-.1-1.7-.96-2.73-2.87-2.73-5.25 0-2.38 1.03-4.29 2.73-5.25.11-.07.24-.1.37-.1.3 0 .54.24.54.54v.19c0 .18-.1.34-.26.43z"/>
+        </svg>
+
+      </button>
+
+    </div>
+
+  </div>
+
 </div>

@@ -1,29 +1,70 @@
 <div class="auth-container">
-  <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
-    <h2>Iniciar sesión</h2>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Correo electrónico</mat-label>
-      <input matInput formControlName="email" type="email" autocomplete="email" />
-      <mat-error *ngIf="email?.hasError('required')">El correo es obligatorio</mat-error>
-      <mat-error *ngIf="email?.hasError('email')">Formato de correo inválido</mat-error>
-    </mat-form-field>
+  <div class="top-section">
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Contraseña</mat-label>
-      <input matInput formControlName="password" type="password" autocomplete="current-password" />
-      <mat-error *ngIf="password?.hasError('required')">La contraseña es obligatoria</mat-error>
-    </mat-form-field>
+    <h1 class="title">Inicia Sesión</h1>
 
-    <div class="actions">
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading">Iniciar sesión</button>
+    <div class="tabs">
+      <a routerLink="/login" class="tab active">Iniciar Sesión</a>
+      <a routerLink="/register" class="tab">Registrarse</a>
     </div>
 
-    <div class="social">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <div class="input-group">
+        <span class="icon">👤</span>
+        <input
+          type="email"
+          placeholder="Correo Electrónico"
+          formControlName="email">
+      </div>
+
+      <div class="input-group">
+        <span class="icon">🔒</span>
+        <input
+          type="password"
+          placeholder="Contraseña"
+          formControlName="password">
+      </div>
+
+      <div class="forgot">
+        <a routerLink="/forgot-password">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="bottom-section">
+
+    <button class="main-btn" type="submit">
+      Iniciar Sesión
+    </button>
+
+    <div class="divider">
+      <div class="line"></div>
+      <span>O inicia sesión con</span>
+      <div class="line"></div>
     </div>
 
-    <div class="error" *ngIf="error">{{ error }}</div>
+    <div class="social-icons">
 
-    <p class="links">¿No tienes una cuenta? <a routerLink="/register">Regístrate</a></p>
-  </form>
+      <div class="social facebook">
+        f
+      </div>
+
+      <div class="social google">
+        G
+      </div>
+
+      <div class="social apple">
+        
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
