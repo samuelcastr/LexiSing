@@ -1,0 +1,22 @@
+.chat {
+  padding: 12px;
+}
+.messages {
+  max-height: 60vh;
+  overflow: auto;
+  margin-bottom: 12px;
+}
+.composer {
+  display: flex;
+  gap: 8px;
+}
+
+.message { display:flex; align-items:flex-end; margin:8px 0; }
+.message .bubble { max-width:70%; padding:10px 12px; border-radius:12px; }
+.message.mine { justify-content:flex-end; }
+.message.mine .bubble { background:#DCF8C6; border-bottom-right-radius:2px; }
+.message.theirs { justify-content:flex-start; }
+.message.theirs .bubble { background:#fff; border:1px solid #e0e0e0; border-bottom-left-radius:2px; }
+.message .meta { display:flex; justify-content:space-between; gap:8px; margin-top:6px; font-size:0.75rem; color:#666; }
+.message .delete { background:transparent; border:none; margin-left:8px; cursor:pointer; }
+

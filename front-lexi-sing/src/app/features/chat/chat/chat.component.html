@@ -1,0 +1,19 @@
+<div class="chat">
+  <div class="messages">
+    <div *ngFor="let m of messages" class="message" [ngClass]="{'mine': m.senderUid === uid, 'theirs': m.senderUid !== uid}">
+      <div class="bubble">
+        <div class="content">{{ m.content }}</div>
+        <div class="meta">
+          <small class="sender">{{ m.senderUid }}</small>
+          <small class="time">{{ m.timestamp?.toDate ? (m.timestamp.toDate() | date:'shortTime') : '' }}</small>
+        </div>
+      </div>
+      <button *ngIf="m.senderUid === uid" mat-icon-button class="delete" (click)="deleteMessage(m.id)">🗑️</button>
+    </div>
+  </div>
+
+  <div class="composer">
+    <input matInput placeholder="Escribe un mensaje" [(ngModel)]="text" />
+    <button mat-raised-button color="primary" (click)="send()">Enviar</button>
+  </div>
+</div>
