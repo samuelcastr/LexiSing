@@ -1,19 +1,45 @@
-<div class="chat">
-  <div class="messages">
-    <div *ngFor="let m of messages" class="message" [ngClass]="{'mine': m.senderUid === uid, 'theirs': m.senderUid !== uid}">
-      <div class="bubble">
-        <div class="content">{{ m.content }}</div>
-        <div class="meta">
-          <small class="sender">{{ m.senderUid }}</small>
-          <small class="time">{{ m.timestamp?.toDate ? (m.timestamp.toDate() | date:'shortTime') : '' }}</small>
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="back-button">
+      <a routerLink="/conversations">
+        <mat-icon>arrow_back</mat-icon>
+        Conversaciones
+      </a>
+    </div>
+    <h2>Chat</h2>
+    <div class="spacer"></div> <!-- Spacer para centrar título -->
+  </div>
+
+  <div class="messages" #messagesContainer>
+    <div *ngFor="let m of messages" class="message-row" [ngClass]="{'sent': isMyMessage(m.senderUid), 'received': !isMyMessage(m.senderUid)}">
+      <div class="bubble-wrapper">
+        <div class="bubble" [ngClass]="{'sent': isMyMessage(m.senderUid), 'received': !isMyMessage(m.senderUid)}">
+          <div class="content">{{ m.content }}</div>
+          <div class="timestamp">{{ getMessageTime(m.timestamp) }}</div>
         </div>
+        <button *ngIf="isMyMessage(m.senderUid)" mat-icon-button [matMenuTriggerFor]="menu" class="delete-btn">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="deleteMessage(m.id)">
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </mat-menu>
       </div>
-      <button *ngIf="m.senderUid === uid" mat-icon-button class="delete" (click)="deleteMessage(m.id)">🗑️</button>
     </div>
   </div>
 
   <div class="composer">
-    <input matInput placeholder="Escribe un mensaje" [(ngModel)]="text" />
-    <button mat-raised-button color="primary" (click)="send()">Enviar</button>
+    <input 
+      matInput 
+      placeholder="Escribe un mensaje..." 
+      [(ngModel)]="text" 
+      (keyup.enter)="send()"
+      class="input-field"
+    />
+    <button mat-icon-button color="primary" (click)="send()" [disabled]="!text.trim()">
+      <mat-icon>send</mat-icon>
+    </button>
   </div>
 </div>

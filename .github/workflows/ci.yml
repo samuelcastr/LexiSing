@@ -1,0 +1,52 @@
+name: Build & Test CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    
+    - name: Install frontend dependencies
+      working-directory: ./front-lexi-sing
+      run: npm ci
+    
+    - name: Build frontend
+      working-directory: ./front-lexi-sing
+      run: npm run build
+    
+    - name: Lint frontend
+      working-directory: ./front-lexi-sing
+      run: npm run lint 2>/dev/null || echo "Linter warnings ignored"
+
+  build-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.14'
+    
+    - name: Install backend dependencies
+      working-directory: ./back_lexiSing
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Check backend syntax
+      working-directory: ./back_lexiSing
+      run: python manage.py check

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./front-lexi-sing
+      dockerfile: Dockerfile
+    container_name: lexising-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - lexising-network
+
+  backend:
+    build:
+      context: ./back_lexiSing
+      dockerfile: Dockerfile
+    container_name: lexising-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DEBUG: "True"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
+      CORS_ALLOWED_ORIGINS: "http://localhost,http://127.0.0.1,http://frontend"
+    volumes:
+      - ./back_lexiSing/firebase-key.json:/app/firebase-key.json:ro
+    networks:
+      - lexising-network
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: lexising-db
+    environment:
+      POSTGRES_DB: lexising
+      POSTGRES_USER: lexising
+      POSTGRES_PASSWORD: lexising_dev_password
+    volumes:
+      - lexising_data:/var/lib/postgresql/data
+    networks:
+      - lexising-network
+
+networks:
+  lexising-network:
+    driver: bridge
+
+volumes:
+  lexising_data:
