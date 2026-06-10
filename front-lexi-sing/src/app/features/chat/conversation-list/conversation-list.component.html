@@ -1,11 +1,51 @@
-<div class="conv-list">
-  <h3>Tus conversaciones</h3>
-  <mat-list>
-    <mat-list-item *ngFor="let c of conversations">
-      <a [routerLink]="['/chat', c.id]">{{ c.lastMessage || 'Nueva conversación' }}</a>
-    </mat-list-item>
-  </mat-list>
-  <div class="actions">
-    <button mat-stroked-button routerLink="/dashboard">Volver</button>
+<div class="conversation-list-container">
+  <div class="header">
+    <h2>Tus Conversaciones</h2>
+    <button mat-mini-fab color="primary" (click)="toggleNewConvForm()" [matTooltip]="'Nueva conversación'">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="showNewConvForm" class="new-conv-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>UID del usuario</mat-label>
+      <input matInput [(ngModel)]="newConvParticipant" placeholder="Ej: user_id_123" />
+    </mat-form-field>
+    <div class="form-actions">
+      <button mat-raised-button color="primary" (click)="createConversation()">
+        <mat-icon>check</mat-icon>
+        Crear
+      </button>
+      <button mat-stroked-button (click)="toggleNewConvForm()">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <div class="conversations-list">
+    <div *ngIf="conversations.length === 0" class="empty-state">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <p>No tienes conversaciones aún</p>
+      <p class="hint">Haz clic en + para crear una nueva</p>
+    </div>
+
+    <mat-card *ngFor="let c of conversations" class="conversation-item" [routerLink]="['/chat', c.id]">
+      <div class="conversation-content">
+        <div class="conversation-info">
+          <h3>Conversación</h3>
+          <p class="last-message">{{ c.lastMessage || 'Inicia una conversación...' }}</p>
+          <small class="time" *ngIf="c.updatedAt">{{ c.updatedAt?.toDate ? (c.updatedAt.toDate() | date:'short') : 'Ahora' }}</small>
+        </div>
+        <mat-icon class="arrow">chevron_right</mat-icon>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="footer">
+    <button mat-stroked-button routerLink="/dashboard">
+      <mat-icon>arrow_back</mat-icon>
+      Volver al Dashboard
+    </button>
   </div>
 </div>
