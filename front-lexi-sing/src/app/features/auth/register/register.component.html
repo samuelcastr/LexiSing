@@ -48,21 +48,22 @@
           formControlName="confirmPassword">
       </div>
 
+      <button
+        class="main-btn"
+        type="submit"
+        [disabled]="loading">
+        {{ loading ? 'Cargando...' : 'Registrarse' }}
+      </button>
+
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+
     </form>
 
   </div>
 
   <div class="bottom-section">
-
-    <button
-      class="main-btn"
-      type="submit"
-      (click)="submit()"
-      [disabled]="loading">
-
-      Registrarse
-
-    </button>
 
     <div class="divider">
       <div class="line"></div>
