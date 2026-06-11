@@ -2,11 +2,16 @@
     width:100%;
     min-height:100vh;
     background:#f3f4f6;
+    display:flex;
+    flex-direction:column;
 }
 
 .top-section{
     width:100%;
     padding-top:70px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
 }
 
 .title{
@@ -46,7 +51,8 @@
 
 form{
     width:350px;
-    margin:35px auto 0;
+    margin:35px auto;
+    margin-bottom:60px;
 }
 
 .input-group{
@@ -83,7 +89,7 @@ form{
 }
 
 .bottom-section{
-    margin-top:70px;
+    margin-top:auto;
     background:#05101e;
     border-top-left-radius:35px;
     border-top-right-radius:35px;
@@ -212,6 +218,7 @@ form{
     form{
         width:85%;
         max-width:320px;
+        margin-bottom:50px;
     }
 
     .bottom-section{
@@ -246,7 +253,7 @@ form{
     form{
         width:90%;
         max-width:300px;
-        margin:20px auto 0;
+        margin:20px auto 50px;
     }
 
     .input-group{
@@ -317,7 +324,7 @@ form{
 
     form{
         width:94%;
-        margin:18px auto 0;
+        margin:18px auto 50px;
     }
 
     .input-group{
