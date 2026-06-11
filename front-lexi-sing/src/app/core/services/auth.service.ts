@@ -7,32 +7,86 @@ import { from, Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { AuthResponse } from '../models/auth-response.model';
+import { UserApiService } from './user-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private auth: Auth, private firestore: Firestore, private router: Router) {}
 
-  register(email: string, password: string, nombre: string): Observable<AuthResponse> {
-    return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
-      switchMap(cred => {
-        const uid = cred.user.uid;
-        const userData: User = {
-          uid,
-          nombre,
-          email: email,
-          rol: 'usuario',
-          fechaCreacion: serverTimestamp(),
-          activo: true,
-        } as unknown as User;
+  constructor(private auth: Auth, private firestore: Firestore, private router: Router, private userApi: UserApiService) { }
 
-        const ref = doc(this.firestore, 'usuarios', uid);
-        return from(setDoc(ref, userData)).pipe(
-          map(() => ({ user: userData, message: 'Registro exitoso' } as AuthResponse))
-        );
-      }),
-      catchError(err => of({ user: null, message: err?.message || 'Error al registrar', error: err } as AuthResponse))
-    );
-  }
+register(
+  email: string,
+  password: string,
+  nombre: string
+): Observable<AuthResponse> {
+
+  return from(
+    createUserWithEmailAndPassword(
+      this.auth,
+      email,
+      password
+    )
+  ).pipe(
+
+    switchMap(cred => {
+
+      const uid = cred.user.uid;
+
+      console.log('UID creado:', uid);
+
+      const userData: User = {
+        uid,
+        nombre,
+        email,
+        rol: 'usuario',
+        fechaCreacion: serverTimestamp(),
+        activo: true,
+      } as unknown as User;
+
+      const ref = doc(
+        this.firestore,
+        'usuarios',
+        uid
+      );
+
+      return from(
+        setDoc(ref, userData)
+      ).pipe(
+
+        map(() => {
+
+          console.log(
+            'Usuario guardado en Firestore'
+          );
+
+          return {
+            user: userData,
+            message: 'Registro exitoso'
+          };
+        })
+
+      );
+
+    }),
+
+    catchError(err => {
+
+      console.error(
+        'ERROR REGISTER:',
+        err
+      );
+
+      return of({
+        user: null,
+        message:
+          err?.message ||
+          'Error al registrar',
+        error: err
+      });
+
+    })
+  );
+}
 
   login(email: string, password: string): Observable<AuthResponse> {
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(

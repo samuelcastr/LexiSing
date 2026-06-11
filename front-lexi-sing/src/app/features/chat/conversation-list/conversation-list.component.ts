@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
+import { UserApiService } from '../../../core/services/user-api.service';
 
 @Component({
   selector: 'app-conversation-list',
@@ -20,15 +21,30 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./conversation-list.component.scss']
 })
 export class ConversationListComponent implements OnInit {
+  users: any[] = [];
+  selectedUserUid = '';
   conversations: any[] = [];
   uid: string | null = null;
   showNewConvForm = false;
   newConvParticipant = '';
 
-  constructor(private convService: ConversationService, private auth: AuthService, private router: Router) {}
+  constructor(private convService: ConversationService, private auth: AuthService, private router: Router, private userApi: UserApiService) { }
 
   ngOnInit(): void {
     this.loadConversations();
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+
+    this.userApi.getUsers()
+      .subscribe(users => {
+
+        this.users = users.filter(
+          u => u.uid !== this.uid
+        );
+
+      });
   }
 
   loadConversations(): void {
@@ -42,12 +58,21 @@ export class ConversationListComponent implements OnInit {
   }
 
   createConversation(): void {
-    if (!this.newConvParticipant || !this.uid) return;
-    this.convService.createConversation([this.uid, this.newConvParticipant]).then(() => {
-      this.newConvParticipant = '';
-      this.showNewConvForm = false;
-      this.loadConversations();
-    }).catch(err => console.error('Error creando conversación:', err));
+
+    if (!this.selectedUserUid || !this.uid)
+      return;
+
+    this.convService
+      .createConversation([
+        this.uid,
+        this.selectedUserUid
+      ])
+      .then(() => {
+
+        this.selectedUserUid = '';
+        this.showNewConvForm = false;
+
+      });
   }
 
   toggleNewConvForm(): void {

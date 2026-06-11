@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from app.core.authentication import FirebaseAuthentication
 from rest_framework import status
-
+from app.core.firebase import db
 
 class HealthCheckView(APIView):
     permission_classes = [AllowAny]
@@ -54,4 +54,43 @@ class ConversationsListView(APIView):
                 'created_by': uid,
             }
         }, status=status.HTTP_201_CREATED)
+    
+class UsersListView(APIView):
 
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+
+        try:
+
+            usuarios_ref = db.collection(
+                'usuarios'
+            )
+
+            docs = usuarios_ref.stream()
+
+            users = []
+
+            for doc in docs:
+
+                data = doc.to_dict()
+
+                users.append({
+                    'uid': data.get('uid'),
+                    'nombre': data.get('nombre'),
+                    'email': data.get('email')
+                })
+
+            return Response(
+                users,
+                status=200
+            )
+
+        except Exception as e:
+
+            return Response(
+                {
+                    'error': str(e)
+                },
+                status=500
+            )

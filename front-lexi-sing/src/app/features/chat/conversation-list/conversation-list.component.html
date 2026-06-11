@@ -9,7 +9,33 @@
   <div *ngIf="showNewConvForm" class="new-conv-form">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>UID del usuario</mat-label>
-      <input matInput [(ngModel)]="newConvParticipant" placeholder="Ej: user_id_123" />
+      <mat-form-field appearance="outline" class="full-width">
+
+  <mat-label>
+    Selecciona un usuario
+  </mat-label>
+
+  <select
+    matNativeControl
+    [(ngModel)]="selectedUserUid">
+
+    <option value="">
+      Seleccionar usuario
+    </option>
+
+    <option
+      *ngFor="let user of users"
+      [value]="user.uid">
+
+      {{ user.nombre }}
+      -
+      {{ user.email }}
+
+    </option>
+
+  </select>
+
+</mat-form-field>
     </mat-form-field>
     <div class="form-actions">
       <button mat-raised-button color="primary" (click)="createConversation()">
