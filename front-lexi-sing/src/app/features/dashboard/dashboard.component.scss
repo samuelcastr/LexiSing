@@ -1,70 +1,139 @@
-.dashboard-container {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f6fa;
 }
 
-.header {
-  margin-bottom: 48px;
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 500;
-    margin: 0 0 8px 0;
-    color: #1976d2;
-  }
-  .subtitle {
-    font-size: 1rem;
-    color: #666;
-    margin: 0;
-  }
+/* Sidebar */
+
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: #1e1b3a;
+  color: white;
+  padding: 25px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 24px;
+  font-weight: bold;
+  color: #8b5cf6;
+
+  margin-bottom: 40px;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 15px;
+
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  color: #d1d5db;
+
+  transition: 0.3s;
+}
+
+nav a:hover,
+nav a.active {
+  background: #8b5cf6;
+  color: white;
+}
+
+/* Contenido */
+
+.content {
+  flex: 1;
+  padding: 30px;
+}
+
+/* Barra superior */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 30px;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.topbar p {
+  color: #6b7280;
+}
+
+.profile mat-icon {
+  font-size: 45px;
+  width: 45px;
+  height: 45px;
+
+  color: #8b5cf6;
+}
+
+/* Tarjetas */
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+  gap: 25px;
 }
 
 .feature-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+  padding: 25px;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  }
+  border-radius: 20px;
 
-  mat-card-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
 
-    .icon {
-      font-size: 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  transition: 0.3s;
+}
 
-    mat-card-title {
-      font-size: 1.25rem;
-      margin: 0;
-    }
-  }
+.feature-card:hover {
+  transform: translateY(-5px);
+}
 
-  mat-card-content {
-    p {
-      color: #666;
-      margin: 0 0 16px 0;
-      font-size: 0.9rem;
-    }
+.card-icon {
+  font-size: 45px;
 
-    button {
-      width: 100%;
-      mat-icon {
-        margin-right: 8px;
-      }
-    }
-  }
+  margin-bottom: 15px;
+}
+
+.feature-card h3 {
+  margin-bottom: 10px;
+
+  color: #1f2937;
+}
+
+.feature-card p {
+  color: #6b7280;
+
+  margin-bottom: 20px;
+}
+
+button {
+  border-radius: 12px;
 }
