@@ -1,0 +1,187 @@
+<div class="dashboard-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div>
+
+      <div class="logo">
+        <mat-icon>back_hand</mat-icon>
+      </div>
+
+      <nav>
+
+        <a class="active">
+          <mat-icon>home</mat-icon>
+          Inicio
+        </a>
+
+        <a routerLink="/conversations">
+          <mat-icon>chat</mat-icon>
+          Chat
+        </a>
+
+        <a>
+          <mat-icon>forum</mat-icon>
+          Comunicación en vivo
+        </a>
+
+        <a>
+          <mat-icon>groups</mat-icon>
+          Empleados
+        </a>
+
+        <a>
+          <mat-icon>description</mat-icon>
+          Reportes
+        </a>
+
+        <a>
+          <mat-icon>settings</mat-icon>
+          Configuración
+        </a>
+
+      </nav>
+
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Cerrar sesión
+    </button>
+
+  </aside>
+
+  <!-- Contenido -->
+  <main class="content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+
+      <div>
+        <h1>¡Hola, Empresa! 👋</h1>
+        <p>Bienvenido a LexiSyng</p>
+      </div>
+
+      <div class="topbar-right">
+
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+
+        <button class="notification">
+          <mat-icon>notifications_none</mat-icon>
+        </button>
+
+        <div class="profile">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Tarjetas -->
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <span>Empleados activos</span>
+        <h2>24</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Conversaciones hoy</span>
+        <h2>16</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Mensajes enviados</span>
+        <h2>128</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Usuarios en línea</span>
+        <h2>8</h2>
+      </div>
+
+    </div>
+
+    <!-- Sección inferior -->
+    <div class="bottom-grid">
+
+      <!-- Actividad -->
+      <div class="activity-card">
+
+        <h2>Actividad reciente</h2>
+
+        <div class="activity-item">
+          <mat-icon>account_circle</mat-icon>
+
+          <div>
+            <h4>Ana García inició una conversación</h4>
+            <span>Hace 5 min</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <mat-icon>account_circle</mat-icon>
+
+          <div>
+            <h4>Carlos López envió un mensaje</h4>
+            <span>Hace 10 min</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <mat-icon>account_circle</mat-icon>
+
+          <div>
+            <h4>María Fernández inició una conversación</h4>
+            <span>Hace 15 min</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <mat-icon>account_circle</mat-icon>
+
+          <div>
+            <h4>Luis Pérez envió un mensaje</h4>
+            <span>Hace 20 min</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Acciones -->
+      <div class="actions-card">
+
+        <h2>Acciones rápidas</h2>
+
+        <button>
+          <mat-icon>chat_bubble_outline</mat-icon>
+          Nueva conversación
+        </button>
+
+        <button>
+          <mat-icon>forum</mat-icon>
+          Comunicación en vivo
+        </button>
+
+        <button>
+          <mat-icon>groups</mat-icon>
+          Ver empleados
+        </button>
+
+        <button>
+          <mat-icon>description</mat-icon>
+          Generar reporte
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
