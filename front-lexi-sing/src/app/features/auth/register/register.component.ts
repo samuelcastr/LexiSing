@@ -54,7 +54,7 @@ export class RegisterComponent {
       next: res => {
         this.loading = false;
         if (res.user) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/login']);
         } else {
           this.error = res.message || 'Error al registrarse';
         }

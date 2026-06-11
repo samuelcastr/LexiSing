@@ -165,21 +165,13 @@ form{
     height:32px;
 }
 
-.facebook{
-    background:#1877f2;
-}
-
 .google{
     background:white;
 }
 
-.apple{
-    background:white;
-}
-
-.apple{
-    background:black;
-    color:white;
+.microsoft{
+    background:rgb(0, 0, 0);
+    color:black;
 }
 
 .error-message{
@@ -191,4 +183,245 @@ form{
     background:#fee2e2;
     border-radius:6px;
     border:1px solid #fca5a5;
+}
+
+
+@media (max-width: 1024px) {
+    .tabs{
+        width: 100%;
+        max-width:480px;
+    }
+
+    .bottom-section{
+        padding:25px 60px 40px;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .title{
+        font-size:40px;
+        margin-bottom:30px;
+    }
+
+    .tabs{
+        width:92%;
+        max-width:450px;
+    }
+
+    form{
+        width:85%;
+        max-width:320px;
+    }
+
+    .bottom-section{
+        margin-top:45px;
+        padding:22px 40px 35px;
+    }
+
+    .social-icons{
+        gap:22px;
+    }
+
+    .social{
+        width:55px;
+        height:55px;
+    }
+}
+
+/* Tablets - 600px to 768px */
+@media (max-width: 600px) {
+    .title{
+        font-size:34px;
+        margin-bottom:25px;
+    }
+
+    .tabs{
+        width:95%;
+        max-width:400px;
+        height:52px;
+        font-size:13px;
+    }
+
+    form{
+        width:90%;
+        max-width:300px;
+        margin:20px auto 0;
+    }
+
+    .input-group{
+        height:38px;
+        font-size:12px;
+        margin-bottom:14px;
+    }
+
+    .icon{
+        margin-right:8px;
+    }
+
+    .bottom-section{
+        margin-top:35px;
+        padding:18px 30px 30px;
+        border-top-left-radius:30px;
+        border-top-right-radius:30px;
+    }
+
+    .main-btn{
+        height:38px;
+        font-size:12px;
+        margin-top:15px;
+    }
+
+    .divider{
+        gap:15px;
+        margin-top:18px;
+    }
+
+    .divider span{
+        font-size:10px;
+    }
+
+    .social-icons{
+        gap:18px;
+        margin-top:28px;
+    }
+
+    .social{
+        width:52px;
+        height:52px;
+    }
+
+    .social svg{
+        width:30px;
+        height:30px;
+    }
+}
+
+/* Mobile Small - 480px */
+@media (max-width: 480px) {
+    .title{
+        font-size:28px;
+        margin-bottom:20px;
+    }
+
+    .tabs{
+        width:96%;
+        height:48px;
+        font-size:11px;
+        gap:3px;
+    }
+
+    .tab{
+        font-size:11px;
+    }
+
+    form{
+        width:94%;
+        margin:18px auto 0;
+    }
+
+    .input-group{
+        height:35px;
+        font-size:11px;
+        margin-bottom:12px;
+        padding:0 10px;
+    }
+
+    .input-group input{
+        font-size:11px;
+    }
+
+    .icon{
+        margin-right:6px;
+        font-size:14px;
+    }
+
+    .forgot{
+        margin-top:8px;
+    }
+
+    .forgot a{
+        font-size:10px;
+    }
+
+    .bottom-section{
+        margin-top:30px;
+        padding:14px 18px 22px;
+        border-top-left-radius:25px;
+        border-top-right-radius:25px;
+    }
+
+    .main-btn{
+        height:34px;
+        font-size:11px;
+        margin-top:12px;
+    }
+
+    .divider{
+        gap:12px;
+        margin-top:14px;
+    }
+
+    .divider span{
+        font-size:8px;
+    }
+
+    .line{
+        height:0.5px;
+    }
+
+    .social-icons{
+        gap:12px;
+        margin-top:20px;
+    }
+
+    .social{
+        width:48px;
+        height:48px;
+    }
+
+    .social svg{
+        width:26px;
+        height:26px;
+    }
+}
+
+/* Extra Small Mobile - 360px */
+@media (max-width: 360px) {
+    .title{
+        font-size:24px;
+        margin-bottom:16px;
+    }
+
+    .tabs{
+        width:98%;
+        height:45px;
+    }
+
+    form{
+        width:96%;
+    }
+
+    .input-group{
+        height:32px;
+        font-size:10px;
+    }
+
+    .bottom-section{
+        padding:12px 15px 18px;
+    }
+
+    .main-btn{
+        height:32px;
+        font-size:10px;
+    }
+
+    .social-icons{
+        gap:10px;
+    }
+
+    .social{
+        width:44px;
+        height:44px;
+    }
 }
