@@ -1,77 +1,140 @@
-<div class="conversation-list-container">
-  <div class="header">
-    <h2>Tus Conversaciones</h2>
-    <button mat-mini-fab color="primary" (click)="toggleNewConvForm()" [matTooltip]="'Nueva conversación'">
-      <mat-icon>add</mat-icon>
-    </button>
-  </div>
-
-  <div *ngIf="showNewConvForm" class="new-conv-form">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>UID del usuario</mat-label>
-      <mat-form-field appearance="outline" class="full-width">
-
-  <mat-label>
-    Selecciona un usuario
-  </mat-label>
-
-  <select
-    matNativeControl
-    [(ngModel)]="selectedUserUid">
-
-    <option value="">
-      Seleccionar usuario
-    </option>
-
-    <option
-      *ngFor="let user of users"
-      [value]="user.uid">
-
-      {{ user.nombre }}
-      -
-      {{ user.email }}
-
-    </option>
-
-  </select>
-
-</mat-form-field>
-    </mat-form-field>
-    <div class="form-actions">
-      <button mat-raised-button color="primary" (click)="createConversation()">
-        <mat-icon>check</mat-icon>
-        Crear
-      </button>
-      <button mat-stroked-button (click)="toggleNewConvForm()">
-        <mat-icon>close</mat-icon>
-        Cancelar
-      </button>
-    </div>
-  </div>
-
-  <div class="conversations-list">
-    <div *ngIf="conversations.length === 0" class="empty-state">
-      <mat-icon>chat_bubble_outline</mat-icon>
-      <p>No tienes conversaciones aún</p>
-      <p class="hint">Haz clic en + para crear una nueva</p>
+<div class="conversation-container">
+  <!-- Sidebar izquierdo - Conversaciones + Cámara -->
+  <aside class="sidebar-left">
+    <div class="sidebar-header">
+      <h2>Comunicación en vivo</h2>
     </div>
 
-    <mat-card *ngFor="let c of conversations" class="conversation-item" [routerLink]="['/chat', c.id]">
-      <div class="conversation-content">
-        <div class="conversation-info">
-          <h3>Conversación</h3>
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="text" placeholder="Buscar conversación..." />
+    </div>
+
+    <div class="conversations-list">
+      <div *ngIf="conversations.length === 0" class="empty-state-sidebar">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>No tienes conversaciones</p>
+      </div>
+
+      <div *ngFor="let c of conversations"
+           class="conversation-item"
+           (click)="selectConversation(c)"
+           [class.active]="selectedConversation?.id === c.id">
+        <div class="conversation-item-content">
+          <h4>{{ c.participantName || 'Conversación' }}</h4>
           <p class="last-message">{{ c.lastMessage || 'Inicia una conversación...' }}</p>
           <small class="time" *ngIf="c.updatedAt">{{ c.updatedAt?.toDate ? (c.updatedAt.toDate() | date:'short') : 'Ahora' }}</small>
         </div>
-        <mat-icon class="arrow">chevron_right</mat-icon>
       </div>
-    </mat-card>
+    </div>
+
+    <button mat-raised-button class="new-conv-btn" (click)="toggleNewConvForm()">
+      <mat-icon>add</mat-icon>
+      Nueva conversación
+    </button>
+  </aside>
+
+  <!-- Centro/Derecha - Chat -->
+  <div class="chat-panel">
+    <div *ngIf="selectedConversation" class="chat-container">
+      <!-- Header del chat -->
+      <div class="chat-header">
+        <button mat-icon-button (click)="deselectConversation()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h3>{{ selectedConversation.nombre || 'Conversación' }}</h3>
+        <button mat-icon-button (click)="showCameraModal = true" *ngIf="!showCameraModal">
+          <mat-icon>videocam</mat-icon>
+        </button>
+        <button mat-icon-button (click)="showCameraModal = false" *ngIf="showCameraModal">
+          <mat-icon>videocam_off</mat-icon>
+        </button>
+      </div>
+
+      <!-- Mensajes con Cámara a la izquierda -->
+      <div class="messages-wrapper">
+        <!-- Cámara flotante a la izquierda -->
+        <div *ngIf="showCameraModal" class="camera-side-widget">
+          <div class="camera-side-card">
+            <div class="camera-side-header">
+              <button mat-icon-button (click)="showCameraModal = false" class="close-camera">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="camera-side-video">
+              <video #videoElement autoplay playsinline muted></video>
+              <div *ngIf="!cameraActive" class="camera-side-placeholder">
+                <mat-icon>videocam_off</mat-icon>
+              </div>
+              <div class="camera-side-controls">
+                <button mat-icon-button *ngIf="!cameraActive" (click)="startCamera()" class="camera-side-start">
+                  <mat-icon>videocam</mat-icon>
+                </button>
+                <button mat-icon-button *ngIf="cameraActive" (click)="stopCamera()" class="camera-side-stop">
+                  <mat-icon>videocam_off</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div class="messages-container" [class.with-camera]="showCameraModal">
+          <div *ngFor="let msg of messages"
+               class="message"
+               [class.received]="msg.senderUid !== uid"
+               [class.sent]="msg.senderUid === uid">
+            <p>{{ msg.content }}</p>
+            <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input de mensaje -->
+      <div class="chat-input-area">
+        <input type="text"
+               placeholder="Escribe un mensaje..."
+               class="chat-input"
+               [(ngModel)]="messageText"
+               (keyup.enter)="sendMessage()" />
+        <button mat-icon-button color="primary" (click)="sendMessage()">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!selectedConversation" class="chat-empty">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <p>Selecciona una conversación para comenzar</p>
+    </div>
   </div>
 
-  <div class="footer">
-    <button mat-stroked-button routerLink="/dashboard">
-      <mat-icon>arrow_back</mat-icon>
-      Volver al Dashboard
-    </button>
+  <!-- Modal de nueva conversación -->
+  <div *ngIf="showNewConvForm" class="modal-overlay" (click)="toggleNewConvForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Nueva conversación</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Selecciona un usuario</mat-label>
+        <mat-select [(ngModel)]="selectedUserUid">
+          <mat-option value="">-- Seleccionar usuario --</mat-option>
+          <mat-option *ngFor="let user of users; trackBy: trackByUid" [value]="user.uid">
+            {{ user.nombre }}{{ user.email ? (' - ' + user.email) : '' }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div *ngIf="users.length === 0" class="no-users-message">
+        <p>No hay usuarios disponibles</p>
+      </div>
+      <div class="modal-actions">
+        <button mat-raised-button color="primary" (click)="createConversation()">
+          <mat-icon>check</mat-icon>
+          Crear
+        </button>
+        <button mat-stroked-button (click)="toggleNewConvForm()">
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+      </div>
+    </div>
   </div>
 </div>
