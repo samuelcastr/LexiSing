@@ -11,20 +11,29 @@
 /* SIDEBAR */
 
 .sidebar{
-    width:260px;
-    background:#0f1225;
-    color:white;
-    padding:25px;
+     width: 260px;
+    min-width: 260px;
+    background: #0f1225;
+    color: white;
+    padding: 25px;
 
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .logo{
-    font-size:40px;
-    color:white;
-    margin-bottom:40px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    font-size: 40px;
+    color: white;
+
+    margin-bottom: 40px;
 }
 
 nav{
@@ -71,8 +80,10 @@ nav a.active{
 /* CONTENIDO */
 
 .content{
-    flex:1;
-    padding:30px;
+    flex: 1;
+    padding: 30px;
+    min-width: 0;
+    transition: all 0.3s ease;
 }
 
 /* TOPBAR */
@@ -140,12 +151,11 @@ nav a.active{
 /* TARJETAS */
 
 .stats-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:20px;
-    margin-bottom:25px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
 }
-
 .stat-card{
     background:white;
     padding:25px;
@@ -165,9 +175,14 @@ nav a.active{
 /* INFERIOR */
 
 .bottom-grid{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:25px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+}
+@media (max-width: 1100px) {
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .activity-card,
@@ -229,4 +244,28 @@ nav a.active{
 
 .actions-card button:hover{
     background:#f3f4f6;
+}
+
+.sidebar.collapsed {
+    width: 85px;
+    min-width: 85px;
+    padding: 25px 10px;
+}
+
+.sidebar.collapsed nav a {
+    justify-content: center;
+    padding: 15px 0;
+}
+
+.sidebar.collapsed mat-icon {
+    margin: 0;
+}
+
+.sidebar.collapsed .logout-btn {
+    justify-content: center;
+    padding: 0;
+}
+
+.sidebar.collapsed .logo {
+    justify-content: center;
 }

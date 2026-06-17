@@ -15,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { FormsModule } from '@angular/forms';
 import { UserApiService } from '../../../core/services/user-api.service';
+import { ActivityService } from '../../../core/services/activity.service';
 
 @Component({
   selector: 'app-conversation-list',
@@ -37,7 +38,14 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   messageText: string = '';
   messages: any[] = [];
 
-  constructor(private convService: ConversationService, private auth: AuthService, private router: Router, private userApi: UserApiService, private cameraService: CameraService) { }
+  constructor(
+    private convService: ConversationService,
+    private auth: AuthService,
+    private router: Router,
+    private userApi: UserApiService,
+    private cameraService: CameraService,
+    private activityService: ActivityService
+  ) { }
 
   ngOnInit(): void {
     this.auth.getCurrentUser().subscribe(user => {
@@ -95,9 +103,20 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
     this.convService.createConversation([this.uid, this.selectedUserUid])
       .then(() => {
+
+        const currentUser = this.users.find(
+          u => u.uid === this.uid
+        );
+
+        this.activityService.addActivity(
+          currentUser?.nombre || 'Usuario',
+          'inició una conversación'
+        );
+
         this.selectedUserUid = '';
         this.showNewConvForm = false;
         this.loadConversations();
+
       })
       .catch(error => {
         console.error('Error creando conversación:', error);
@@ -124,6 +143,8 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   selectConversation(conversation: any): void {
+    console.log(conversation);
+
     this.selectedConversation = conversation;
     this.loadMessages(conversation.id);
   }
@@ -147,7 +168,18 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       content: this.messageText,
       senderUid: this.uid
     }).then(() => {
+
+      const currentUser = this.users.find(
+        u => u.uid === this.uid
+      );
+
+      this.activityService.addActivity(
+        currentUser?.nombre || 'Usuario',
+        'envió un mensaje'
+      );
+
       this.messageText = '';
+
     }).catch(error => {
       console.error('Error enviando mensaje:', error);
     });

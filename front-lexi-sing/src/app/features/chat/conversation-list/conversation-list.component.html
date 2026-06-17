@@ -2,7 +2,14 @@
   <!-- Sidebar izquierdo - Conversaciones + Cámara -->
   <aside class="sidebar-left">
     <div class="sidebar-header">
-      <h2>Comunicación en vivo</h2>
+      <button mat-icon-button class="back-btn" routerLink="/dashboard">
+        <mat-icon>
+          arrow_back
+        </mat-icon>
+      </button>
+      <h2>
+        Comunicación en vivo
+      </h2>
     </div>
 
     <div class="search-box">
@@ -16,14 +23,13 @@
         <p>No tienes conversaciones</p>
       </div>
 
-      <div *ngFor="let c of conversations"
-           class="conversation-item"
-           (click)="selectConversation(c)"
-           [class.active]="selectedConversation?.id === c.id">
+      <div *ngFor="let c of conversations" class="conversation-item" (click)="selectConversation(c)"
+        [class.active]="selectedConversation?.id === c.id">
         <div class="conversation-item-content">
           <h4>{{ c.participantName || 'Conversación' }}</h4>
           <p class="last-message">{{ c.lastMessage || 'Inicia una conversación...' }}</p>
-          <small class="time" *ngIf="c.updatedAt">{{ c.updatedAt?.toDate ? (c.updatedAt.toDate() | date:'short') : 'Ahora' }}</small>
+          <small class="time" *ngIf="c.updatedAt">{{ c.updatedAt?.toDate ? (c.updatedAt.toDate() | date:'short') :
+            'Ahora' }}</small>
         </div>
       </div>
     </div>
@@ -42,7 +48,7 @@
         <button mat-icon-button (click)="deselectConversation()">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        <h3>{{ selectedConversation.nombre || 'Conversación' }}</h3>
+        <h3>{{ selectedConversation.participantName }}</h3>
         <button mat-icon-button (click)="showCameraModal = true" *ngIf="!showCameraModal">
           <mat-icon>videocam</mat-icon>
         </button>
@@ -54,36 +60,26 @@
       <!-- Mensajes con Cámara a la izquierda -->
       <div class="messages-wrapper">
         <!-- Cámara flotante a la izquierda -->
-        <div *ngIf="showCameraModal" class="camera-side-widget">
-          <div class="camera-side-card">
-            <div class="camera-side-header">
-              <button mat-icon-button (click)="showCameraModal = false" class="close-camera">
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-            <div class="camera-side-video">
-              <video #videoElement autoplay playsinline muted></video>
-              <div *ngIf="!cameraActive" class="camera-side-placeholder">
-                <mat-icon>videocam_off</mat-icon>
-              </div>
-              <div class="camera-side-controls">
-                <button mat-icon-button *ngIf="!cameraActive" (click)="startCamera()" class="camera-side-start">
-                  <mat-icon>videocam</mat-icon>
-                </button>
-                <button mat-icon-button *ngIf="cameraActive" (click)="stopCamera()" class="camera-side-stop">
-                  <mat-icon>videocam_off</mat-icon>
-                </button>
-              </div>
-            </div>
+        <div class="camera-side-video">
+          <video #videoElement autoplay playsinline muted></video>
+
+          <div class="camera-side-controls">
+            <button *ngIf="!cameraActive" class="camera-toggle-btn" (click)="startCamera()">
+              <mat-icon>videocam</mat-icon>
+              Iniciar cámara
+            </button>
+
+            <button *ngIf="cameraActive" class="camera-toggle-btn stop" (click)="stopCamera()">
+              <mat-icon>videocam_off</mat-icon>
+              Detener cámara
+            </button>
           </div>
         </div>
 
         <!-- Mensajes -->
         <div class="messages-container" [class.with-camera]="showCameraModal">
-          <div *ngFor="let msg of messages"
-               class="message"
-               [class.received]="msg.senderUid !== uid"
-               [class.sent]="msg.senderUid === uid">
+          <div *ngFor="let msg of messages" class="message" [class.received]="msg.senderUid !== uid"
+            [class.sent]="msg.senderUid === uid">
             <p>{{ msg.content }}</p>
             <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}</small>
           </div>
@@ -92,11 +88,8 @@
 
       <!-- Input de mensaje -->
       <div class="chat-input-area">
-        <input type="text"
-               placeholder="Escribe un mensaje..."
-               class="chat-input"
-               [(ngModel)]="messageText"
-               (keyup.enter)="sendMessage()" />
+        <input type="text" placeholder="Escribe un mensaje..." class="chat-input" [(ngModel)]="messageText"
+          (keyup.enter)="sendMessage()" />
         <button mat-icon-button color="primary" (click)="sendMessage()">
           <mat-icon>send</mat-icon>
         </button>
@@ -113,15 +106,30 @@
   <div *ngIf="showNewConvForm" class="modal-overlay" (click)="toggleNewConvForm()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <h3>Nueva conversación</h3>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Selecciona un usuario</mat-label>
-        <mat-select [(ngModel)]="selectedUserUid">
-          <mat-option value="">-- Seleccionar usuario --</mat-option>
-          <mat-option *ngFor="let user of users; trackBy: trackByUid" [value]="user.uid">
-            {{ user.nombre }}{{ user.email ? (' - ' + user.email) : '' }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <p class="modal-subtitle">
+        Selecciona un usuario para iniciar una conversación
+      </p>
+      <div class="users-list">
+        <div class="user-card" *ngFor="let user of users" (click)="selectedUserUid = user.uid"
+          [class.selected]="selectedUserUid === user.uid">
+          <mat-icon>
+            account_circle
+          </mat-icon>
+          <div class="user-info">
+            <h4>
+              {{ user.nombre }}
+            </h4>
+            <span>
+              {{ user.email }}
+            </span>
+          </div>
+          <mat-icon *ngIf="selectedUserUid === user.uid">
+            check_circle
+          </mat-icon>
+
+        </div>
+
+      </div>
       <div *ngIf="users.length === 0" class="no-users-message">
         <p>No hay usuarios disponibles</p>
       </div>

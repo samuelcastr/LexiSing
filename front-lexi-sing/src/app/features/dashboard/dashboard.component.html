@@ -1,11 +1,11 @@
 <div class="dashboard-layout">
 
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
 
     <div>
 
-      <div class="logo">
+      <div class="logo" [class.collapsed]="!sidebarOpen">
         <mat-icon>back_hand</mat-icon>
       </div>
 
@@ -13,32 +13,32 @@
 
         <a class="active">
           <mat-icon>home</mat-icon>
-          Inicio
+          <span *ngIf="sidebarOpen">Inicio</span>
         </a>
 
         <a routerLink="/conversations">
           <mat-icon>chat</mat-icon>
-          Chat
+          <span *ngIf="sidebarOpen">Chat</span>
         </a>
 
         <a>
           <mat-icon>forum</mat-icon>
-          Comunicación en vivo
+          <span *ngIf="sidebarOpen">Comunicación en vivo</span>
         </a>
 
         <a>
           <mat-icon>groups</mat-icon>
-          Empleados
+          <span *ngIf="sidebarOpen">Empleados</span>
         </a>
 
         <a>
           <mat-icon>description</mat-icon>
-          Reportes
+          <span *ngIf="sidebarOpen">Reportes</span>
         </a>
 
         <a>
           <mat-icon>settings</mat-icon>
-          Configuración
+          <span *ngIf="sidebarOpen">Configuración</span>
         </a>
 
       </nav>
@@ -47,7 +47,7 @@
 
     <button class="logout-btn" (click)="logout()">
       <mat-icon>logout</mat-icon>
-      Cerrar sesión
+      <span *ngIf="sidebarOpen">Cerrar sesión</span>
     </button>
 
   </aside>
@@ -58,9 +58,19 @@
     <!-- Topbar -->
     <div class="topbar">
 
-      <div>
-        <h1>¡Hola, Empresa! 👋</h1>
-        <p>Bienvenido a LexiSyng</p>
+      <div class="topbar-left">
+
+        <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+
+          <mat-icon>menu</mat-icon>
+
+        </button>
+
+        <div>
+          <h1>¡Hola, {{ userName }}! </h1>
+          <p>Bienvenido a LexiSing</p>
+        </div>
+
       </div>
 
       <div class="topbar-right">
@@ -87,17 +97,17 @@
 
       <div class="stat-card">
         <span>Empleados activos</span>
-        <h2>24</h2>
+        <h2>{{ empleadosActivos }}</h2>
       </div>
 
       <div class="stat-card">
         <span>Conversaciones hoy</span>
-        <h2>16</h2>
+        <h2>{{ conversacionesHoy }}</h2>
       </div>
 
       <div class="stat-card">
         <span>Mensajes enviados</span>
-        <h2>128</h2>
+        <h2>{{ mensajesEnviados }}</h2>
       </div>
 
       <div class="stat-card">
@@ -115,40 +125,30 @@
 
         <h2>Actividad reciente</h2>
 
-        <div class="activity-item">
-          <mat-icon>account_circle</mat-icon>
+        <div class="activity-item" *ngFor="let activity of recentActivities">
+
+          <mat-icon>
+            account_circle
+          </mat-icon>
 
           <div>
-            <h4>Ana García inició una conversación</h4>
-            <span>Hace 5 min</span>
+
+            <h4>
+              {{ activity.userName }}
+              {{ activity.action }}
+            </h4>
+
+            <span>
+
+              {{
+              activity.timestamp?.toDate()
+              | date:'short'
+              }}
+
+            </span>
+
           </div>
-        </div>
 
-        <div class="activity-item">
-          <mat-icon>account_circle</mat-icon>
-
-          <div>
-            <h4>Carlos López envió un mensaje</h4>
-            <span>Hace 10 min</span>
-          </div>
-        </div>
-
-        <div class="activity-item">
-          <mat-icon>account_circle</mat-icon>
-
-          <div>
-            <h4>María Fernández inició una conversación</h4>
-            <span>Hace 15 min</span>
-          </div>
-        </div>
-
-        <div class="activity-item">
-          <mat-icon>account_circle</mat-icon>
-
-          <div>
-            <h4>Luis Pérez envió un mensaje</h4>
-            <span>Hace 20 min</span>
-          </div>
         </div>
 
       </div>
