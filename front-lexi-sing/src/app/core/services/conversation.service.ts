@@ -5,7 +5,7 @@ import { Conversation, Message } from '../models/message.model';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationService {
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore) { }
 
   getConversationsForUser(uid: string): Observable<Conversation[]> {
     const col = collection(this.firestore, 'conversaciones');
@@ -46,5 +46,22 @@ export class ConversationService {
       // Nota: actualizar lastMessage debe manejarse con transacción o Cloud Function en producción.
       return true;
     });
+  }
+  updateMessage(
+    convId: string,
+    messageId: string,
+    newContent: string
+  ) {
+
+    const msgRef = doc(
+      this.firestore,
+      `conversaciones/${convId}/mensajes/${messageId}`
+    );
+
+    return updateDoc(msgRef, {
+      content: newContent,
+      edited: true
+    });
+
   }
 }

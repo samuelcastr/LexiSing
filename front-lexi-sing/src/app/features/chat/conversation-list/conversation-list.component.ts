@@ -37,6 +37,13 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   selectedConversation: any = null;
   messageText: string = '';
   messages: any[] = [];
+  selectedMessage: any = null;
+  showEditModal = false;
+  editingMessage: any = null;
+  editedText = '';
+  showDeleteModal = false;
+  messageToDelete: any = null;
+  
 
   constructor(
     private convService: ConversationService,
@@ -197,6 +204,75 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     }).catch(error => {
       console.error('Error enviando mensaje:', error);
     });
+  }
+
+  selectMessage(msg: any): void {
+    if (msg.senderUid === this.uid) {
+      this.selectedMessage = msg;
+    }
+  }
+
+  clearSelection(): void {
+    this.selectedMessage = null;
+  }
+
+  deleteMessage(msg: any): void {
+
+    this.messageToDelete = msg;
+    this.showDeleteModal = true;
+
+  }
+  editMessage(msg: any): void {
+
+    this.editingMessage = msg;
+    this.editedText = msg.content;
+
+    this.showEditModal = true;
+  }
+  saveEditedMessage(): void {
+
+    if (!this.editedText.trim()) {
+      return;
+    }
+
+    this.convService.updateMessage(
+      this.selectedConversation.id,
+      this.editingMessage.id,
+      this.editedText
+    ).then(() => {
+
+      this.showEditModal = false;
+      this.selectedMessage = null;
+      this.editingMessage = null;
+
+    });
+
+  }
+  closeEditModal(): void {
+
+    this.showEditModal = false;
+    this.editingMessage = null;
+  }
+
+  confirmDelete(): void {
+
+    this.convService.deleteMessage(
+      this.selectedConversation.id,
+      this.messageToDelete.id
+    ).then(() => {
+
+      this.showDeleteModal = false;
+      this.selectedMessage = null;
+      this.messageToDelete = null;
+
+    });
+
+  }
+  closeDeleteModal(): void {
+
+    this.showDeleteModal = false;
+    this.messageToDelete = null;
+
   }
 }
 

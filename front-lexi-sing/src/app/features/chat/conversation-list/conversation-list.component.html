@@ -56,6 +56,24 @@
           <mat-icon>videocam_off</mat-icon>
         </button>
       </div>
+      <div class="message-menu" *ngIf="selectedMessage">
+
+        <button class="menu-btn edit-btn" (click)="editMessage(selectedMessage)">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button class="menu-btn delete-btn" (click)="deleteMessage(selectedMessage)">
+          <mat-icon>delete</mat-icon>
+          Eliminar
+        </button>
+
+        <button class="menu-btn close-btn" (click)="clearSelection()">
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+
+      </div>
 
       <!-- Mensajes con Cámara a la izquierda -->
       <div class="messages-wrapper">
@@ -79,9 +97,21 @@
         <!-- Mensajes -->
         <div class="messages-container" [class.with-camera]="showCameraModal">
           <div *ngFor="let msg of messages" class="message" [class.received]="msg.senderUid !== uid"
-            [class.sent]="msg.senderUid === uid">
+            [class.sent]="msg.senderUid === uid" [class.selected]="selectedMessage?.id === msg.id"
+            (click)="selectMessage(msg)">
+
             <p>{{ msg.content }}</p>
-            <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}</small>
+
+            <small class="edited-label" *ngIf="msg.edited">
+
+              editado
+
+            </small>
+
+            <small>
+              {{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}
+            </small>
+
           </div>
         </div>
       </div>
@@ -144,5 +174,74 @@
         </button>
       </div>
     </div>
+  </div>
+  <div class="modal-overlay" *ngIf="showEditModal">
+
+    <div class="edit-modal">
+
+      <h3>
+        Editar mensaje
+      </h3>
+
+      <p>
+        Modifica el contenido del mensaje.
+      </p>
+
+      <textarea [(ngModel)]="editedText" rows="4">
+    </textarea>
+
+      <div class="modal-buttons">
+
+        <button class="cancel-btn" (click)="closeEditModal()">
+
+          Cancelar
+
+        </button>
+
+        <button class="save-btn" (click)="saveEditedMessage()">
+
+          Guardar cambios
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+  <div class="modal-overlay" *ngIf="showDeleteModal">
+
+    <div class="delete-modal">
+
+      <mat-icon>
+        delete_forever
+      </mat-icon>
+
+      <h3>
+        Eliminar mensaje
+      </h3>
+
+      <p>
+        ¿Deseas eliminar este mensaje?
+      </p>
+
+      <div class="modal-buttons">
+
+        <button class="cancel-btn" (click)="closeDeleteModal()">
+
+          Cancelar
+
+        </button>
+
+        <button class="delete-btn" (click)="confirmDelete()">
+
+          Eliminar
+
+        </button>
+
+      </div>
+
+    </div>
+
   </div>
 </div>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, collectionGroup } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { User } from '../models/user.model';
 import { Conversation } from '../models/conversation.model';
@@ -38,30 +38,30 @@ export class DashboardService {
     ) as Observable<Conversation[]>;
 
   }
-  getMensajes(): Observable<Message[]> {
+  getMensajes(): Observable<any[]> {
 
-  const mensajesRef = collection(
-    this.firestore,
-    'messages'
-  );
+    const mensajesRef = collectionGroup(
+      this.firestore,
+      'mensajes'
+    );
 
-  return collectionData(
-    mensajesRef,
-    { idField: 'id' }
-  ) as Observable<Message[]>;
+    return collectionData(
+      mensajesRef,
+      { idField: 'id' }
+    );
 
- }
- getRecentActivity() {
+  }
+  getRecentActivity() {
 
-  const ref = collection(
-    this.firestore,
-    'conversations'
-  );
+    const ref = collection(
+      this.firestore,
+      'conversations'
+    );
 
-  return collectionData(
-    ref,
-    { idField: 'id' }
-  );
-}
+    return collectionData(
+      ref,
+      { idField: 'id' }
+    );
+  }
 }
 

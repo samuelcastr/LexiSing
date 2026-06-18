@@ -30,6 +30,8 @@ export class DashboardComponent implements OnInit {
   conversacionesHoy = 0;
   mensajesEnviados = 0;
   recentActivities: any[] = [];
+  onlineUsers = 0;
+  messagesSent = 0;
 
 
   constructor(
@@ -77,7 +79,14 @@ export class DashboardComponent implements OnInit {
           messages.length;
 
       });
+    this.dashboardService.getUsuarios().subscribe(users => {
 
+      this.onlineUsers =
+        users.filter(
+          user => user.activo === true
+        ).length;
+
+    });
 
   }
   loadActivities(): void {
