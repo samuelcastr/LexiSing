@@ -51,9 +51,11 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.auth.getCurrentUser().subscribe(user => {
       if (user?.uid) {
         this.uid = user.uid;
-        this.loadUsers();
-        this.loadConversations();
+      } else {
+        this.uid = 'supervisor-demo';
       }
+      this.loadUsers();
+      this.loadConversations();
     });
   }
 
@@ -67,6 +69,10 @@ export class ConversationListComponent implements OnInit, OnDestroy {
         const otherUid = conv.participants?.find(p => p !== this.uid);
         const otherUser = this.users.find(u => u.uid === otherUid);
         return { ...conv, participantName: otherUser?.nombre || 'Conversación' };
+      }).sort((a, b) => {
+        const timeA = a.updatedAt?.toDate?.() || new Date(0);
+        const timeB = b.updatedAt?.toDate?.() || new Date(0);
+        return timeB.getTime() - timeA.getTime();
       });
     });
   }
@@ -157,6 +163,14 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
   deselectConversation(): void {
     this.selectedConversation = null;
+  }
+
+  goBack(): void {
+    if (this.router.url.includes('/supervisor/conversations')) {
+      this.router.navigate(['/dashboard/supervisor']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   sendMessage(): void {

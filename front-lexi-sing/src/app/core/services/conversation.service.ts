@@ -9,7 +9,7 @@ export class ConversationService {
 
   getConversationsForUser(uid: string): Observable<Conversation[]> {
     const col = collection(this.firestore, 'conversaciones');
-    const q = query(col, where('participants', 'array-contains', uid), orderBy('updatedAt', 'desc'));
+    const q = query(col, where('participants', 'array-contains', uid));
     return collectionData(q, { idField: 'id' }) as Observable<Conversation[]>;
   }
 

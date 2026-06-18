@@ -1,0 +1,22 @@
+import { inject, Injectable } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { map, take } from 'rxjs/operators';
+
+export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
+  return () => {
+    const authService = inject(AuthService);
+    const router = inject(Router);
+
+    return authService.getCurrentUser().pipe(
+      take(1),
+      map(user => {
+        if (!user || !allowedRoles.includes(user.rol)) {
+          router.navigate(['/dashboard']);
+          return false;
+        }
+        return true;
+      })
+    );
+  };
+};
