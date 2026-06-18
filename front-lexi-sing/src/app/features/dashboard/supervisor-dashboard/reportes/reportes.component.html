@@ -1,0 +1,76 @@
+<div class="reportes-container">
+  <!-- Header -->
+  <div class="header">
+    <button mat-icon-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Reportes</h1>
+  </div>
+
+  <!-- Tarjetas de estadísticas -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <mat-icon>people</mat-icon>
+        <div>
+          <p>Total Usuarios</p>
+          <h2>{{ totalUsuarios }}</h2>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <mat-icon>chat</mat-icon>
+        <div>
+          <p>Conversaciones</p>
+          <h2>{{ totalConversaciones }}</h2>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <mat-icon>mail</mat-icon>
+        <div>
+          <p>Mensajes Totales</p>
+          <h2>{{ totalMensajes }}</h2>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <mat-icon>trending_up</mat-icon>
+        <div>
+          <p>Usuarios Activos</p>
+          <h2>{{ usuariosActivos }}</h2>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Gráficos -->
+  <mat-tab-group class="charts-container" (selectedIndexChange)="onTabChange($event)">
+    <!-- Tab 1: Estado de Usuarios -->
+    <mat-tab label="Estado de Usuarios">
+      <div id="grafico-usuarios" class="chart-wrapper"></div>
+    </mat-tab>
+
+    <!-- Tab 2: Conversaciones por Participantes -->
+    <mat-tab label="Conversaciones">
+      <div id="grafico-conversaciones" class="chart-wrapper"></div>
+    </mat-tab>
+
+    <!-- Tab 3: Actividad 3D -->
+    <mat-tab label="Actividad 3D">
+      <div id="grafico-3d" class="chart-wrapper chart-3d"></div>
+    </mat-tab>
+
+    <!-- Tab 4: Mensajes por Hora -->
+    <mat-tab label="Mensajes por Hora">
+      <div id="grafico-mensajes" class="chart-wrapper"></div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+

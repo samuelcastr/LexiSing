@@ -1,0 +1,41 @@
+<div class="monitoreo-container">
+  <!-- Header -->
+  <div class="header">
+    <button mat-icon-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Monitoreo de Conversaciones</h1>
+  </div>
+
+  <!-- Tabla de conversaciones -->
+  <div class="conversations-table">
+    <table mat-table [dataSource]="conversations" class="full-width-table">
+      <!-- Participantes Column -->
+      <ng-container matColumnDef="participantes">
+        <th mat-header-cell *matHeaderCellDef>Participantes</th>
+        <td mat-cell *matCellDef="let element">{{ element.participantNames }}</td>
+      </ng-container>
+
+      <!-- Último Mensaje Column -->
+      <ng-container matColumnDef="ultimoMensaje">
+        <th mat-header-cell *matHeaderCellDef>Último Mensaje</th>
+        <td mat-cell *matCellDef="let element">{{ element.ultimoMensaje }}</td>
+      </ng-container>
+
+      <!-- Fecha Column -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let element">{{ element.fecha | date:'short' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <!-- Estado vacío -->
+    <div *ngIf="conversations.length === 0" class="empty-state">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <p>No hay conversaciones</p>
+    </div>
+  </div>
+</div>

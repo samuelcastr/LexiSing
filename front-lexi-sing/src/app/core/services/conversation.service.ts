@@ -13,6 +13,11 @@ export class ConversationService {
     return collectionData(q, { idField: 'id' }) as Observable<Conversation[]>;
   }
 
+  getAllConversations(): Observable<Conversation[]> {
+    const col = collection(this.firestore, 'conversaciones');
+    return collectionData(col, { idField: 'id' }) as Observable<Conversation[]>;
+  }
+
   createConversation(participants: string[]): Promise<any> {
     const col = collection(this.firestore, 'conversaciones');
     const payload: Conversation = { participants, updatedAt: serverTimestamp(), lastMessage: '' } as any;
