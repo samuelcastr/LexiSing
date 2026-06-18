@@ -20,10 +20,13 @@ export class CameraService {
     }
   }
 
-  stopCamera(): void {
+  stopCamera(videoElement?: HTMLVideoElement): void {
     if (this.stream) {
       this.stream.getTracks().forEach(track => track.stop());
       this.stream = null;
+    }
+    if (videoElement) {
+      videoElement.srcObject = null;
     }
   }
 }
