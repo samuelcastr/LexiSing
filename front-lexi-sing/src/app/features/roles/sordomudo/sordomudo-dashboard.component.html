@@ -1,0 +1,179 @@
+<div class="dashboard-layout">
+
+  <!-- Sidebar (limitada) -->
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+
+    <div>
+
+      <div class="logo" [class.collapsed]="!sidebarOpen">
+        <mat-icon>pan_tool</mat-icon>
+      </div>
+
+      <nav>
+
+        <a class="active">
+          <mat-icon>home</mat-icon>
+          <span *ngIf="sidebarOpen">Inicio</span>
+        </a>
+
+        <a routerLink="/sordomudo/chat">
+          <mat-icon>chat</mat-icon>
+          <span *ngIf="sidebarOpen">Chat</span>
+        </a>
+
+        <!-- Opciones restringidas para Sordomudo eliminadas -->
+
+      </nav>
+
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="sidebarOpen">Cerrar sesión</span>
+    </button>
+
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+
+      <div class="topbar-left">
+
+        <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <div>
+          <h1>Panel Sordomudo</h1>
+          <p>Accede al traductor y gestiona tus sesiones</p>
+        </div>
+
+      </div>
+
+      <div class="topbar-right">
+
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+
+        <button class="notification">
+          <mat-icon>notifications_none</mat-icon>
+        </button>
+
+        <div class="profile">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Tarjetas simples -->
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <span>Texto reconocido</span>
+        <h2>{{ recognizedText || '—' }}</h2>
+        <div style="margin-top:8px;color:#666;font-size:13px">Estado: {{ cameraStatus }}</div>
+      </div>
+
+      <div class="stat-card">
+        <span>Traducciones hoy</span>
+        <h2>{{ (traduccionesHoy$ | async) ?? '—' }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Sesiones activas</span>
+        <h2>{{ (sesionesActivas$ | async) ?? '—' }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Conversaciones</span>
+        <h2>{{ (totalConversations$ | async) ?? '—' }}</h2>
+        <a routerLink="/sordomudo/chat" class="chat-link">Ir al chat sordomudo</a>
+      </div>
+
+    </div>
+
+    <div style="margin-bottom:15px; display:flex; gap:12px; flex-wrap:wrap;">
+      <button class="test-data-btn" (click)="seedTestData()" type="button">Generar datos de prueba</button>
+      <button class="test-data-btn" routerLink="/conversations" type="button">Abrir conversaciones</button>
+    </div>
+
+    <!-- Sección inferior: actividad + acciones -->
+    <div class="bottom-grid">
+
+      <div class="activity-card">
+
+        <h2>Historial reciente</h2>
+
+        <ng-container *ngIf="recentActivity$ | async as recent">
+          <div class="activity-item" *ngFor="let item of recent">
+            <mat-icon>keyboard_voice</mat-icon>
+            <div>
+              <h4>{{ item.content || item }}</h4>
+              <span>{{ (item.timestamp?.toDate ? item.timestamp.toDate() : item.timestamp) | date:'short' }}</span>
+            </div>
+          </div>
+          <div *ngIf="recent.length === 0">No hay traducciones aún.</div>
+        </ng-container>
+        <ng-container *ngIf="!(recentActivity$ | async)">
+          <div class="activity-item" *ngFor="let item of history">
+            <mat-icon>keyboard_voice</mat-icon>
+            <div>
+              <h4>{{ item }}</h4>
+              <span>Ahora</span>
+            </div>
+          </div>
+          <div *ngIf="history.length === 0">No hay traducciones aún.</div>
+        </ng-container>
+
+      </div>
+
+      <div class="actions-card">
+
+        <h2>Acciones</h2>
+
+        <button (click)="enterSession()" [disabled]="sessionStarted">
+          <mat-icon>play_arrow</mat-icon>
+          Entrar a traducción
+        </button>
+
+        <button (click)="startCamera()" [disabled]="!sessionStarted">
+          <mat-icon>videocam</mat-icon>
+          Iniciar cámara
+        </button>
+
+        <button (click)="stopCamera()" [disabled]="!sessionStarted">
+          <mat-icon>stop</mat-icon>
+          Detener cámara
+        </button>
+
+        <button (click)="copyRecognized()">
+          <mat-icon>content_copy</mat-icon>
+          Copiar texto
+        </button>
+
+        <button (click)="clearHistory()">
+          <mat-icon>delete</mat-icon>
+          Limpiar historial
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Zona de traducción en la parte superior del contenido -->
+    <section style="margin-top:18px;">
+      <ng-container *ngIf="sessionStarted">
+        <app-sordomudo-role></app-sordomudo-role>
+      </ng-container>
+    </section>
+
+  </main>
+
+</div>

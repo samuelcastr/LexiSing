@@ -1,0 +1,29 @@
+<div class="monitoring-page">
+  <div class="header">
+    <h2>Monitoreo de conversaciones</h2>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver
+    </button>
+  </div>
+
+  <table mat-table [dataSource]="conversations" class="mat-elevation-z2">
+    <ng-container matColumnDef="participantes">
+      <th mat-header-cell *matHeaderCellDef>Participantes</th>
+      <td mat-cell *matCellDef="let conversation">{{ conversation.participantNames }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="ultimoMensaje">
+      <th mat-header-cell *matHeaderCellDef>Último mensaje</th>
+      <td mat-cell *matCellDef="let conversation">{{ conversation.ultimoMensaje }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="fecha">
+      <th mat-header-cell *matHeaderCellDef>Fecha</th>
+      <td mat-cell *matCellDef="let conversation">{{ conversation.fecha | date:'short' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>

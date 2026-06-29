@@ -1,0 +1,37 @@
+<div class="sordomudo-page">
+  <div class="sordomudo-card">
+    <div class="hero-panel">
+      <div>
+        <p class="eyebrow">Traductor de señas</p>
+        <h1>Tu mano se convierte en texto en tiempo real</h1>
+        <p>Coloca tu mano frente a la cámara y la app irá reescribiendo el mensaje mientras se mueve.</p>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot" [class.active]="cameraStatus === 'Cámara activa'"></span>
+        <span>{{ cameraStatus }}</span>
+      </div>
+    </div>
+
+    <div class="camera-grid">
+      <div class="camera-panel">
+        <video #video autoplay muted playsinline></video>
+        <div class="camera-actions">
+          <button (click)="startCamera()">Iniciar cámara</button>
+          <button class="secondary" (click)="stopCamera()">Detener cámara</button>
+        </div>
+      </div>
+
+      <div class="translation-panel">
+        <p class="panel-label">Texto traducido</p>
+        <div class="translation-box">{{ recognizedText }}</div>
+        <div class="history-panel">
+          <p class="panel-label">Historial reciente</p>
+          <ul>
+            <li *ngFor="let item of history">{{ item }}</li>
+            <li *ngIf="history.length === 0">No hay traducciones aún.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

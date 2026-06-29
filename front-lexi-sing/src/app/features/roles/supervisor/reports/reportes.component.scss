@@ -1,0 +1,7 @@
+.reports-page { padding: 24px; }
+
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+
+.stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; }
+
+.chart { min-height: 420px; margin-top: 16px; }

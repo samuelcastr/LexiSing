@@ -1,0 +1,121 @@
+<div class="dashboard-layout">
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+    <div>
+      <div class="logo" [class.collapsed]="!sidebarOpen">
+        <mat-icon>pan_tool</mat-icon>
+      </div>
+
+      <nav>
+        <a class="active">
+          <mat-icon>dashboard</mat-icon>
+          <span *ngIf="sidebarOpen">Monitoreo</span>
+        </a>
+
+        <a routerLink="/supervisor/conversations" class="nav-link">
+          <mat-icon>message</mat-icon>
+          <span *ngIf="sidebarOpen">Chat</span>
+        </a>
+
+        <a routerLink="/supervisor/monitoreo-conversaciones">
+          <mat-icon>chat</mat-icon>
+          <span *ngIf="sidebarOpen">Conversaciones</span>
+        </a>
+
+        <a routerLink="/supervisor/reportes">
+          <mat-icon>description</mat-icon>
+          <span *ngIf="sidebarOpen">Reportes</span>
+        </a>
+      </nav>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="sidebarOpen">Cerrar sesión</span>
+    </button>
+  </aside>
+
+  <main class="content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <div>
+          <h1>¡Hola, {{ userName }}!</h1>
+          <p>Supervisor Dashboard</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+
+        <button class="notification">
+          <mat-icon>notifications_none</mat-icon>
+        </button>
+
+        <div class="profile">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span>Usuarios sordos</span>
+        <h2>{{ usuariosSordos }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Conversaciones hoy</span>
+        <h2>{{ conversacionesHoy }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Usuarios activos</span>
+        <h2>{{ usuariosActivos }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Total monitoreado</span>
+        <h2>{{ usuariosSordos + usuariosActivos }}</h2>
+      </div>
+    </div>
+
+    <div class="bottom-grid">
+      <div class="activity-card">
+        <h2>Actividad reciente</h2>
+        <div class="activity-item" *ngFor="let activity of recentActivities">
+          <mat-icon>account_circle</mat-icon>
+          <div>
+            <h4>{{ activity.userName }} {{ activity.action }}</h4>
+            <span>{{ activity.timestamp?.toDate() | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-card">
+        <h2>Acciones rápidas</h2>
+        <button>
+          <mat-icon>groups</mat-icon>
+          Ver todos los usuarios
+        </button>
+        <button>
+          <mat-icon>message</mat-icon>
+          Conversaciones activas
+        </button>
+        <button>
+          <mat-icon>description</mat-icon>
+          Generar reporte
+        </button>
+        <button>
+          <mat-icon>analytics</mat-icon>
+          Estadísticas
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

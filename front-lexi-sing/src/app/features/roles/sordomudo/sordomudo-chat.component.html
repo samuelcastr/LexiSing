@@ -1,0 +1,156 @@
+<div class="conversation-container">
+  <aside class="sidebar-left">
+    <div class="sidebar-header">
+      <button mat-icon-button class="back-btn" (click)="goBack()" aria-label="Volver">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h2>Comunicación en vivo</h2>
+    </div>
+
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="text" placeholder="Buscar conversación..." disabled />
+    </div>
+
+    <div class="conversations-list">
+      <div *ngIf="conversations.length === 0" class="empty-state-sidebar">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>Sin conversaciones aún</p>
+      </div>
+
+      <div *ngFor="let conv of conversations" class="conversation-item" [class.active]="activeConversation?.id === conv.id" (click)="selectConversation(conv)">
+        <div class="conversation-item-content">
+          <h4>{{ conv.participantName || 'Conversación' }}</h4>
+          <p class="last-message">{{ conv.lastMessage || 'Sin mensajes aún' }}</p>
+          <small class="time" *ngIf="conv.updatedAtDate">{{ conv.updatedAtDate | date:'short' }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-card">
+      <span>Estado</span>
+      <h3>{{ sessionStarted ? 'Activa' : 'Inactiva' }}</h3>
+      <p>{{ cameraStatus }}</p>
+    </div>
+
+    <button mat-raised-button class="new-conv-btn" color="primary" (click)="createSordomudoConversation()">
+      <mat-icon>add</mat-icon>
+      Crear chat
+    </button>
+
+    <div class="summary-card">
+      <h3>Resumen</h3>
+      <p>Usuario: {{ currentUserName }}</p>
+      <p>Chat: {{ convId ? 'Activo' : 'No creado' }}</p>
+      <p>Mensajes: {{ messages.length }}</p>
+    </div>
+
+    <div class="sidebar-actions">
+      <button mat-stroked-button color="primary" (click)="enterSession()">Entrar a sesión</button>
+      <button mat-stroked-button color="accent" (click)="startCamera()" [disabled]="!sessionStarted">Iniciar cámara</button>
+      <button mat-stroked-button color="warn" (click)="stopCamera()" [disabled]="!sessionStarted">Detener cámara</button>
+    </div>
+  </aside>
+
+  <div class="chat-panel">
+    <div *ngIf="!showCreateButton" class="chat-container">
+      <div class="chat-header">
+        <button mat-icon-button (click)="goBack()" aria-label="Volver">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="chat-header-title">
+          <h3>Chat de soporte</h3>
+          <span>Sordomudo</span>
+        </div>
+        <div class="chat-header-actions">
+          <button mat-icon-button aria-label="Buscar chat">
+            <mat-icon>search</mat-icon>
+          </button>
+          <button mat-icon-button aria-label="Opciones">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="messages-wrapper">
+        <div class="camera-side-widget">
+          <div class="camera-side-card">
+            <div class="camera-side-header">
+              <span>Vista de cámara</span>
+              <button mat-icon-button class="close-camera" (click)="stopCamera()" *ngIf="cameraActive" aria-label="Cerrar cámara">
+                <mat-icon>videocam_off</mat-icon>
+              </button>
+            </div>
+            <div class="camera-side-video">
+              <video #videoElement autoplay playsinline muted></video>
+              <div class="camera-side-controls">
+                <button mat-stroked-button color="primary" *ngIf="!cameraActive" (click)="startCamera()">
+                  <mat-icon>videocam</mat-icon>
+                  Iniciar cámara
+                </button>
+                <button mat-stroked-button color="warn" *ngIf="cameraActive" (click)="stopCamera()">
+                  <mat-icon>videocam_off</mat-icon>
+                  Detener cámara
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="messages-container" #messagesContainer>
+          <div class="message" *ngFor="let m of messages" [ngClass]="{ 'sent': isMyMessage(m.senderUid), 'received': !isMyMessage(m.senderUid) }">
+            <p>{{ m.content }}</p>
+            <small>{{ m.timestamp?.toDate ? (m.timestamp.toDate() | date:'shortTime') : 'Ahora' }}</small>
+            <button *ngIf="isMyMessage(m.senderUid)" mat-icon-button (click)="selectMessage(m)" class="overflow-btn" aria-label="Más acciones">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="message-actions-footer" *ngIf="selectedMessage">
+        <div class="action-text">
+          <span>Acciones para este mensaje</span>
+          <button mat-icon-button (click)="selectedMessage = null" aria-label="Cerrar acciones">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="action-buttons">
+          <button mat-flat-button color="primary" class="action-btn" (click)="editMessage(selectedMessage)">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+          <button mat-flat-button color="warn" class="action-btn" (click)="deleteMessage(selectedMessage?.id)">
+            <mat-icon>delete</mat-icon>
+            Eliminar
+          </button>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div *ngIf="editingMessage" class="edit-banner">
+          <span>Editando mensaje</span>
+          <button mat-icon-button (click)="cancelEdit()" aria-label="Cancelar edición">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <input
+          matInput
+          placeholder="Escribe un mensaje..."
+          [(ngModel)]="text"
+          (keyup.enter)="send()"
+          class="chat-input"
+        />
+        <button mat-icon-button color="primary" (click)="send()" [disabled]="!text.trim()" aria-label="Enviar mensaje">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="showCreateButton" class="chat-empty">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <p>Sin chat asignado</p>
+      <button mat-raised-button color="primary" (click)="createSordomudoConversation()">Crear chat</button>
+    </div>
+  </div>
+</div>

@@ -10,7 +10,7 @@ import {
   serverTimestamp
 } from '@angular/fire/firestore';
 
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -49,10 +49,8 @@ export class ActivityService {
       limit(10)
     );
 
-    return collectionData(
-      q,
-      { idField: 'id' }
-    ) as Observable<any[]>;
+    // Temporal: devolver vacío para evitar llamadas Firestore en desarrollo
+    return of([] as any[]);
   }
 
 }
