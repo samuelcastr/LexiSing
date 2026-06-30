@@ -43,7 +43,7 @@ export class LoginComponent {
       next: res => {
         this.loading = false;
         if (res.user) {
-          this.navigateToRoleHome(res.user.rol);
+          this.router.navigate(['/dashboard']);
         } else {
           this.error = res.message || 'Error al iniciar sesión';
         }
@@ -53,27 +53,6 @@ export class LoginComponent {
         this.error = err?.message || 'Error de red';
       }
     });
-  }
-
-  private navigateToRoleHome(role: string | undefined): void {
-    const normalizedRole = role?.toString().toLowerCase().trim();
-
-    switch (normalizedRole) {
-      case 'admin':
-        this.router.navigate(['/admin']);
-        break;
-      case 'supervisor':
-        this.router.navigate(['/supervisor']);
-        break;
-      case 'empleado':
-        this.router.navigate(['/empleado']);
-        break;
-      case 'sordomudo':
-        this.router.navigate(['/sordomudo']);
-        break;
-      default:
-        this.router.navigate(['/usuario']);
-    }
   }
   
 }

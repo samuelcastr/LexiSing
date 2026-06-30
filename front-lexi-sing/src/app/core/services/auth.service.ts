@@ -90,37 +90,7 @@ register(
 
   login(email: string, password: string): Observable<AuthResponse> {
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
-      switchMap(cred => {
-        const uid = cred.user.uid;
-        const ref = doc(this.firestore, 'usuarios', uid);
-        return from(getDoc(ref)).pipe(
-          switchMap(snapshot => {
-            if (snapshot.exists()) {
-              const userData = snapshot.data() as User;
-              if (!userData.rol) {
-                const updatedUser = { ...userData, rol: 'usuario', activo: true } as User;
-                return from(setDoc(ref, updatedUser, { merge: true })).pipe(
-                  map(() => ({ user: updatedUser, message: 'Login exitoso' } as AuthResponse))
-                );
-              }
-              return of({ user: userData, message: 'Login exitoso' } as AuthResponse);
-            }
-
-            const userData: User = {
-              uid,
-              nombre: cred.user.displayName ?? '',
-              email: cred.user.email ?? '',
-              rol: 'usuario',
-              fechaCreacion: serverTimestamp(),
-              activo: true
-            } as unknown as User;
-
-            return from(setDoc(ref, userData)).pipe(
-              map(() => ({ user: userData, message: 'Login exitoso' } as AuthResponse))
-            );
-          })
-        );
-      }),
+      map(cred => ({ user: { uid: cred.user.uid, nombre: cred.user.displayName ?? '', email: cred.user.email ?? '' } as User, message: 'Login exitoso' } as AuthResponse)),
       catchError(err => of({ user: null, message: err?.message || 'Error al autenticar', error: err } as AuthResponse))
     );
   }
