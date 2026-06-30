@@ -11,10 +11,10 @@ import { MatTableModule } from '@angular/material/table';
   selector: 'app-monitoreo-conversaciones',
   standalone: true,
   imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatTableModule],
-  templateUrl: './monitoreo-conversaciones.component.html',
-  styleUrls: ['./monitoreo-conversaciones.component.scss']
+  templateUrl: './monitoreo-conversaciones.html',
+  styleUrls: ['./monitoreo-conversaciones.scss']
 })
-export class MonitoreoConversacionesComponent implements OnInit {
+export class MonitoreoConversaciones implements OnInit {
   conversations: any[] = [];
   displayedColumns: string[] = ['participantes', 'ultimoMensaje', 'fecha'];
   users: any[] = [];
@@ -27,34 +27,36 @@ export class MonitoreoConversacionesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUsers();
-    this.loadAllConversations();
   }
 
   loadUsers(): void {
     this.userApi.getUsers().subscribe(users => {
       this.users = users;
+      this.loadAllConversations();
     });
   }
 
   loadAllConversations(): void {
     this.convService.getAllConversations().subscribe(conversations => {
-      this.conversations = conversations.map(conv => {
-        const participantNames = conv.participants?.map((uid: string) => {
-          const user = this.users.find(u => u.uid === uid);
-          return user?.nombre || uid;
-        }).join(', ') || 'Sin participantes';
+      this.conversations = conversations
+        .map(conv => {
+          const participantNames = conv.participants?.map((uid: string) => {
+            const user = this.users.find((u: any) => u.uid === uid);
+            return user?.nombre || user?.displayName || user?.email || uid;
+          }).join(', ') || 'Sin participantes';
 
-        return {
-          ...conv,
-          participantNames,
-          ultimoMensaje: conv.lastMessage || 'Sin mensajes',
-          fecha: conv.updatedAt?.toDate ? conv.updatedAt.toDate() : new Date()
-        };
-      }).sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+          return {
+            ...conv,
+            participantNames,
+            ultimoMensaje: conv.lastMessage || 'Sin mensajes',
+            fecha: conv.updatedAt?.toDate ? conv.updatedAt.toDate() : new Date()
+          };
+        })
+        .sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/dashboard/supervisor']);
+    this.router.navigate(['/roles/supervisor']);
   }
 }

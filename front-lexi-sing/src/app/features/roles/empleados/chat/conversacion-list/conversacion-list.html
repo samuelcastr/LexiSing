@@ -1,23 +1,21 @@
+
 <div class="conversation-container">
   <!-- Sidebar izquierdo - Conversaciones + Cámara -->
   <aside class="sidebar-left">
     <div class="sidebar-header">
       <button mat-icon-button class="back-btn" (click)="goBack()">
-        <mat-icon>arrow_back</mat-icon>
+        <mat-icon>
+          arrow_back
+        </mat-icon>
       </button>
-      <div class="sidebar-title">
-        <div class="title-icon">
-          <mat-icon>forum</mat-icon>
-        </div>
-        <div>
-          <h2>Chats</h2>
-        </div>
-      </div>
+      <h2>
+        Comunicación en vivo
+      </h2>
     </div>
 
     <div class="search-box">
       <mat-icon>search</mat-icon>
-      <input type="text" placeholder="Buscar conversación..." [(ngModel)]="searchTerm" (input)="filterConversations()" />
+      <input type="text" placeholder="Buscar conversación..." />
     </div>
 
     <div class="conversations-list">
@@ -26,14 +24,8 @@
         <p>No tienes conversaciones</p>
       </div>
 
-      <div *ngIf="conversations.length > 0 && filteredConversations.length === 0" class="empty-state-sidebar">
-        <mat-icon>search_off</mat-icon>
-        <p>No se encontraron conversaciones</p>
-      </div>
-
-      <div *ngFor="let c of filteredConversations" class="conversation-item" (click)="selectConversation(c)"
+      <div *ngFor="let c of conversations" class="conversation-item" (click)="selectConversation(c)"
         [class.active]="selectedConversation?.id === c.id">
-        <div class="conversation-avatar">{{ (c.participantName || 'C').charAt(0).toUpperCase() }}</div>
         <div class="conversation-item-content">
           <h4>{{ c.participantName || 'Conversación' }}</h4>
           <p class="last-message">{{ c.lastMessage || 'Inicia una conversación...' }}</p>
@@ -54,20 +46,14 @@
     <div *ngIf="selectedConversation" class="chat-container">
       <!-- Header del chat -->
       <div class="chat-header">
-        <div class="chat-user-info">
-          <button mat-icon-button class="back-chat-btn" (click)="deselectConversation()">
-            <mat-icon>arrow_back</mat-icon>
-          </button>
-          <div class="header-avatar">{{ selectedConversation.participantName?.charAt(0)?.toUpperCase() || 'C' }}</div>
-          <div>
-            <h3>{{ selectedConversation.participantName }}</h3>
-            <span>{{ participantPresence === 'online' ? 'En línea' : 'Sin conexión' }}</span>
-          </div>
-        </div>
-        <button mat-icon-button class="header-camera-btn" (click)="showCameraModal = true" *ngIf="!showCameraModal">
+        <button mat-icon-button (click)="deselectConversation()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h3>{{ selectedConversation.participantName }}</h3>
+        <button mat-icon-button (click)="showCameraModal = true" *ngIf="!showCameraModal">
           <mat-icon>videocam</mat-icon>
         </button>
-        <button mat-icon-button class="header-camera-btn" (click)="showCameraModal = false" *ngIf="showCameraModal">
+        <button mat-icon-button (click)="showCameraModal = false" *ngIf="showCameraModal">
           <mat-icon>videocam_off</mat-icon>
         </button>
       </div>
@@ -95,27 +81,8 @@
         <div class="messages-container" [class.with-camera]="showCameraModal">
           <div *ngFor="let msg of messages" class="message" [class.received]="msg.senderUid !== uid"
             [class.sent]="msg.senderUid === uid">
-            <div *ngIf="editingMessageId !== msg.id; else editMode">
-              <p (contextmenu)="msg.senderUid === uid ? onMessageContextMenu($event, msg) : null">{{ msg.content }}</p>
-              <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}</small>
-              <div class="message-actions" *ngIf="msg.senderUid === uid && activeMessageMenuId === msg.id">
-                <button mat-stroked-button color="primary" (click)="startEditMessage(msg)">Editar</button>
-                <button mat-stroked-button color="warn" (click)="deleteMessage(msg)">Eliminar</button>
-              </div>
-            </div>
-            <ng-template #editMode>
-              <div class="edit-message-box">
-                <input type="text" [(ngModel)]="editingText" />
-                <div class="edit-actions">
-                  <button mat-icon-button color="primary" (click)="saveEditMessage(msg)">
-                    <mat-icon>check</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="cancelEditMessage()">
-                    <mat-icon>close</mat-icon>
-                  </button>
-                </div>
-              </div>
-            </ng-template>
+            <p>{{ msg.content }}</p>
+            <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}</small>
           </div>
         </div>
       </div>

@@ -19,10 +19,10 @@ import { User } from '../../../core/models/user.model';
     MatCardModule,
     MatIconModule
   ],
-  templateUrl: './supervisor-dashboard.component.html',
-  styleUrls: ['./supervisor-dashboard.component.scss']
+  templateUrl: './supervisor.html',
+  styleUrls: ['./supervisor.scss']
 })
-export class SupervisorDashboardComponent implements OnInit {
+export class Supervisor implements OnInit {
 
   userName: string = 'Usuario';
   sidebarOpen = true;

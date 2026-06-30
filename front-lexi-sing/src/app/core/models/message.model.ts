@@ -5,6 +5,9 @@ export interface Message {
   timestamp: any; // Firestore Timestamp
   read?: boolean;
   edited?: boolean;
+  deleted?: boolean;
+  deletedAt?: any;
+  editedAt?: any;
 }
 
 export interface Conversation {

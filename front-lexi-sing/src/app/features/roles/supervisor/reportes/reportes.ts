@@ -13,10 +13,10 @@ import { MatTabsModule } from '@angular/material/tabs';
   selector: 'app-reportes',
   standalone: true,
   imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatCardModule, MatTabsModule],
-  templateUrl: './reportes.component.html',
-  styleUrls: ['./reportes.component.scss']
+  templateUrl: './reportes.html',
+  styleUrls: ['./reportes.scss']
 })
-export class ReportesComponent implements OnInit, AfterViewInit {
+export class Reportes implements OnInit, AfterViewInit {
   totalUsuarios = 0;
   totalConversaciones = 0;
   totalMensajes = 0;
@@ -287,6 +287,6 @@ export class ReportesComponent implements OnInit, AfterViewInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/dashboard/supervisor']);
+    this.router.navigate(['/roles/supervisor']);
   }
 }

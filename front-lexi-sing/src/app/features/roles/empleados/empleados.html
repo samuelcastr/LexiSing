@@ -1,0 +1,113 @@
+<div class="dashboard-layout">
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+    <div>
+      <div class="logo">
+        <mat-icon>pan_tool</mat-icon>
+      </div>
+
+      <nav>
+        <a class="active">
+          <mat-icon>home</mat-icon>
+          <span *ngIf="sidebarOpen">Inicio</span>
+        </a>
+
+        <a routerLink="/empleados/conversations">
+          <mat-icon>chat</mat-icon>
+          <span *ngIf="sidebarOpen">Chat</span>
+        </a>
+
+        <a>
+          <mat-icon>description</mat-icon>
+          <span *ngIf="sidebarOpen">Reportes</span>
+        </a>
+
+        <a>
+          <mat-icon>person</mat-icon>
+          <span *ngIf="sidebarOpen">Perfil</span>
+        </a>
+      </nav>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="sidebarOpen">Cerrar sesión</span>
+    </button>
+  </aside>
+
+  <main class="content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <div>
+          <h1>Hola, {{ userName }}</h1>
+          <p>Bienvenido a tu espacio de trabajo</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="profile">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span>Conversaciones</span>
+        <h2>{{ conversaciones }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Mensajes</span>
+        <h2>{{ mensajes }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Reportes</span>
+        <h2>{{ reportes }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Perfil</span>
+        <h2>Activo</h2>
+      </div>
+    </div>
+
+    <div class="bottom-grid">
+      <div class="activity-card">
+        <h2>Actividad reciente</h2>
+
+        <div class="activity-item" *ngFor="let item of recentActivities">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <div>
+            <h4>{{ item.userName }} {{ item.action }}</h4>
+            <span>{{ item.timestamp?.toDate ? (item.timestamp.toDate() | date:'short') : 'Reciente' }}</span>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="recentActivities.length === 0">
+          No hay actividad reciente todavía.
+        </div>
+      </div>
+
+      <div class="actions-card">
+        <h2>Acciones rápidas</h2>
+        <button type="button" routerLink="/empleados/conversations">
+          <mat-icon>chat</mat-icon>
+          Abrir chat
+        </button>
+        <button type="button">
+          <mat-icon>description</mat-icon>
+          Ver reportes
+        </button>
+        <button type="button">
+          <mat-icon>person</mat-icon>
+          Ver perfil
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

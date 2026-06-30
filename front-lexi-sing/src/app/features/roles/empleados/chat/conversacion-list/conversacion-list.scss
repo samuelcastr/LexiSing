@@ -1,0 +1,291 @@
+*{
+    box-sizing: border-box;
+}
+
+.dashboard-layout{
+    display:flex;
+    min-height:100vh;
+    background:#f5f5f7;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+     width: 280px;
+    min-width: 280px;
+    background: #0f1225;
+    color: white;
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.logo{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    font-size: 32px;
+    color: white;
+
+    margin-bottom: 30px;
+}
+
+nav{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+nav a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:10px 12px;
+    border-radius:15px;
+
+    color:#d1d5db;
+    font-size:13px;
+
+    text-decoration:none;
+    cursor:pointer;
+
+    transition:.3s;
+
+    min-width: 0;
+    overflow: hidden;
+}
+
+nav a span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+nav a:hover,
+nav a.active{
+    background:#6d4cff;
+    color:white;
+}
+
+.logout-btn{
+    height:40px;
+    background:none;
+    border:none;
+    color:white;
+    font-size:13px;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    cursor:pointer;
+}
+
+/* CONTENIDO */
+
+.content{
+    flex: 1;
+    padding: 20px;
+    min-width: 0;
+    transition: all 0.3s ease;
+}
+
+/* TOPBAR */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:18px;
+}
+
+.topbar h1{
+    margin:0;
+    font-size:28px;
+}
+
+.topbar p{
+    color:#777;
+    font-size:13px;
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.search-box{
+    width:230px;
+    height:45px;
+
+    background:white;
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+
+    padding:0 15px;
+}
+
+.search-box input{
+    border:none;
+    outline:none;
+    margin-left:10px;
+    width:100%;
+}
+
+.notification{
+    width:45px;
+    height:45px;
+
+    border:none;
+    border-radius:50%;
+    background:white;
+    cursor:pointer;
+}
+
+.profile mat-icon{
+    font-size:40px;
+    width:40px;
+    height:40px;
+    color:#6d4cff;
+}
+
+/* TARJETAS */
+
+.stats-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.stat-card{
+    background:white;
+    padding:16px;
+    border-radius:18px;
+    box-shadow:0 3px 15px rgba(0,0,0,.06);
+}
+
+.stat-card span{
+    color:#777;
+    font-size:12px;
+}
+
+.stat-card h2{
+    margin-top:8px;
+    font-size:24px;
+}
+
+/* INFERIOR */
+
+.bottom-grid{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+}
+@media (max-width: 1100px) {
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.activity-card,
+.actions-card{
+    background:white;
+    border-radius:20px;
+    padding:18px;
+
+    box-shadow:0 3px 15px rgba(0,0,0,.06);
+}
+
+.activity-card h2,
+.actions-card h2{
+    font-size:18px;
+    margin:0 0 12px 0;
+}
+
+.activity-item{
+    display:flex;
+    align-items:center;
+    gap:15px;
+
+    margin-top:25px;
+}
+
+.activity-item mat-icon{
+    font-size:36px;
+    width:36px;
+    height:36px;
+    color:#777;
+}
+
+.activity-item h4{
+    margin:0;
+    font-size:13px;
+}
+
+.activity-item span{
+    color:#999;
+    font-size:13px;
+}
+
+.actions-card{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.actions-card button{
+    height:44px;
+
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    background:white;
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding-left:16px;
+    font-size:12px;
+
+    cursor:pointer;
+    transition:.3s;
+}
+
+.actions-card button:hover{
+    background:#f3f4f6;
+}
+
+.sidebar.collapsed {
+    width: 85px;
+    min-width: 85px;
+    padding: 25px 10px;
+}
+
+.sidebar.collapsed nav a {
+    justify-content: center;
+    padding: 15px 0;
+}
+
+.sidebar.collapsed mat-icon {
+    margin: 0;
+}
+
+.sidebar.collapsed .logout-btn {
+    justify-content: center;
+    padding: 0;
+}
+
+.sidebar.collapsed .logo {
+    justify-content: center;
+}

@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { ConversationService } from '../../../core/services/conversation.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { CameraService } from '../../../core/services/camera.service';
+import { ConversationService } from '../../../../../core/services/conversation.service';
+import { AuthService } from '../../../../../core/services/auth.service';
+import { CameraService } from '../../../../../core/services/camera.service';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,16 +14,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { FormsModule } from '@angular/forms';
-import { UserApiService } from '../../../core/services/user-api.service';
-import { ActivityService } from '../../../core/services/activity.service';
-import { PresenceService } from '../../../core/services/presence.service';
+import { UserApiService } from '../../../../../core/services/user-api.service';
+import { ActivityService } from '../../../../../core/services/activity.service';
 
 @Component({
   selector: 'app-conversation-list',
   standalone: true,
   imports: [CommonModule, RouterModule, MatListModule, MatButtonModule, MatIconModule, MatInputModule, MatFormFieldModule, MatCardModule, MatTooltipModule, MatSelectModule, MatOptionModule, FormsModule],
-  templateUrl: './conversation-list.component.html',
-  styleUrls: ['./conversation-list.component.scss']
+  templateUrl: './conversacion-list.html',
+  styleUrls: ['./conversacion-list.scss']
 })
 export class ConversationListComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
@@ -31,8 +30,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   users: any[] = [];
   selectedUserUid: string = '';
   conversations: any[] = [];
-  filteredConversations: any[] = [];
-  searchTerm: string = '';
   uid: string = '';
   showNewConvForm = false;
   showCameraModal = false;
@@ -40,10 +37,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   selectedConversation: any = null;
   messageText: string = '';
   messages: any[] = [];
-  editingMessageId: string | null = null;
-  editingText: string = '';
-  activeMessageMenuId: string | null = null;
-  participantPresence: 'online' | 'offline' = 'offline';
 
   constructor(
     private convService: ConversationService,
@@ -52,18 +45,15 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     private location: Location,
     private userApi: UserApiService,
     private cameraService: CameraService,
-    private activityService: ActivityService,
-    private presenceService: PresenceService
+    private activityService: ActivityService
   ) { }
 
   ngOnInit(): void {
     this.auth.getCurrentUser().subscribe(user => {
       if (user?.uid) {
         this.uid = user.uid;
-        this.presenceService.startPresence(this.uid);
       } else {
         this.uid = 'supervisor-demo';
-        this.presenceService.startPresence(this.uid);
       }
       this.loadUsers();
       this.loadConversations();
@@ -72,7 +62,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopCamera();
-    this.presenceService.stopPresence();
   }
 
   loadConversations(): void {
@@ -86,23 +75,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
         const timeB = b.updatedAt?.toDate?.() || new Date(0);
         return timeB.getTime() - timeA.getTime();
       });
-
-      this.filterConversations();
-    });
-  }
-
-  filterConversations(): void {
-    const term = this.searchTerm.trim().toLowerCase();
-
-    if (!term) {
-      this.filteredConversations = [...this.conversations];
-      return;
-    }
-
-    this.filteredConversations = this.conversations.filter(conv => {
-      const name = (conv.participantName || '').toLowerCase();
-      const lastMessage = (conv.lastMessage || '').toLowerCase();
-      return name.includes(term) || lastMessage.includes(term);
     });
   }
 
@@ -118,7 +90,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.userApi.getUsers().subscribe({
       next: (users) => {
         this.users = users.filter(u => u.uid && u.uid !== this.uid);
-        this.loadConversations();
       },
       error: (error) => {
         console.error('Error cargando usuarios:', error);
@@ -179,37 +150,38 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   selectConversation(conversation: any): void {
+    console.log(conversation);
+
     this.selectedConversation = conversation;
     this.loadMessages(conversation.id);
-
-    const otherUid = conversation.participants?.find((p: string) => p !== this.uid);
-    if (otherUid) {
-      this.presenceService.observePresence(otherUid).subscribe(status => {
-        this.participantPresence = status;
-      });
-    }
   }
 
   loadMessages(convId: string): void {
     this.convService.getMessages(convId).subscribe(msgs => {
-      this.messages = msgs.filter(msg => !msg.deleted);
+      this.messages = msgs;
     });
   }
 
   deselectConversation(): void {
     this.selectedConversation = null;
-    this.participantPresence = 'offline';
   }
-
 
   goBack(): void {
-    if (this.router.url.includes('/supervisor/conversations')) {
-      this.router.navigate(['/roles/supervisor']);
+    const currentUrl = this.router.url;
+    const targetUrl = currentUrl.includes('/supervisor/conversations')
+      ? '/roles/supervisor'
+      : (currentUrl.includes('/empleados/conversations') || currentUrl.includes('/conversations'))
+        ? '/roles/empleados'
+        : '/dashboard';
 
-    } else {
-      this.router.navigate(['/dashboard']);
+    if (typeof window !== 'undefined') {
+      window.location.assign(targetUrl);
+      return;
     }
+
+    this.router.navigateByUrl(targetUrl);
   }
+
   sendMessage(): void {
     if (!this.messageText.trim() || !this.selectedConversation?.id) {
       return;
@@ -234,58 +206,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     }).catch(error => {
       console.error('Error enviando mensaje:', error);
     });
-  }
-
-  toggleMessageMenu(messageId: string | null): void {
-    this.activeMessageMenuId = this.activeMessageMenuId === messageId ? null : messageId;
-  }
-
-  onMessageContextMenu(event: MouseEvent, message: any): void {
-    event.preventDefault();
-    if (message?.senderUid === this.uid) {
-      this.toggleMessageMenu(message.id);
-    }
-  }
-
-  startEditMessage(message: any): void {
-    this.activeMessageMenuId = null;
-    this.editingMessageId = message.id;
-    this.editingText = message.content;
-  }
-
-  cancelEditMessage(): void {
-    this.editingMessageId = null;
-    this.editingText = '';
-  }
-
-  saveEditMessage(message: any): void {
-    if (!this.selectedConversation?.id || !message?.id || !this.editingText.trim()) {
-      return;
-    }
-
-    this.convService.editMessage(this.selectedConversation.id, message.id, this.editingText.trim())
-      .then(() => {
-        this.editingMessageId = null;
-        this.editingText = '';
-      })
-      .catch(error => {
-        console.error('Error editando mensaje:', error);
-      });
-  }
-
-  deleteMessage(message: any): void {
-    if (!this.selectedConversation?.id || !message?.id) {
-      return;
-    }
-
-    this.activeMessageMenuId = null;
-    this.convService.softDeleteMessage(this.selectedConversation.id, message.id)
-      .then(() => {
-        this.editingMessageId = null;
-      })
-      .catch(error => {
-        console.error('Error eliminando mensaje:', error);
-      });
   }
 }
 

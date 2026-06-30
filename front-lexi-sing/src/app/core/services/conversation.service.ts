@@ -40,11 +40,25 @@ export class ConversationService {
     });
   }
 
+  editMessage(convId: string, messageId: string, newContent: string) {
+    const msgRef = doc(this.firestore, `conversaciones/${convId}/mensajes/${messageId}`);
+    return updateDoc(msgRef, {
+      content: newContent,
+      edited: true,
+      editedAt: serverTimestamp()
+    } as Partial<Message>);
+  }
+
   deleteMessage(convId: string, messageId: string) {
     const msgRef = doc(this.firestore, `conversaciones/${convId}/mensajes/${messageId}`);
-    return deleteDoc(msgRef).then(() => {
-      // Nota: actualizar lastMessage debe manejarse con transacción o Cloud Function en producción.
-      return true;
-    });
+    return updateDoc(msgRef, {
+      deleted: true,
+      deletedAt: serverTimestamp(),
+      content: 'Mensaje eliminado'
+    } as Partial<Message>);
+  }
+
+  softDeleteMessage(convId: string, messageId: string) {
+    return this.deleteMessage(convId, messageId);
   }
 }

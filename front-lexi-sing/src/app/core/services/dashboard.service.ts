@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, collectionGroup } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, collectionGroup, query, orderBy, limit } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { Conversation } from '../models/conversation.model';
 import { Message } from '../models/message.model';
@@ -51,17 +52,23 @@ export class DashboardService {
     );
 
   }
-  getRecentActivity() {
+  getTraduccionesHoy(): Observable<number> {
+    return this.getMensajes().pipe(map((mensajes) => mensajes.length));
+  }
 
-    const ref = collection(
-      this.firestore,
-      'conversations'
-    );
+  getSesionesActivas(): Observable<number> {
+    return this.getConversaciones().pipe(map((conversaciones) => conversaciones.length));
+  }
 
-    return collectionData(
-      ref,
-      { idField: 'id' }
-    );
+  getTotalConversations(): Observable<number> {
+    return this.getConversaciones().pipe(map((conversaciones) => conversaciones.length));
+  }
+
+  getRecentActivity(): Observable<any[]> {
+    const ref = collection(this.firestore, 'activities');
+    const q = query(ref, orderBy('timestamp', 'desc'), limit(5));
+
+    return collectionData(q, { idField: 'id' }) as Observable<any[]>;
   }
 }
 
