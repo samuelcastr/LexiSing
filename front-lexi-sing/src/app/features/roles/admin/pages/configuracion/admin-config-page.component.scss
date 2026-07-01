@@ -1,0 +1,52 @@
+@use '../../variables' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.content-card {
+  background: $card;
+  border-radius: 20px !important;
+  padding: 25px;
+  box-shadow: $shadow;
+  border: none;
+  animation: fadeIn .4s ease;
+}
+
+.empty-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 350px;
+}
+
+.empty-page mat-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  color: $primary;
+  margin-bottom: 20px;
+}
+
+.empty-page h2 {
+  margin-bottom: 10px;
+  color: $text;
+}
+
+.empty-page p {
+  color: $text-light;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

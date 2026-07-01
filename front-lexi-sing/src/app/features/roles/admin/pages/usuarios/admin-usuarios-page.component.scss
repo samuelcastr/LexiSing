@@ -1,0 +1,32 @@
+@use '../../variables' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.section-header h2 {
+  margin: 0;
+  color: $text;
+  font-size: 28px;
+}
+
+.section-header p {
+  margin-top: 6px;
+  color: $text-light;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}

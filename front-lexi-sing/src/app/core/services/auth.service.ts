@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, authState } from '@angular/fire/auth';
-import { Firestore, doc, setDoc, serverTimestamp, getDoc } from '@angular/fire/firestore';
+import { Firestore, doc, setDoc, serverTimestamp, getDoc, collection, getDocs, updateDoc } from '@angular/fire/firestore';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { from, Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -90,7 +90,16 @@ register(
 
   login(email: string, password: string): Observable<AuthResponse> {
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
-      map(cred => ({ user: { uid: cred.user.uid, nombre: cred.user.displayName ?? '', email: cred.user.email ?? '' } as User, message: 'Login exitoso' } as AuthResponse)),
+      switchMap(cred => {
+        const uid = cred.user.uid;
+        const ref = doc(this.firestore, 'usuarios', uid);
+        return from(getDoc(ref)).pipe(
+          map(snapshot => {
+            const user = snapshot.exists() ? (snapshot.data() as User) : { uid, nombre: cred.user.displayName ?? '', email: cred.user.email ?? '', rol: 'usuario' } as User;
+            return { user, message: 'Login exitoso' } as AuthResponse;
+          })
+        );
+      }),
       catchError(err => of({ user: null, message: err?.message || 'Error al autenticar', error: err } as AuthResponse))
     );
   }
@@ -242,6 +251,18 @@ register(
         );
       })
     );
+  }
+
+  getAllUsers(): Observable<User[]> {
+    return from(getDocs(collection(this.firestore, 'usuarios'))).pipe(
+      map(snapshot => snapshot.docs.map(d => ({ uid: d.id, ...d.data() } as User))),
+      catchError(() => of([]))
+    );
+  }
+
+  updateUserRole(uid: string, newRole: string): Observable<void> {
+    const ref = doc(this.firestore, 'usuarios', uid);
+    return from(updateDoc(ref, { rol: newRole } as any));
   }
 
   isAuthenticated(): Observable<boolean> {

@@ -43,7 +43,7 @@ export class LoginComponent {
       next: res => {
         this.loading = false;
         if (res.user) {
-          this.router.navigate(['/dashboard']);
+          this.navigateToRoleHome(res.user.rol);
         } else {
           this.error = res.message || 'Error al iniciar sesión';
         }
@@ -53,6 +53,16 @@ export class LoginComponent {
         this.error = err?.message || 'Error de red';
       }
     });
+  }
+
+  private navigateToRoleHome(rol: string): void {
+    const roleRoutes: Record<string, string> = {
+      admin: '/roles/admin',
+      supervisor: '/roles/supervisor',
+      empleado: '/roles/empleados',
+      usuario: '/roles/usuario',
+    };
+    this.router.navigate([roleRoutes[rol] || '/dashboard']);
   }
   
 }

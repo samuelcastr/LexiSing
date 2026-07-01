@@ -1,0 +1,14 @@
+<div class="section-header">
+  <div>
+    <h2>Solicitudes pendientes</h2>
+    <p>Usuarios registrados que aún no tienen un rol asignado.</p>
+  </div>
+</div>
+
+<app-user-table
+  [users]="pendingUsers"
+  [showPendingBadge]="true"
+  [showActionForRole]="'usuario'"
+  actionButtonLabel="Aprobar"
+  (roleChanged)="handleRoleChange($event)">
+</app-user-table>

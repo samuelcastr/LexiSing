@@ -1,0 +1,14 @@
+<div class="cards">
+  <app-stat-card title="Total usuarios" [value]="totalUsuarios" icon="groups" colorClass="purple"></app-stat-card>
+  <app-stat-card title="Solicitudes" [value]="totalPendientes" icon="pending_actions" colorClass="blue"></app-stat-card>
+  <app-stat-card title="Empleados" [value]="totalEmpleados" icon="badge" colorClass="green"></app-stat-card>
+  <app-stat-card title="Supervisores" [value]="totalSupervisores" icon="supervisor_account" colorClass="orange"></app-stat-card>
+</div>
+
+<mat-card class="welcome-card">
+  <h2>Bienvenido al panel de administración</h2>
+  <p>
+    Desde aquí podrás aprobar usuarios nuevos, asignar roles, consultar estadísticas,
+    revisar reportes y administrar todo LexiSing.
+  </p>
+</mat-card>

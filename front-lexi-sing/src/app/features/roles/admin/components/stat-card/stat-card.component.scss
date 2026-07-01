@@ -1,0 +1,71 @@
+@use '../../variables' as *;
+
+:host {
+  display: block;
+}
+
+.stat-card {
+  background: $card;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: $shadow;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: .25s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+}
+
+.stat-card::after {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  top: -80px;
+  right: -70px;
+}
+
+.stat-card h4 {
+  margin: 0;
+  color: $text-light;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-card h2 {
+  margin-top: 10px;
+  margin-bottom: 0;
+  font-size: 34px;
+  color: $text;
+}
+
+.stat-card mat-icon {
+  font-size: 45px;
+  width: 45px;
+  height: 45px;
+  opacity: .9;
+}
+
+.purple {
+  border-left: 6px solid $primary;
+}
+
+.blue {
+  border-left: 6px solid #3B82F6;
+}
+
+.green {
+  border-left: 6px solid $success;
+}
+
+.orange {
+  border-left: 6px solid $warning;
+}

@@ -1,0 +1,138 @@
+@use '../../variables' as *;
+
+.content-card {
+  background: $card;
+  border-radius: 20px !important;
+  padding: 25px;
+  box-shadow: $shadow;
+  border: none;
+  animation: fadeIn .4s ease;
+}
+
+.table-container {
+  width: 100%;
+  overflow: auto;
+}
+
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: $primary;
+  border-radius: 20px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #E5E7EB;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.user-table th {
+  background: #F8FAFC;
+  color: $text;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 18px;
+  border-bottom: 2px solid $border;
+}
+
+.user-table td {
+  padding: 18px;
+  border-bottom: 1px solid #EDF2F7;
+}
+
+.user-table tr {
+  transition: .25s;
+}
+
+.user-table tbody tr:hover {
+  background: #F9FAFB;
+  transform: scale(1.003);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: $primary;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pending {
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.role {
+  background: #EDE9FE;
+  color: $primary;
+}
+
+mat-select {
+  width: 170px;
+}
+
+.mat-mdc-select-trigger {
+  border-radius: 10px;
+}
+
+button[mat-flat-button] {
+  border-radius: 12px !important;
+  font-weight: 600;
+  padding: 8px 18px !important;
+  transition: .25s;
+  min-width: 120px;
+}
+
+button[mat-flat-button]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(91,75,255,.30);
+}
+
+.mat-mdc-header-row {
+  background: #F8FAFC;
+}
+
+.mat-mdc-row:hover {
+  background: #F8FAFC;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
