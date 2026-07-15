@@ -96,7 +96,7 @@
           <div *ngFor="let msg of messages" class="message" [class.received]="msg.senderUid !== uid"
             [class.sent]="msg.senderUid === uid">
             <div *ngIf="editingMessageId !== msg.id; else editMode">
-              <p (contextmenu)="msg.senderUid === uid ? onMessageContextMenu($event, msg) : null">{{ msg.content }}</p>
+              <p (contextmenu)="msg.senderUid === uid ? onMessageContextMenu($event, msg) : null">{{ msg.content }} <span *ngIf="msg.edited" class="edited-badge">(editado)</span></p>
               <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}</small>
               <div class="message-actions" *ngIf="msg.senderUid === uid && activeMessageMenuId === msg.id">
                 <button mat-stroked-button color="primary" (click)="startEditMessage(msg)">Editar</button>

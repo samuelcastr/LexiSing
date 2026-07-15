@@ -265,6 +265,9 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
     this.convService.editMessage(this.selectedConversation.id, message.id, this.editingText.trim())
       .then(() => {
+        this.messages = this.messages.map(m =>
+          m.id === message.id ? { ...m, content: this.editingText.trim(), edited: true } : m
+        );
         this.editingMessageId = null;
         this.editingText = '';
       })

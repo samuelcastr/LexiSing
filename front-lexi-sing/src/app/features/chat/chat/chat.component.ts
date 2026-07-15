@@ -25,6 +25,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   text = '';
   uid: string | null = null;
   currentUser: User | null = null;
+  editingMessage: any | null = null;
   private shouldScroll = false;
 
   constructor(private route: ActivatedRoute, private convService: ConversationService, private auth: AuthService) {}
@@ -39,7 +40,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
         this.uid = user.uid;
         this.currentUser = user;
         this.convService.getMessages(this.convId).subscribe(list => {
-          this.messages = list;
+          this.messages = list.filter(msg => !msg.deleted);
           this.shouldScroll = true;
         });
       });
@@ -63,6 +64,22 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
   send(): void {
     if (!this.text.trim() || !this.uid) return;
+
+    if (this.editingMessage) {
+      const editedId = this.editingMessage.id;
+      const newContent = this.text;
+      this.convService.editMessage(this.convId, editedId, newContent).then(() => {
+        this.messages = this.messages.map(m =>
+          m.id === editedId ? { ...m, content: newContent, edited: true } : m
+        );
+        this.text = '';
+        this.editingMessage = null;
+      }).catch(error => {
+        console.error('Error editando mensaje:', error);
+      });
+      return;
+    }
+
     const payload = { senderUid: this.uid, content: this.text };
     this.convService.sendMessage(this.convId, payload).then(() => {
       this.text = '';
@@ -70,11 +87,21 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  editMessage(msg: any): void {
+    this.editingMessage = msg;
+    this.text = msg.content;
+  }
+
+  cancelEdit(): void {
+    this.editingMessage = null;
+    this.text = '';
+  }
+
   deleteMessage(messageId: string): void {
     if (!this.convId || !messageId) return;
     if (confirm('¿Eliminar este mensaje?')) {
       this.convService.deleteMessage(this.convId, messageId).then(() => {
-        // Mensaje eliminado
+        this.messages = this.messages.filter(m => m.id !== messageId);
       });
     }
   }

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth, authState } from '@angular/fire/auth';
+import { Auth } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, serverTimestamp, getDoc, collection, getDocs, updateDoc } from '@angular/fire/firestore';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from '@angular/fire/auth';
 import { from, Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { User } from '../models/user.model';
@@ -11,8 +11,13 @@ import { UserApiService } from './user-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readyPromise: Promise<void>;
 
-  constructor(private auth: Auth, private firestore: Firestore, private router: Router, private userApi: UserApiService) { }
+  constructor(private auth: Auth, private firestore: Firestore, private router: Router, private userApi: UserApiService) {
+    this.readyPromise = typeof window !== 'undefined'
+      ? this.auth.authStateReady().catch(() => undefined as void)
+      : Promise.resolve();
+  }
 
 register(
   email: string,
@@ -241,8 +246,12 @@ register(
   }
 
   getCurrentUser(): Observable<User | null> {
-    return authState(this.auth).pipe(
-      switchMap(fbUser => {
+    if (typeof window === 'undefined') {
+      return of(null);
+    }
+    return from(this.readyPromise).pipe(
+      switchMap(() => {
+        const fbUser = this.auth.currentUser;
         if (!fbUser) return of(null);
         const ref = doc(this.firestore, 'usuarios', fbUser.uid);
         return from(getDoc(ref)).pipe(
@@ -266,6 +275,11 @@ register(
   }
 
   isAuthenticated(): Observable<boolean> {
-    return authState(this.auth).pipe(map(u => !!u));
+    if (typeof window === 'undefined') {
+      return of(false);
+    }
+    return from(this.readyPromise).pipe(
+      map(() => !!this.auth.currentUser)
+    );
   }
 }
