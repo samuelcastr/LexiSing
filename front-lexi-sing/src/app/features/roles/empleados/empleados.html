@@ -16,6 +16,8 @@
           <span *ngIf="sidebarOpen">Chat</span>
         </a>
 
+       
+
         <a>
           <mat-icon>description</mat-icon>
           <span *ngIf="sidebarOpen">Reportes</span>
@@ -25,8 +27,15 @@
           <mat-icon>person</mat-icon>
           <span *ngIf="sidebarOpen">Perfil</span>
         </a>
+
+         <a routerLink="/empleados/configuracion" class="nav-link">
+          <mat-icon>settings</mat-icon>
+          <span *ngIf="sidebarOpen">Configuración</span>
+        </a>
+        
       </nav>
     </div>
+    
 
     <button class="logout-btn" (click)="logout()">
       <mat-icon>logout</mat-icon>
@@ -102,6 +111,10 @@
         <button type="button">
           <mat-icon>description</mat-icon>
           Ver reportes
+        </button>
+        <button type="button" routerLink="/empleados/configuracion">
+          <mat-icon>settings</mat-icon>
+          Configuración
         </button>
         <button type="button">
           <mat-icon>person</mat-icon>

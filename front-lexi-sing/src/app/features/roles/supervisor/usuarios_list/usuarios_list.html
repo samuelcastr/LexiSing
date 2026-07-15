@@ -1,0 +1,26 @@
+<div class="usuarios-list-layout">
+  <div class="page-header">
+    <button mat-icon-button routerLink="/roles/supervisor">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Usuarios</h1>
+  </div>
+
+  <mat-card class="usuarios-card">
+    <div class="usuarios-table">
+      <div class="usuarios-row header">
+        <span>Nombre</span>
+        <span>Correo</span>
+        <span>Rol</span>
+      </div>
+      <div class="usuarios-row" *ngFor="let user of usuarios">
+        <span>{{ user.nombre }}</span>
+        <span>{{ user.email }}</span>
+        <span>{{ user.rol }}</span>
+      </div>
+      <div class="no-usuarios" *ngIf="usuarios.length === 0">
+        No hay usuarios registrados.
+      </div>
+    </div>
+  </mat-card>
+</div>

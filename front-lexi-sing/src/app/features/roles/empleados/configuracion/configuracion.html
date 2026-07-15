@@ -1,0 +1,97 @@
+<div class="config-layout">
+
+  <div class="config-header">
+    <button mat-icon-button class="back-btn" routerLink="/roles/empleados">
+      <mat-icon>arrow_back_ios_new</mat-icon>
+    </button>
+
+    <div>
+      <h1>Configuración de perfil</h1>
+      <p>Administra la información de tu cuenta y mantén tus datos actualizados.</p>
+    </div>
+  </div>
+
+  <div class="config-grid">
+
+    <mat-card class="profile-card">
+      <div class="avatar-container">
+        <div class="profile-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+
+        <button mat-mini-fab class="camera-btn">
+          <mat-icon>photo_camera</mat-icon>
+        </button>
+      </div>
+
+      <h2>Juan Pérez</h2>
+
+      <span class="profile-role">Supervisor</span>
+
+      <p>
+        Gestiona tu información personal y protege tu cuenta actualizando los datos cuando sea necesario.
+      </p>
+
+      <div class="profile-info">
+        <div>
+          <small>Miembro desde</small>
+          <strong>Julio 2025</strong>
+        </div>
+        <div>
+          <small>Último acceso</small>
+          <strong>Hoy</strong>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="profile-form-card">
+      <h3 class="section-title">Información personal</h3>
+
+      <div class="form-grid">
+        <div class="profile-field">
+          <label>Nombre</label>
+          <input type="text" placeholder="Juan Pérez" [(ngModel)]="nombre" name="nombre">
+        </div>
+
+        <div class="profile-field">
+          <label>Teléfono</label>
+          <input type="text" placeholder="3001234567">
+        </div>
+
+        <div class="profile-field full">
+          <label>Email</label>
+          <input type="email" placeholder="juan@gmail.com" [(ngModel)]="email" name="email">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 class="section-title">Seguridad</h3>
+
+      <div class="form-grid">
+        <div class="profile-field">
+          <label>Nueva contraseña</label>
+          <input type="password" placeholder="********" [(ngModel)]="nuevoPassword" name="nuevoPassword">
+        </div>
+        <div class="profile-field">
+          <label>Confirmar contraseña</label>
+          <input type="password" placeholder="********" [(ngModel)]="confirmarPassword" name="confirmarPassword">
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="cancel-btn" type="button" (click)="cancel()">
+          Cancelar
+        </button>
+        <button class="save-info-btn" type="button" (click)="saveChanges()" [disabled]="saving">
+          <mat-icon>save</mat-icon>
+          Guardar cambios
+        </button>
+      </div>
+
+      <div class="status-message" *ngIf="message">
+        {{ message }}
+      </div>
+    </mat-card>
+  </div>
+</div>

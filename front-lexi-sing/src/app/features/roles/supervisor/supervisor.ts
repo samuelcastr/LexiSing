@@ -49,14 +49,11 @@ export class Supervisor implements OnInit {
 
     this.dashboardService.getUsuarios().subscribe(users => {
       this.usuariosSordos = users.filter(user => user.activo).length;
+      this.usuariosActivos = users.length;
     });
 
     this.dashboardService.getConversaciones().subscribe(conversaciones => {
       this.conversacionesHoy = conversaciones.length;
-    });
-
-    this.dashboardService.getUsuarios().subscribe(users => {
-      this.usuariosActivos = users.length;
     });
   }
 

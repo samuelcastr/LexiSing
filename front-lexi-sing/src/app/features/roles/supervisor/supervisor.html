@@ -21,19 +21,24 @@
           <span *ngIf="sidebarOpen">Chat</span>
         </a>
 
-        <a>
+        <a routerLink="/supervisor/usuarios" class="nav-link">
           <mat-icon>groups</mat-icon>
           <span *ngIf="sidebarOpen">Usuarios</span>
         </a>
 
-        <a routerLink="/supervisor/monitoreo-conversaciones">
+        <a routerLink="/supervisor/monitoreo-conversaciones" class="nav-link">
           <mat-icon>chat</mat-icon>
           <span *ngIf="sidebarOpen">Conversaciones</span>
         </a>
 
-        <a routerLink="/supervisor/reportes">
+        <a routerLink="/supervisor/reportes" class="nav-link">
           <mat-icon>description</mat-icon>
           <span *ngIf="sidebarOpen">Reportes</span>
+        </a>
+
+        <a routerLink="/supervisor/configuracion" class="nav-link">
+          <mat-icon>settings</mat-icon>
+          <span *ngIf="sidebarOpen">Configuración</span>
         </a>
 
       </nav>
@@ -130,7 +135,7 @@
 
         <h2>Acciones rápidas</h2>
 
-        <button>
+        <button routerLink="/supervisor/usuarios">
           <mat-icon>groups</mat-icon>
           Ver todos los usuarios
         </button>

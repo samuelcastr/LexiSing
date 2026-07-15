@@ -7,6 +7,9 @@ import { Supervisor} from './features/roles/supervisor/supervisor';
 import { MonitoreoConversaciones } from './features/roles/supervisor/monitoreo-conversaciones/monitoreo-conversaciones';
 import { Chat } from "./features/roles/supervisor/chat/chat";
 import { Reportes} from './features/roles/supervisor/reportes/reportes';
+import { SupervisorUsuariosList } from './features/roles/supervisor/usuarios_list/usuarios_list';
+import { SupervisorConfiguracion } from './features/roles/supervisor/configuracion/configuracion';
+import { SupervisorConfiguracion as EmpleadoConfiguracion } from './features/roles/empleados/configuracion/configuracion';
 //empleados
 import { Empleados } from './features/roles/empleados/empleados';
 //admin
@@ -32,10 +35,13 @@ export const APP_ROUTES: Routes = [
   { path: 'roles/supervisor', component: Supervisor, canActivate: [authGuard, roleGuard(['supervisor'])] },
   { path: 'supervisor/monitoreo-conversaciones', component: MonitoreoConversaciones, canActivate: [authGuard, roleGuard(['supervisor'])] },
   { path: 'supervisor/chat', component: Chat, canActivate: [authGuard, roleGuard(['supervisor'])] },
+  { path: 'supervisor/usuarios', component: SupervisorUsuariosList, canActivate: [authGuard, roleGuard(['supervisor'])] },
+  { path: 'supervisor/configuracion', component: SupervisorConfiguracion, canActivate: [authGuard, roleGuard(['supervisor'])] },
   { path: 'supervisor/reportes', component: Reportes, canActivate: [authGuard, roleGuard(['supervisor'])] },
   { path: 'supervisor/conversations', component: ConversationListComponent, canActivate: [authGuard, roleGuard(['supervisor'])] },
   //empleados
   { path: 'roles/empleados', component: Empleados, canActivate: [authGuard, roleGuard(['empleado'])] },
+  { path: 'empleados/configuracion', component: EmpleadoConfiguracion, canActivate: [authGuard, roleGuard(['empleado'])] },
   { path: 'empleados/conversations', component: ConversationListComponent, canActivate: [authGuard, roleGuard(['empleado'])] },
   //admin
   {
