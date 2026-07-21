@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, serverTimestamp, getDoc, collection, getDocs, updateDoc } from '@angular/fire/firestore';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from '@angular/fire/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile as fbUpdateProfile, updateEmail as fbUpdateEmail, updatePassword as fbUpdatePassword, reauthenticateWithCredential, EmailAuthProvider } from '@angular/fire/auth';
 import { from, Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { User } from '../models/user.model';
@@ -206,18 +206,12 @@ register(
             if (!snapshot.exists()) {
               return from(setDoc(ref, userData)).pipe(
                 map(result => {
-                  this.router.navigate(['/dashboard']);
                   return { user: userData, message: 'Login con Google por redirect exitoso' } as AuthResponse;
                 })
               );
             }
 
-            return of({ user: snapshot.data() as User, message: 'Login con Google por redirect exitoso' } as AuthResponse).pipe(
-              map(result => {
-                this.router.navigate(['/dashboard']);
-                return result;
-              })
-            );
+            return of({ user: snapshot.data() as User, message: 'Login con Google por redirect exitoso' } as AuthResponse);
           })
         );
       }),
@@ -272,6 +266,48 @@ register(
   updateUserRole(uid: string, newRole: string): Observable<void> {
     const ref = doc(this.firestore, 'usuarios', uid);
     return from(updateDoc(ref, { rol: newRole } as any));
+  }
+
+  updateUserProfile(data: { nombre?: string; email?: string }): Observable<void> {
+    const fbUser = this.auth.currentUser;
+    if (!fbUser) return throwError(() => new Error('No hay usuario autenticado'));
+
+    const firestoreUpdates: any = {};
+    if (data.nombre) firestoreUpdates.nombre = data.nombre;
+    if (data.email) firestoreUpdates.email = data.email;
+
+    const tasks: Promise<any>[] = [];
+
+    if (data.nombre) {
+      tasks.push(fbUpdateProfile(fbUser, { displayName: data.nombre }));
+    }
+
+    if (data.email && data.email !== fbUser.email) {
+      tasks.push(fbUpdateEmail(fbUser, data.email));
+    }
+
+    if (Object.keys(firestoreUpdates).length > 0) {
+      const ref = doc(this.firestore, 'usuarios', fbUser.uid);
+      tasks.push(updateDoc(ref, firestoreUpdates));
+    }
+
+    return from(Promise.all(tasks)).pipe(
+      map(() => undefined),
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    const fbUser = this.auth.currentUser;
+    if (!fbUser || !fbUser.email) return throwError(() => new Error('No hay usuario autenticado'));
+
+    const credential = EmailAuthProvider.credential(fbUser.email, currentPassword);
+
+    return from(reauthenticateWithCredential(fbUser, credential)).pipe(
+      switchMap(() => from(fbUpdatePassword(fbUser, newPassword))),
+      map(() => undefined),
+      catchError(err => throwError(() => err))
+    );
   }
 
   isAuthenticated(): Observable<boolean> {

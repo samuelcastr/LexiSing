@@ -1,5 +1,62 @@
-<mat-card class="content-card empty-page">
-  <mat-icon>analytics</mat-icon>
-  <h2>Reportes</h2>
-  <p>Aquí se mostrarán estadísticas, gráficas y exportación de datos.</p>
-</mat-card>
+<div class="reportes-container">
+
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <mat-icon>people</mat-icon>
+        <div>
+          <p>Total Usuarios</p>
+          <h2>{{ totalUsuarios }}</h2>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <mat-icon>chat</mat-icon>
+        <div>
+          <p>Conversaciones</p>
+          <h2>{{ totalConversaciones }}</h2>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <mat-icon>mail</mat-icon>
+        <div>
+          <p>Mensajes Totales</p>
+          <h2>{{ totalMensajes }}</h2>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <mat-icon>trending_up</mat-icon>
+        <div>
+          <p>Usuarios Activos</p>
+          <h2>{{ usuariosActivos }}</h2>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <mat-tab-group class="charts-container" (selectedIndexChange)="onTabChange($event)">
+    <mat-tab label="Estado de Usuarios">
+      <div id="admin-grafico-usuarios" class="chart-wrapper"></div>
+    </mat-tab>
+
+    <mat-tab label="Conversaciones">
+      <div id="admin-grafico-conversaciones" class="chart-wrapper"></div>
+    </mat-tab>
+
+    <mat-tab label="Actividad 3D">
+      <div id="admin-grafico-3d" class="chart-wrapper chart-3d"></div>
+    </mat-tab>
+
+    <mat-tab label="Mensajes por Hora">
+      <div id="admin-grafico-mensajes" class="chart-wrapper"></div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

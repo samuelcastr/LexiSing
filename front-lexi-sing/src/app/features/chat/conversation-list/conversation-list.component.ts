@@ -17,6 +17,8 @@ import { FormsModule } from '@angular/forms';
 import { UserApiService } from '../../../core/services/user-api.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { PresenceService } from '../../../core/services/presence.service';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-conversation-list',
@@ -44,6 +46,11 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   editingText: string = '';
   activeMessageMenuId: string | null = null;
   participantPresence: 'online' | 'offline' = 'offline';
+  userRole: string = '';
+  private destroy$ = new Subject<void>();
+  private convSub?: Subscription;
+  private usersSub?: Subscription;
+  private presenceSub?: Subscription;
 
   constructor(
     private convService: ConversationService,
@@ -57,26 +64,31 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.auth.getCurrentUser().subscribe(user => {
+    this.auth.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
       if (user?.uid) {
         this.uid = user.uid;
+        this.userRole = user.rol || '';
         this.presenceService.startPresence(this.uid);
       } else {
-        this.uid = 'supervisor-demo';
-        this.presenceService.startPresence(this.uid);
+        return;
       }
       this.loadUsers();
-      this.loadConversations();
     });
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.convSub?.unsubscribe();
+    this.usersSub?.unsubscribe();
+    this.presenceSub?.unsubscribe();
     this.stopCamera();
     this.presenceService.stopPresence();
   }
 
   loadConversations(): void {
-    this.convService.getConversationsForUser(this.uid).subscribe(list => {
+    this.convSub?.unsubscribe();
+    this.convSub = this.convService.getConversationsForUser(this.uid).pipe(takeUntil(this.destroy$)).subscribe(list => {
       this.conversations = list.map(conv => {
         const otherUid = conv.participants?.find(p => p !== this.uid);
         const otherUser = this.users.find(u => u.uid === otherUid);
@@ -115,7 +127,8 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   loadUsers(): void {
-    this.userApi.getUsers().subscribe({
+    this.usersSub?.unsubscribe();
+    this.usersSub = this.userApi.getUsers().pipe(takeUntil(this.destroy$)).subscribe({
       next: (users) => {
         this.users = users.filter(u => u.uid && u.uid !== this.uid);
         this.loadConversations();
@@ -170,7 +183,9 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   stopCamera(): void {
-    this.cameraService.stopCamera(this.videoElement.nativeElement);
+    if (this.videoElement?.nativeElement) {
+      this.cameraService.stopCamera(this.videoElement.nativeElement);
+    }
     this.cameraActive = false;
   }
 
@@ -184,14 +199,21 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
     const otherUid = conversation.participants?.find((p: string) => p !== this.uid);
     if (otherUid) {
-      this.presenceService.observePresence(otherUid).subscribe(status => {
+      this.presenceSub?.unsubscribe();
+      this.presenceSub = this.presenceService.observePresence(otherUid).subscribe(status => {
         this.participantPresence = status;
       });
+    }
+
+    if (this.userRole === 'sordomudo' && !this.cameraActive) {
+      setTimeout(() => {
+        this.startCamera();
+      }, 500);
     }
   }
 
   loadMessages(convId: string): void {
-    this.convService.getMessages(convId).subscribe(msgs => {
+    this.convService.getMessages(convId).pipe(takeUntil(this.destroy$)).subscribe(msgs => {
       this.messages = msgs.filter(msg => !msg.deleted);
     });
   }
@@ -199,13 +221,23 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   deselectConversation(): void {
     this.selectedConversation = null;
     this.participantPresence = 'offline';
+    if (this.userRole === 'sordomudo' && this.cameraActive) {
+      this.stopCamera();
+    }
   }
 
 
   goBack(): void {
-    if (this.router.url.includes('/supervisor/conversations')) {
-      this.router.navigate(['/roles/supervisor']);
-
+    if (this.router.url.includes('/roles/supervisor/conversations')) {
+      this.router.navigate(['/roles/supervisor/dashboard']);
+    } else if (this.router.url.includes('/roles/admin/conversations')) {
+      this.router.navigate(['/roles/admin/dashboard']);
+    } else if (this.router.url.includes('/roles/empleados/conversations')) {
+      this.router.navigate(['/roles/empleados/dashboard']);
+    } else if (this.router.url.includes('/roles/sordomudo/conversations')) {
+      this.router.navigate(['/roles/sordomudo/dashboard']);
+    } else if (this.router.url.includes('/roles/usuario/conversations')) {
+      this.router.navigate(['/roles/usuario/dashboard']);
     } else {
       this.router.navigate(['/dashboard']);
     }

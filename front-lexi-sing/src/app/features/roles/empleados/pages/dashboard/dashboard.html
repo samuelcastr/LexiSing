@@ -1,0 +1,41 @@
+<div class="stats-grid">
+  <div class="stat-card">
+    <span>Conversaciones</span>
+    <h2>{{ conversaciones }}</h2>
+  </div>
+
+  <div class="stat-card">
+    <span>Mensajes</span>
+    <h2>{{ mensajes }}</h2>
+  </div>
+</div>
+
+<div class="bottom-grid">
+  <div class="activity-card">
+    <h2>Actividad reciente</h2>
+
+    <div class="activity-item" *ngFor="let item of recentActivities">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <div>
+        <h4>{{ item.userName }} {{ item.action }}</h4>
+        <span>{{ item.timestamp?.toDate ? (item.timestamp.toDate() | date:'short') : 'Reciente' }}</span>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="recentActivities.length === 0">
+      No hay actividad reciente todavía.
+    </div>
+  </div>
+
+  <div class="actions-card">
+    <h2>Acciones rápidas</h2>
+    <button type="button" routerLink="/roles/empleados/conversations">
+      <mat-icon>chat</mat-icon>
+      Abrir chat
+    </button>
+    <button type="button" routerLink="/roles/empleados/reportes">
+      <mat-icon>description</mat-icon>
+      Ver reportes
+    </button>
+  </div>
+</div>

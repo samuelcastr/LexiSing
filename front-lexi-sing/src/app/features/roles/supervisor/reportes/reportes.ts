@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { DashboardService } from '../../../../core/services/dashboard.service';
 import { ConversationService } from '../../../../core/services/conversation.service';
 import { ActivityService } from '../../../../core/services/activity.service';
@@ -29,7 +29,6 @@ export class Reportes implements OnInit, AfterViewInit {
     private dashboardService: DashboardService,
     private convService: ConversationService,
     private activityService: ActivityService,
-    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -284,9 +283,5 @@ export class Reportes implements OnInit, AfterViewInit {
     };
 
     this.Plotly.newPlot('grafico-mensajes', [trace], layout, { responsive: true });
-  }
-
-  goBack(): void {
-    this.router.navigate(['/roles/supervisor']);
   }
 }

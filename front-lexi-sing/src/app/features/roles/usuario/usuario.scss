@@ -161,3 +161,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 480px) {
+  .waiting-room-page {
+    padding: 16px 12px 32px;
+  }
+
+  .waiting-card {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .waiting-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .info-box {
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+
+  .help-card {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}

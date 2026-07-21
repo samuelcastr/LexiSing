@@ -117,4 +117,56 @@
   }
 }
 
+@media (max-width: 480px) {
+  .reportes-container {
+    padding: 12px;
+  }
+
+  .header {
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .stat-content mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .stat-content h2 {
+    font-size: 22px;
+  }
+
+  .chart-wrapper {
+    padding: 12px;
+    height: 350px;
+  }
+
+  .chart-3d {
+    height: 400px;
+  }
+
+  ::ng-deep .mat-tab-label {
+    min-width: 90px !important;
+    padding: 0 10px !important;
+    font-size: 12px;
+  }
+}
+
 

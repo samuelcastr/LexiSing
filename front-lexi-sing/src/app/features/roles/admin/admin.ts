@@ -33,7 +33,7 @@ export class Admin implements OnInit {
   ngOnInit() {
     this.authService.getCurrentUser().subscribe((user: User | null) => {
       if (user) {
-        this.userName = user.nombre || user.email || 'Usuario';
+        this.userName = user.nombre || this.extractNameFromEmail(user.email) || 'Usuario';
       }
     });
   }
@@ -46,5 +46,11 @@ export class Admin implements OnInit {
     this.authService.logout().subscribe(() => {
       console.log('Sesión cerrada');
     });
+  }
+
+  private extractNameFromEmail(email: string): string {
+    if (!email) return '';
+    const local = email.split('@')[0];
+    return local.charAt(0).toUpperCase() + local.slice(1);
   }
 }

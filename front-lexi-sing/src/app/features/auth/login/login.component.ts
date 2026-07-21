@@ -61,8 +61,9 @@ export class LoginComponent {
       supervisor: '/roles/supervisor',
       empleado: '/roles/empleados',
       usuario: '/roles/usuario',
+      sordomudo: '/roles/sordomudo',
     };
-    this.router.navigate([roleRoutes[rol] || '/dashboard']);
+    this.router.navigate([roleRoutes[rol] || '/login']);
   }
   
 }

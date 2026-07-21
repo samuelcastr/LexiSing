@@ -1,47 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { DashboardService } from '../../../core/services/dashboard.service';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models/user.model';
 
 @Component({
-  selector: 'app-sordomudo-dashboard',
+  selector: 'app-empleados',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule],
   templateUrl: './empleados.html',
   styleUrls: ['./empleados.scss']
 })
 export class Empleados implements OnInit {
   userName = 'Usuario';
   sidebarOpen = true;
-  conversaciones = 0;
-  mensajes = 0;
-  reportes = 0;
-  recentActivities: any[] = [];
 
-  constructor(
-    private authService: AuthService,
-    private dashboardService: DashboardService
-  ) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
     this.authService.getCurrentUser().subscribe((user: User | null) => {
-      this.userName = user?.nombre || user?.email || 'Usuario';
-    });
-
-    this.dashboardService.getConversaciones().subscribe((conversations) => {
-      this.conversaciones = conversations.length;
-    });
-
-    this.dashboardService.getMensajes().subscribe((messages) => {
-      this.mensajes = messages.length;
-    });
-
-    this.dashboardService.getRecentActivity().subscribe((activities: any[]) => {
-      this.recentActivities = activities.slice(0, 5);
+      this.userName = user?.nombre || this.extractNameFromEmail(user?.email || '') || 'Usuario';
     });
   }
 
@@ -51,5 +31,11 @@ export class Empleados implements OnInit {
 
   logout(): void {
     this.authService.logout().subscribe();
+  }
+
+  private extractNameFromEmail(email: string): string {
+    if (!email) return '';
+    const local = email.split('@')[0];
+    return local.charAt(0).toUpperCase() + local.slice(1);
   }
 }

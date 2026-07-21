@@ -1,10 +1,6 @@
 <div class="config-layout">
 
   <div class="config-header">
-    <button mat-icon-button class="back-btn" routerLink="/roles/supervisor">
-      <mat-icon>arrow_back_ios_new</mat-icon>
-    </button>
-
     <div>
       <h1>Configuración de perfil</h1>
       <p>Administra la información de tu cuenta y mantén tus datos actualizados.</p>
@@ -18,15 +14,11 @@
         <div class="profile-avatar">
           <mat-icon>person</mat-icon>
         </div>
-
-        <button mat-mini-fab class="camera-btn">
-          <mat-icon>photo_camera</mat-icon>
-        </button>
       </div>
 
-      <h2>Juan Pérez</h2>
+      <h2>{{ nombre || 'Usuario' }}</h2>
 
-      <span class="profile-role">Supervisor</span>
+      <span class="profile-role">{{ user?.rol || 'Sin rol' }}</span>
 
       <p>
         Gestiona tu información personal y protege tu cuenta actualizando los datos cuando sea necesario.
@@ -34,12 +26,12 @@
 
       <div class="profile-info">
         <div>
-          <small>Miembro desde</small>
-          <strong>Julio 2025</strong>
+          <small>Email</small>
+          <strong>{{ email || 'Sin email' }}</strong>
         </div>
         <div>
-          <small>Último acceso</small>
-          <strong>Hoy</strong>
+          <small>Estado</small>
+          <strong>{{ user?.activo ? 'Activo' : 'Inactivo' }}</strong>
         </div>
       </div>
     </mat-card>
@@ -50,17 +42,12 @@
       <div class="form-grid">
         <div class="profile-field">
           <label>Nombre</label>
-          <input type="text" placeholder="Juan Pérez" [(ngModel)]="nombre" name="nombre">
-        </div>
-
-        <div class="profile-field">
-          <label>Teléfono</label>
-          <input type="text" placeholder="3001234567">
+          <input type="text" placeholder="Tu nombre" [(ngModel)]="nombre" name="nombre">
         </div>
 
         <div class="profile-field full">
           <label>Email</label>
-          <input type="email" placeholder="juan@gmail.com" [(ngModel)]="email" name="email">
+          <input type="email" placeholder="tu@email.com" [(ngModel)]="email" name="email">
         </div>
       </div>
 
@@ -69,6 +56,10 @@
       <h3 class="section-title">Seguridad</h3>
 
       <div class="form-grid">
+        <div class="profile-field full">
+          <label>Contraseña actual</label>
+          <input type="password" placeholder="Ingresa tu contraseña actual solo si vas a cambiarla" [(ngModel)]="currentPassword" name="currentPassword">
+        </div>
         <div class="profile-field">
           <label>Nueva contraseña</label>
           <input type="password" placeholder="********" [(ngModel)]="nuevoPassword" name="nuevoPassword">
@@ -85,11 +76,14 @@
         </button>
         <button class="save-info-btn" type="button" (click)="saveChanges()" [disabled]="saving">
           <mat-icon>save</mat-icon>
-          Guardar cambios
+          {{ saving ? 'Guardando...' : 'Guardar cambios' }}
         </button>
       </div>
 
-      <div class="status-message" *ngIf="message">
+      <div class="status-message success" *ngIf="message && !message.includes('Error')">
+        {{ message }}
+      </div>
+      <div class="status-message error" *ngIf="message && message.includes('Error')">
         {{ message }}
       </div>
     </mat-card>

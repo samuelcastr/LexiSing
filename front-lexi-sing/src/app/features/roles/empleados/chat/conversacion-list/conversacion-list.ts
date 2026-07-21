@@ -168,10 +168,10 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     const currentUrl = this.router.url;
-    const targetUrl = currentUrl.includes('/supervisor/conversations')
-      ? '/roles/supervisor'
-      : (currentUrl.includes('/empleados/conversations') || currentUrl.includes('/conversations'))
-        ? '/roles/empleados'
+    const targetUrl = currentUrl.includes('/roles/supervisor/conversations')
+      ? '/roles/supervisor/dashboard'
+      : (currentUrl.includes('/roles/empleados/conversations') || currentUrl.includes('/conversations'))
+        ? '/roles/empleados/dashboard'
         : '/dashboard';
 
     if (typeof window !== 'undefined') {

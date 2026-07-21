@@ -1,0 +1,59 @@
+<div class="dashboard-layout">
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+    <div>
+      <div class="logo" [class.collapsed]="!sidebarOpen">
+        <mat-icon>pan_tool</mat-icon>
+      </div>
+
+      <nav>
+        <a routerLink="/roles/sordomudo/dashboard" routerLinkActive="active">
+          <mat-icon>home</mat-icon>
+          <span *ngIf="sidebarOpen">Inicio</span>
+        </a>
+
+        <a routerLink="/roles/sordomudo/conversations" routerLinkActive="active">
+          <mat-icon>chat</mat-icon>
+          <span *ngIf="sidebarOpen">Chat</span>
+        </a>
+
+        <a routerLink="/roles/sordomudo/reportes" routerLinkActive="active">
+          <mat-icon>description</mat-icon>
+          <span *ngIf="sidebarOpen">Reportes</span>
+        </a>
+
+        <a routerLink="/roles/sordomudo/configuracion" routerLinkActive="active">
+          <mat-icon>settings</mat-icon>
+          <span *ngIf="sidebarOpen">Configuración</span>
+        </a>
+      </nav>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="sidebarOpen">Cerrar sesión</span>
+    </button>
+  </aside>
+
+  <main class="content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <div>
+          <h1>¡Hola, {{ userName }}!</h1>
+          <p>Espacio de trabajo</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="profile">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

@@ -25,7 +25,7 @@ import { User } from '../../../../../core/models/user.model';
 })
 export class UserTableComponent {
   @Input() users: User[] = [];
-  @Input() availableRoles: string[] = ['usuario', 'empleado', 'supervisor', 'admin'];
+  @Input() availableRoles: string[] = ['usuario', 'empleado', 'supervisor', 'admin', 'sordomudo'];
   @Input() showPendingBadge: boolean = false;
   @Input() actionButtonLabel: string = 'Guardar';
   @Input() showActionForRole: string | null = null;
