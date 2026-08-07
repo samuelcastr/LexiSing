@@ -24,8 +24,10 @@
   background: linear-gradient(135deg, #ffffff 0%, #f8f7ff 100%);
   border-bottom: 1px solid rgba(139, 92, 246, 0.12);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
+  z-index: 1;
 }
 
 .sidebar-title {
@@ -187,19 +189,39 @@
   color: #9ca3af;
 }
 
-.new-conv-btn {
-  margin: 12px;
-  width: calc(100% - 24px);
-  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
-  color: white !important;
-  border-radius: 14px;
-  font-weight: 600;
-  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.2);
+.new-conv-icon-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.24);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.new-conv-icon-btn mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.new-conv-icon-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(99, 102, 241, 0.34);
+}
+
+.new-conv-icon-btn:active {
+  transform: scale(0.95);
 }
 
 .chat-panel {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   background: transparent;
   padding: 20px;
 }
@@ -232,7 +254,8 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
@@ -276,9 +299,9 @@
 }
 
 .messages-wrapper {
-  display: grid;
-  grid-template-columns: 320px 1fr;
+  display: flex;
   flex: 1;
+  min-height: 0;
   position: relative;
   overflow: hidden;
   background: linear-gradient(180deg, #fcfbff 0%, #f7f8ff 100%);
@@ -286,9 +309,9 @@
 
 .camera-side-video {
   position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: unset;
+  flex: 0 0 320px;
+  width: 320px;
+  min-height: 0;
   background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
   overflow: hidden;
   border-right: 1px solid #ecebff;
@@ -330,6 +353,9 @@
 }
 
 .messages-container {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -470,9 +496,54 @@
   color: #111827;
 }
 
+.modal-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 8px 0 14px;
+  background: #f8f9ff;
+  border: 1px solid #e8eafc;
+  border-radius: 14px;
+}
+
+.modal-search-box input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: #374151;
+  outline: none;
+}
+
+.modal-search-box input::placeholder {
+  color: #9ca3af;
+}
+
+.modal-search-box mat-icon {
+  color: #8b5cf6;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
 .modal-subtitle {
   margin: 0 0 16px;
   color: #6b7280;
+}
+
+.no-users-message {
+  padding: 18px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+  border: 1px dashed #e8eafc;
+  border-radius: 14px;
+  margin-top: 4px;
+}
+
+.no-users-message p {
+  margin: 0;
 }
 
 .users-list {
@@ -532,7 +603,7 @@
   }
 
   .messages-wrapper {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .camera-side-video {
@@ -559,7 +630,7 @@
   }
 
   .messages-wrapper {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .messages-container {
@@ -597,10 +668,5 @@
 
   .conversation-item {
     padding: 10px;
-  }
-
-  .new-conv-btn {
-    margin: 10px;
-    width: calc(100% - 20px);
   }
 }

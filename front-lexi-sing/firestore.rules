@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function esAdminOSupervisor() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol in ['admin', 'supervisor'];
+    }
+
+    function esParticipante(convId) {
+      return request.auth.uid in get(/databases/$(database)/documents/conversaciones/$(convId)).data.participants;
+    }
+
+    // Usuarios: lectura para cualquier usuario autenticado (búsqueda en chat),
+    // escritura solo sobre el propio perfil o por parte de admin/supervisor.
+    match /usuarios/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && (request.auth.uid == uid || esAdminOSupervisor());
+    }
+
+    // Conversaciones: un usuario solo puede leer conversaciones donde participa.
+    // Admin/supervisor mantienen acceso global para reportes y monitoreo.
+    match /conversaciones/{convId} {
+      allow read: if signedIn() && (esAdminOSupervisor() || esParticipante(convId));
+      allow create: if signedIn();
+      allow update, delete: if signedIn() && (esAdminOSupervisor() || esParticipante(convId));
+
+      // Mensajes: lectura restringida a participantes (o admin/supervisor),
+      // escritura solo de mensajes propios.
+      match /mensajes/{msgId} {
+        allow read: if signedIn() && (esAdminOSupervisor() || esParticipante(convId));
+        allow create: if signedIn() && (esAdminOSupervisor() || esParticipante(convId))
+                        && request.resource.data.senderUid == request.auth.uid;
+        allow update, delete: if signedIn() && (esAdminOSupervisor() || esParticipante(convId))
+                                && resource.data.senderUid == request.auth.uid;
+      }
+    }
+
+    // Actividad global: lectura para autenticados, escritura controlada.
+    match /activities/{activityId} {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+  }
+}

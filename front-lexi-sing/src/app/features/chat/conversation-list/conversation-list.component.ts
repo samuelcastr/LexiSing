@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { UserApiService } from '../../../core/services/user-api.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { PresenceService } from '../../../core/services/presence.service';
+import { ErrorService } from '../../../core/services/error.service';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -29,8 +30,11 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class ConversationListComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+  @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
 
   users: any[] = [];
+  filteredUsers: any[] = [];
+  newConvSearchTerm: string = '';
   selectedUserUid: string = '';
   conversations: any[] = [];
   filteredConversations: any[] = [];
@@ -47,6 +51,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   activeMessageMenuId: string | null = null;
   participantPresence: 'online' | 'offline' = 'offline';
   userRole: string = '';
+  private sending = false;
   private destroy$ = new Subject<void>();
   private convSub?: Subscription;
   private usersSub?: Subscription;
@@ -60,7 +65,8 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     private userApi: UserApiService,
     private cameraService: CameraService,
     private activityService: ActivityService,
-    private presenceService: PresenceService
+    private presenceService: PresenceService,
+    private errorService: ErrorService
   ) { }
 
   ngOnInit(): void {
@@ -121,9 +127,29 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   toggleNewConvForm(): void {
     this.showNewConvForm = !this.showNewConvForm;
     this.selectedUserUid = '';
+    this.newConvSearchTerm = '';
     if (this.showNewConvForm) {
       this.loadUsers();
     }
+  }
+
+  filterUsers(): void {
+    const term = this.normalize(this.newConvSearchTerm.trim().toLowerCase());
+
+    if (!term) {
+      this.filteredUsers = [...this.users];
+      return;
+    }
+
+    this.filteredUsers = this.users.filter(user => {
+      const nombre = this.normalize((user.nombre || '').toLowerCase());
+      const email = this.normalize((user.email || '').toLowerCase());
+      return nombre.includes(term) || email.includes(term);
+    });
+  }
+
+  private normalize(texto: string): string {
+    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
   loadUsers(): void {
@@ -131,22 +157,23 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.usersSub = this.userApi.getUsers().pipe(takeUntil(this.destroy$)).subscribe({
       next: (users) => {
         this.users = users.filter(u => u.uid && u.uid !== this.uid);
+        this.filterUsers();
         this.loadConversations();
       },
       error: (error) => {
-        console.error('Error cargando usuarios:', error);
+        this.errorService.mostrarError(error, 'Error al cargar los usuarios.');
       }
     });
   }
 
   createConversation(): void {
     if (!this.selectedUserUid) {
-      alert('Por favor selecciona un usuario');
+      this.errorService.mostrarError(null, 'Por favor selecciona un usuario.');
       return;
     }
 
     if (this.selectedUserUid === this.uid) {
-      alert('No puedes crear una conversación contigo mismo');
+      this.errorService.mostrarError(null, 'No puedes crear una conversación contigo mismo.');
       return;
     }
 
@@ -168,8 +195,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
       })
       .catch(error => {
-        console.error('Error creando conversación:', error);
-        alert('Error al crear conversación');
+        this.errorService.mostrarError(error, 'Error al crear la conversación.');
       });
   }
 
@@ -178,7 +204,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       await this.cameraService.startCamera(this.videoElement.nativeElement);
       this.cameraActive = true;
     } catch (error) {
-      alert('No se pudo acceder a la cámara. Verifica los permisos.');
+      this.errorService.mostrarError(error, 'No se pudo acceder a la cámara. Verifica los permisos.');
     }
   }
 
@@ -215,7 +241,20 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   loadMessages(convId: string): void {
     this.convService.getMessages(convId).pipe(takeUntil(this.destroy$)).subscribe(msgs => {
       this.messages = msgs.filter(msg => !msg.deleted);
+      this.scrollToBottom();
     });
+  }
+
+  scrollToBottom(): void {
+    setTimeout(() => {
+      try {
+        if (this.messagesContainer?.nativeElement) {
+          this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+        }
+      } catch (err) {
+        // El contenedor aún no está disponible
+      }
+    }, 0);
   }
 
   deselectConversation(): void {
@@ -243,12 +282,16 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     }
   }
   sendMessage(): void {
-    if (!this.messageText.trim() || !this.selectedConversation?.id) {
+    if (this.sending || !this.messageText.trim() || !this.selectedConversation?.id) {
       return;
     }
 
+    const content = this.messageText;
+    this.messageText = '';
+    this.sending = true;
+
     this.convService.sendMessage(this.selectedConversation.id, {
-      content: this.messageText,
+      content,
       senderUid: this.uid
     }).then(() => {
 
@@ -261,10 +304,12 @@ export class ConversationListComponent implements OnInit, OnDestroy {
         'envió un mensaje'
       );
 
-      this.messageText = '';
+      this.scrollToBottom();
 
     }).catch(error => {
-      console.error('Error enviando mensaje:', error);
+      this.errorService.mostrarError(error, 'Error al enviar el mensaje.');
+    }).finally(() => {
+      this.sending = false;
     });
   }
 
@@ -302,9 +347,10 @@ export class ConversationListComponent implements OnInit, OnDestroy {
         );
         this.editingMessageId = null;
         this.editingText = '';
+        this.scrollToBottom();
       })
       .catch(error => {
-        console.error('Error editando mensaje:', error);
+        this.errorService.mostrarError(error, 'Error al editar el mensaje.');
       });
   }
 
@@ -319,7 +365,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
         this.editingMessageId = null;
       })
       .catch(error => {
-        console.error('Error eliminando mensaje:', error);
+        this.errorService.mostrarError(error, 'Error al eliminar el mensaje.');
       });
   }
 }

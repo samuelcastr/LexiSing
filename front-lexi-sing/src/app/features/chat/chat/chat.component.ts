@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../core/models/user.model';
+import { ErrorService } from '../../../core/services/error.service';
 
 @Component({
   selector: 'app-chat',
@@ -26,9 +27,15 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   uid: string | null = null;
   currentUser: User | null = null;
   editingMessage: any | null = null;
+  private sending = false;
   private shouldScroll = false;
 
-  constructor(private route: ActivatedRoute, private convService: ConversationService, private auth: AuthService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private convService: ConversationService,
+    private auth: AuthService,
+    private errorService: ErrorService
+  ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -63,27 +70,33 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   }
 
   send(): void {
-    if (!this.text.trim() || !this.uid) return;
+    if (this.sending || !this.text.trim() || !this.uid) return;
+
+    this.sending = true;
 
     if (this.editingMessage) {
       const editedId = this.editingMessage.id;
-      const newContent = this.text;
+      const newContent = this.text.trim();
+      this.text = '';
+      this.editingMessage = null;
       this.convService.editMessage(this.convId, editedId, newContent).then(() => {
         this.messages = this.messages.map(m =>
           m.id === editedId ? { ...m, content: newContent, edited: true } : m
         );
-        this.text = '';
-        this.editingMessage = null;
       }).catch(error => {
-        console.error('Error editando mensaje:', error);
+        this.errorService.mostrarError(error, 'Error al editar el mensaje.');
+      }).finally(() => {
+        this.sending = false;
       });
       return;
     }
 
-    const payload = { senderUid: this.uid, content: this.text };
+    const payload = { senderUid: this.uid, content: this.text.trim() };
+    this.text = '';
     this.convService.sendMessage(this.convId, payload).then(() => {
-      this.text = '';
       this.shouldScroll = true;
+    }).finally(() => {
+      this.sending = false;
     });
   }
 

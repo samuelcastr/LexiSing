@@ -13,12 +13,10 @@ import { SupervisorConfiguracion } from './features/roles/supervisor/configuraci
 //empleados
 import { Empleados } from './features/roles/empleados/empleados';
 import { EmpleadosDashboardPageComponent } from './features/roles/empleados/pages/dashboard/dashboard';
-import { EmpleadosReportes } from './features/roles/empleados/reportes/reportes';
 import { SupervisorConfiguracion as EmpleadoConfiguracion } from './features/roles/supervisor/configuracion/configuracion';
 //sordomudo
 import { Sordomudo } from './features/roles/sordomudo/sordomudo';
 import { SordomudoDashboardPageComponent } from './features/roles/sordomudo/pages/dashboard/dashboard';
-import { SordomudoReportes } from './features/roles/sordomudo/reportes/reportes';
 import { SordomudoConfiguracion } from './features/roles/sordomudo/configuracion/configuracion';
 //admin
 import { Admin } from './features/roles/admin/admin';
@@ -63,7 +61,6 @@ export const APP_ROUTES: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: EmpleadosDashboardPageComponent },
       { path: 'conversations', component: ConversationListComponent },
-      { path: 'reportes', component: EmpleadosReportes },
       { path: 'configuracion', component: EmpleadoConfiguracion },
     ]
   },
@@ -98,7 +95,6 @@ export const APP_ROUTES: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: SordomudoDashboardPageComponent },
       { path: 'conversations', component: ConversationListComponent },
-      { path: 'reportes', component: SordomudoReportes },
       { path: 'configuracion', component: SordomudoConfiguracion },
     ]
   },

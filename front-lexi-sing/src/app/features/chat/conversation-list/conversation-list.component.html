@@ -10,6 +10,10 @@
           <h2>Chats</h2>
         </div>
       </div>
+      <button mat-icon-button class="new-conv-icon-btn" matTooltip="Nueva conversación" aria-label="Nueva conversación"
+        (click)="toggleNewConvForm()">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
 
     <div class="search-box">
@@ -39,11 +43,6 @@
         </div>
       </div>
     </div>
-
-    <button mat-raised-button class="new-conv-btn" (click)="toggleNewConvForm()">
-      <mat-icon>add</mat-icon>
-      Nueva conversación
-    </button>
   </aside>
 
   <!-- Centro/Derecha - Chat -->
@@ -89,7 +88,7 @@
         </div>
 
         <!-- Mensajes -->
-        <div class="messages-container" [class.with-camera]="showCameraModal">
+        <div class="messages-container" #messagesContainer [class.with-camera]="showCameraModal">
           <div *ngFor="let msg of messages" class="message" [class.received]="msg.senderUid !== uid"
             [class.sent]="msg.senderUid === uid">
             <div *ngIf="editingMessageId !== msg.id; else editMode">
@@ -137,11 +136,16 @@
   <div *ngIf="showNewConvForm" class="modal-overlay" (click)="toggleNewConvForm()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <h3>Nueva conversación</h3>
+      <div class="modal-search-box">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar usuario por nombre..." [(ngModel)]="newConvSearchTerm"
+          (input)="filterUsers()" />
+      </div>
       <p class="modal-subtitle">
         Selecciona un usuario para iniciar una conversación
       </p>
       <div class="users-list">
-        <div class="user-card" *ngFor="let user of users" (click)="selectedUserUid = user.uid"
+        <div class="user-card" *ngFor="let user of filteredUsers" (click)="selectedUserUid = user.uid"
           [class.selected]="selectedUserUid === user.uid">
           <mat-icon>
             account_circle
@@ -163,6 +167,9 @@
       </div>
       <div *ngIf="users.length === 0" class="no-users-message">
         <p>No hay usuarios disponibles</p>
+      </div>
+      <div *ngIf="users.length > 0 && filteredUsers.length === 0" class="no-users-message">
+        <p>No se encontraron usuarios</p>
       </div>
       <div class="modal-actions">
         <button mat-raised-button color="primary" (click)="createConversation()">

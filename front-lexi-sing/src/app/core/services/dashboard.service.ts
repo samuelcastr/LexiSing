@@ -1,10 +1,37 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, collectionGroup, query, orderBy, limit } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, collectionGroup, query, orderBy, limit, where } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { Conversation } from '../models/conversation.model';
 import { Message } from '../models/message.model';
+
+export interface DatoPorHora {
+  hour: number;
+  count: number;
+}
+
+function obtenerTimestamp(item: any, campo: string): Date | null {
+  const valor = item?.[campo];
+  if (!valor) return null;
+  if (typeof valor.toDate === 'function') {
+    const fecha = valor.toDate();
+    return fecha instanceof Date && !isNaN(fecha.getTime()) ? fecha : null;
+  }
+  if (valor instanceof Date && !isNaN(valor.getTime())) return valor;
+  return null;
+}
+
+export function agruparPorHora(items: any[], campo: string): DatoPorHora[] {
+  const horas: DatoPorHora[] = Array.from({ length: 24 }, (_, hour) => ({ hour, count: 0 }));
+  items.forEach(item => {
+    const fecha = obtenerTimestamp(item, campo);
+    if (fecha) {
+      horas[fecha.getHours()].count += 1;
+    }
+  });
+  return horas;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -69,6 +96,34 @@ export class DashboardService {
     const q = query(ref, orderBy('timestamp', 'desc'), limit(5));
 
     return collectionData(q, { idField: 'id' }) as Observable<any[]>;
+  }
+
+  /**
+   * Conversaciones por hora del día.
+   * Si se pasa `uid`, la consulta se filtra a nivel de Firestore
+   * (participants array-contains uid): el empleado solo recibe sus propias conversaciones.
+   */
+  getConversacionesPorHora(uid?: string): Observable<DatoPorHora[]> {
+    const ref = collection(this.firestore, 'conversaciones');
+    const q = uid
+      ? query(ref, where('participants', 'array-contains', uid))
+      : query(ref);
+    return (collectionData(q, { idField: 'id' }) as Observable<any[]>)
+      .pipe(map(conversations => agruparPorHora(conversations, 'updatedAt')));
+  }
+
+  /**
+   * Mensajes por hora del día.
+   * Si se pasa `uid`, la consulta se filtra a nivel de Firestore
+   * (senderUid == uid): el empleado solo recibe sus propios mensajes.
+   */
+  getMensajesPorHora(uid?: string): Observable<DatoPorHora[]> {
+    const ref = collectionGroup(this.firestore, 'mensajes');
+    const q = uid
+      ? query(ref, where('senderUid', '==', uid))
+      : query(ref);
+    return (collectionData(q, { idField: 'id' }) as Observable<any[]>)
+      .pipe(map(messages => agruparPorHora(messages, 'timestamp')));
   }
 }
 

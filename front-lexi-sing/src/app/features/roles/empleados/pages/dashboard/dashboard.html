@@ -33,9 +33,23 @@
       <mat-icon>chat</mat-icon>
       Abrir chat
     </button>
-    <button type="button" routerLink="/roles/empleados/reportes">
-      <mat-icon>description</mat-icon>
-      Ver reportes
-    </button>
+  </div>
+</div>
+
+<div class="charts-section">
+  <div class="chart-card">
+    <app-hourly-bar-chart
+      title="Conversaciones por hora"
+      seriesName="Conversaciones"
+      [data]="conversacionesPorHora">
+    </app-hourly-bar-chart>
+  </div>
+
+  <div class="chart-card">
+    <app-hourly-bar-chart
+      title="Mensajes por hora"
+      seriesName="Mensajes"
+      [data]="mensajesPorHora">
+    </app-hourly-bar-chart>
   </div>
 </div>

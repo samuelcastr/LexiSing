@@ -100,8 +100,27 @@
   background: #f3f4f6;
 }
 
+.charts-section {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 3px 15px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+
 @media (max-width: 1100px) {
   .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .charts-section {
     grid-template-columns: 1fr;
   }
 }
@@ -125,7 +144,8 @@
   }
 
   .activity-card,
-  .actions-card {
+  .actions-card,
+  .chart-card {
     padding: 14px;
     border-radius: 16px;
   }

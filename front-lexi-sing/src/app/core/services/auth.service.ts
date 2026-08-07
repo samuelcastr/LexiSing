@@ -8,6 +8,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { AuthResponse } from '../models/auth-response.model';
 import { UserApiService } from './user-api.service';
+import { traducirErrorFirebase } from '../utils/firebase-errors';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -84,8 +85,7 @@ register(
       return of({
         user: null,
         message:
-          err?.message ||
-          'Error al registrar',
+          traducirErrorFirebase(err, 'Error al registrar'),
         error: err
       });
 
@@ -105,7 +105,7 @@ register(
           })
         );
       }),
-      catchError(err => of({ user: null, message: err?.message || 'Error al autenticar', error: err } as AuthResponse))
+      catchError(err => of({ user: null, message: traducirErrorFirebase(err, 'Error al autenticar'), error: err } as AuthResponse))
     );
   }
 
@@ -167,7 +167,7 @@ register(
             } as AuthResponse)),
             catchError(err2 => of({
               user: null,
-              message: err2?.message || 'Error al usar redirect de Google',
+              message: traducirErrorFirebase(err2, 'Error al usar redirect de Google'),
               code: err2?.code || null,
               error: err2,
             } as AuthResponse))
@@ -217,7 +217,7 @@ register(
       }),
       catchError(err => {
         console.error('Error processing redirect result', err);
-        return of({ user: null, message: err?.message || 'Error al procesar redirect de Google', code: err?.code || null, error: err } as AuthResponse);
+        return of({ user: null, message: traducirErrorFirebase(err, 'Error al procesar redirect de Google'), code: err?.code || null, error: err } as AuthResponse);
       })
     );
   }

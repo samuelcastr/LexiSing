@@ -16,11 +16,6 @@
           <span *ngIf="sidebarOpen">Chat</span>
         </a>
 
-        <a routerLink="/roles/empleados/reportes" routerLinkActive="active">
-          <mat-icon>description</mat-icon>
-          <span *ngIf="sidebarOpen">Reportes</span>
-        </a>
-
         <a routerLink="/roles/empleados/configuracion" routerLinkActive="active">
           <mat-icon>settings</mat-icon>
           <span *ngIf="sidebarOpen">Configuración</span>
@@ -46,9 +41,9 @@
         </div>
       </div>
       <div class="topbar-right">
-        <div class="profile">
+        <a class="profile" routerLink="/roles/empleados/configuracion">
           <mat-icon>account_circle</mat-icon>
-        </div>
+        </a>
       </div>
     </div>
 

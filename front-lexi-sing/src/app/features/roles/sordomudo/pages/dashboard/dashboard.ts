@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { DashboardService } from '../../../../../core/services/dashboard.service';
+import { DashboardService, DatoPorHora } from '../../../../../core/services/dashboard.service';
+import { AuthService } from '../../../../../core/services/auth.service';
+import { HourlyBarChartComponent } from '../../../../../shared/components/hourly-bar-chart/hourly-bar-chart.component';
 
 @Component({
   selector: 'app-sordomudo-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule],
+  imports: [CommonModule, RouterModule, MatIconModule, HourlyBarChartComponent],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
@@ -15,12 +17,29 @@ export class SordomudoDashboardPageComponent implements OnInit {
   conversaciones = 0;
   mensajes = 0;
   recentActivities: any[] = [];
+  conversacionesPorHora: DatoPorHora[] = [];
+  mensajesPorHora: DatoPorHora[] = [];
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(
+    private dashboardService: DashboardService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.dashboardService.getConversaciones().subscribe(c => this.conversaciones = c.length);
-    this.dashboardService.getMensajes().subscribe(m => this.mensajes = m.length);
+    this.authService.getCurrentUser().subscribe(user => {
+      if (!user?.uid) return;
+
+      this.dashboardService.getConversacionesPorHora(user.uid).subscribe(data => {
+        this.conversacionesPorHora = data;
+        this.conversaciones = data.reduce((acc, d) => acc + d.count, 0);
+      });
+
+      this.dashboardService.getMensajesPorHora(user.uid).subscribe(data => {
+        this.mensajesPorHora = data;
+        this.mensajes = data.reduce((acc, d) => acc + d.count, 0);
+      });
+    });
+
     this.dashboardService.getRecentActivity().subscribe(a => this.recentActivities = a.slice(0, 5));
   }
 }
