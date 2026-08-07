@@ -8,13 +8,14 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { AuthResponse } from '../models/auth-response.model';
 import { UserApiService } from './user-api.service';
+import { PresenceService } from './presence.service';
 import { traducirErrorFirebase } from '../utils/firebase-errors';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readyPromise: Promise<void>;
 
-  constructor(private auth: Auth, private firestore: Firestore, private router: Router, private userApi: UserApiService) {
+  constructor(private auth: Auth, private firestore: Firestore, private router: Router, private userApi: UserApiService, private presenceService: PresenceService) {
     this.readyPromise = typeof window !== 'undefined'
       ? this.auth.authStateReady().catch(() => undefined as void)
       : Promise.resolve();
@@ -223,8 +224,12 @@ register(
   }
 
   logout(): Observable<void> {
+    const currentUid = this.auth.currentUser?.uid ?? null;
     return from(signOut(this.auth)).pipe(
       map(() => {
+        if (currentUid) {
+          this.presenceService.stopPresence();
+        }
         this.router.navigate(['/login']);
         return;
       }),
@@ -249,7 +254,10 @@ register(
         if (!fbUser) return of(null);
         const ref = doc(this.firestore, 'usuarios', fbUser.uid);
         return from(getDoc(ref)).pipe(
-          map(snapshot => (snapshot.exists() ? (snapshot.data() as User) : null)),
+          map(snapshot => {
+            if (!snapshot.exists()) return null;
+            return { ...(snapshot.data() as User), uid: fbUser.uid } as User;
+          }),
           catchError(() => of(null))
         );
       })

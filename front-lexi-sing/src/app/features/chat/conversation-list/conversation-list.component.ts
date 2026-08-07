@@ -40,6 +40,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   filteredConversations: any[] = [];
   searchTerm: string = '';
   uid: string = '';
+  currentUser: any | null = null;
   showNewConvForm = false;
   showCameraModal = false;
   cameraActive = false;
@@ -69,12 +70,19 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     private errorService: ErrorService
   ) { }
 
+  private getDisplayName(): string {
+    if (!this.currentUser) {
+      return 'Usuario';
+    }
+    return this.currentUser.nombre?.trim() || this.currentUser.email?.split('@')[0] || 'Usuario';
+  }
+
   ngOnInit(): void {
     this.auth.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
       if (user?.uid) {
+        this.currentUser = user;
         this.uid = user.uid;
         this.userRole = user.rol || '';
-        this.presenceService.startPresence(this.uid);
       } else {
         return;
       }
@@ -89,7 +97,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.usersSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
     this.stopCamera();
-    this.presenceService.stopPresence();
   }
 
   loadConversations(): void {
@@ -180,12 +187,8 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.convService.createConversation([this.uid, this.selectedUserUid])
       .then(() => {
 
-        const currentUser = this.users.find(
-          u => u.uid === this.uid
-        );
-
         this.activityService.addActivity(
-          currentUser?.nombre || 'Usuario',
+          this.getDisplayName(),
           'inició una conversación'
         );
 
@@ -295,12 +298,8 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       senderUid: this.uid
     }).then(() => {
 
-      const currentUser = this.users.find(
-        u => u.uid === this.uid
-      );
-
       this.activityService.addActivity(
-        currentUser?.nombre || 'Usuario',
+        this.getDisplayName(),
         'envió un mensaje'
       );
 

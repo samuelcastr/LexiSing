@@ -24,9 +24,8 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-size: 32px;
-  color: white;
+  justify-content: center;
+  gap: 12px;
   margin-bottom: 30px;
 }
 
@@ -284,4 +283,25 @@ nav a.active {
   .page-content {
     padding: 0;
   }
+}
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.logo-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: .02em;
+}
+
+.sidebar.collapsed .logo-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.sidebar.collapsed .logo-name {
+  display: none;
 }

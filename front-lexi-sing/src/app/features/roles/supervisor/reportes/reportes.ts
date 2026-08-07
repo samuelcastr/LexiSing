@@ -21,6 +21,8 @@ export class Reportes implements OnInit, AfterViewInit {
   totalConversaciones = 0;
   totalMensajes = 0;
   usuariosActivos = 0;
+  mensajesPorHora: { hour: string; count: number }[] = [];
+  mensajesDays = 0;
 
   private Plotly: any;
   private datosGraficos: any = {};
@@ -62,7 +64,41 @@ export class Reportes implements OnInit, AfterViewInit {
     this.dashboardService.getMensajes().subscribe(messages => {
       this.totalMensajes = messages.length;
       this.datosGraficos.messages = messages;
+      this.mensajesPorHora = this.calculateMessagesByHour(messages);
+      this.mensajesDays = this.calculateMessageDays(messages);
     });
+  }
+
+  private calculateMessagesByHour(messages: any[]): { hour: string; count: number }[] {
+    const horaMap: { [key: number]: number } = {};
+    messages.forEach(msg => {
+      const fecha = msg.timestamp?.toDate?.();
+      if (fecha) {
+        const hora = fecha.getHours();
+        horaMap[hora] = (horaMap[hora] || 0) + 1;
+      }
+    });
+
+    return Array.from({ length: 24 }, (_, i) => i)
+      .map(hour => ({ hour: this.formatHour(hour), count: horaMap[hour] || 0 }));
+  }
+
+  private formatHour(hour: number): string {
+    const suffix = hour >= 12 ? 'pm' : 'am';
+    const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+    return `${displayHour}${suffix}`;
+  }
+
+  private calculateMessageDays(messages: any[]): number {
+    const daySet = new Set<string>();
+    messages.forEach(msg => {
+      const fecha = msg.timestamp?.toDate?.();
+      if (fecha) {
+        const dayKey = `${fecha.getFullYear()}-${fecha.getMonth() + 1}-${fecha.getDate()}`;
+        daySet.add(dayKey);
+      }
+    });
+    return daySet.size;
   }
 
   crearTodosGraficos(): void {

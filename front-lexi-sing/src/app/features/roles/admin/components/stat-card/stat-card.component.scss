@@ -7,65 +7,52 @@
 .stat-card {
   background: $card;
   border-radius: 20px;
-  padding: 25px;
+  padding: 22px 25px;
   box-shadow: $shadow;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 18px;
   transition: .25s;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
 }
 
 .stat-card:hover {
   transform: translateY(-8px);
 }
 
-.stat-card::after {
-  content: "";
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.08);
-  top: -80px;
-  right: -70px;
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.stat-card h4 {
+.stat-icon mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #FFFFFF;
+}
+
+.stat-info h4 {
   margin: 0;
   color: $text-light;
   font-size: 14px;
   font-weight: 600;
 }
 
-.stat-card h2 {
-  margin-top: 10px;
+.stat-info h2 {
+  margin-top: 6px;
   margin-bottom: 0;
-  font-size: 34px;
+  font-size: 30px;
   color: $text;
 }
 
-.stat-card mat-icon {
-  font-size: 45px;
-  width: 45px;
-  height: 45px;
-  opacity: .9;
-}
-
-.purple {
-  border-left: 6px solid $primary;
-}
-
-.blue {
-  border-left: 6px solid #3B82F6;
-}
-
-.green {
-  border-left: 6px solid $success;
-}
-
-.orange {
-  border-left: 6px solid $warning;
-}
+// Variantes: mismo círculo, distintos tonos de morado
+.purple-1 .stat-icon { background: $purple-1; }
+.purple-2 .stat-icon { background: $purple-2; }
+.purple-3 .stat-icon { background: $purple-3; }
+.purple-4 .stat-icon { background: $purple-4; }

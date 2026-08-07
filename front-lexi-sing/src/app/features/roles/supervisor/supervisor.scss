@@ -24,10 +24,21 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-size: 32px;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto 30px;
+}
+
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.logo-name {
+  font-size: 20px;
+  font-weight: 700;
   color: white;
-  margin-bottom: 30px;
 }
 
 nav {
@@ -107,17 +118,20 @@ nav a.active {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .topbar h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 20px;
 }
 
 .topbar p {
-  color: #777;
-  font-size: 13px;
+  color: #6b7280;
+  font-size: 12px;
+  margin: 4px 0 0;
 }
 
 .topbar-right {

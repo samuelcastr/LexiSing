@@ -1,6 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
+import { Auth, authState } from '@angular/fire/auth';
 import { AuthService } from './core/services/auth.service';
+import { PresenceService } from './core/services/presence.service';
 import { ErrorToastComponent } from './core/components/error-toast/error-toast.component';
 
 @Component({
@@ -12,9 +14,22 @@ import { ErrorToastComponent } from './core/components/error-toast/error-toast.c
 export class App implements OnInit {
   protected readonly title = signal('front-lexi-sing');
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private auth: Auth,
+    private authService: AuthService,
+    private presenceService: PresenceService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    authState(this.auth).subscribe(user => {
+      if (user?.uid) {
+        this.presenceService.startPresence(user.uid);
+      } else {
+        this.presenceService.stopPresence();
+      }
+    });
+
     this.authService.checkGoogleRedirectResult().subscribe(res => {
       if (res?.user) {
         const roleRoutes: Record<string, string> = {

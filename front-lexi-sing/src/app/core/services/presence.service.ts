@@ -1,39 +1,36 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Firestore, doc, docData, setDoc } from '@angular/fire/firestore';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 interface PresenceState {
   uid: string;
   status: 'online' | 'offline';
   lastSeen: number;
+  tabs?: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class PresenceService {
-  private readonly storageKey = 'lexising-presence-map';
-  private readonly channelName = 'lexising-presence-channel';
-  private readonly presenceSubject = new BehaviorSubject<Record<string, PresenceState>>({});
   private currentUid: string | null = null;
   private heartbeatTimer: any = null;
-  private channel: BroadcastChannel | null = null;
+  private tabId = this.generateTabId();
 
-  constructor() {
-    this.loadFromStorage();
-    this.setupChannel();
+  constructor(private firestore: Firestore) {
     this.setupListeners();
   }
 
   startPresence(uid: string): void {
     this.currentUid = uid;
-    this.setPresence(uid, 'online');
+    this.setPresence(uid, 'online', true);
     this.startHeartbeat();
   }
 
   stopPresence(): void {
     if (this.currentUid) {
-      this.setPresence(this.currentUid, 'offline');
+      this.setPresence(this.currentUid, 'offline', false);
     }
 
     if (this.heartbeatTimer) {
@@ -43,22 +40,19 @@ export class PresenceService {
   }
 
   observePresence(uid: string): Observable<'online' | 'offline'> {
-    return this.presenceSubject.pipe(
-      map(map => map[uid]?.status || 'offline')
-    );
-  }
-
-  private setupChannel(): void {
-    if (typeof window === 'undefined' || typeof BroadcastChannel === 'undefined') {
-      return;
+    if (typeof window === 'undefined') {
+      return of('offline');
     }
 
-    this.channel = new BroadcastChannel(this.channelName);
-    this.channel.onmessage = (event) => {
-      if (event.data?.type === 'presence-update') {
-        this.mergePresence(event.data.payload);
-      }
-    };
+    const presenceRef = doc(this.firestore, 'presence', uid);
+    return docData(presenceRef).pipe(
+      map((state: any) => {
+        const online = state?.status === 'online';
+        const lastSeen = typeof state?.lastSeen === 'number' ? state.lastSeen : 0;
+        const isFresh = lastSeen > Date.now() - 45000;
+        return online && isFresh ? 'online' : 'offline';
+      })
+    );
   }
 
   private setupListeners(): void {
@@ -67,11 +61,10 @@ export class PresenceService {
     }
 
     window.addEventListener('beforeunload', () => this.stopPresence());
+    window.addEventListener('pagehide', () => this.stopPresence());
     window.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden' && this.currentUid) {
-        this.setPresence(this.currentUid, 'offline');
-      } else if (document.visibilityState === 'visible' && this.currentUid) {
-        this.setPresence(this.currentUid, 'online');
+      if (document.visibilityState === 'visible' && this.currentUid) {
+        this.setPresence(this.currentUid, 'online', true);
       }
     });
   }
@@ -83,58 +76,30 @@ export class PresenceService {
 
     this.heartbeatTimer = setInterval(() => {
       if (this.currentUid) {
-        this.setPresence(this.currentUid, 'online');
+        this.setPresence(this.currentUid, 'online', true);
       }
     }, 15000);
   }
 
-  private setPresence(uid: string, status: 'online' | 'offline'): void {
-    const map = this.readPresenceMap();
-    map[uid] = {
+  private setPresence(uid: string, status: 'online' | 'offline', activeTab: boolean): void {
+    const presenceRef = doc(this.firestore, 'presence', uid);
+    const payload: any = {
       uid,
       status,
-      lastSeen: Date.now()
+      lastSeen: Date.now(),
+      tabId: this.tabId,
     };
 
-    this.writePresenceMap(map);
-  }
-
-  private mergePresence(payload: Record<string, PresenceState>): void {
-    const map = this.readPresenceMap();
-    const merged = { ...map, ...payload };
-    this.writePresenceMap(merged);
-  }
-
-  private readPresenceMap(): Record<string, PresenceState> {
-    if (typeof window === 'undefined') {
-      return {};
+    if (activeTab) {
+      payload.activeTab = this.tabId;
     }
 
-    try {
-      const raw = localStorage.getItem(this.storageKey);
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
+    setDoc(presenceRef, payload, { merge: true }).catch(() => {
+      // Ignorar fallos silenciosamente para no romper la navegación.
+    });
   }
 
-  private writePresenceMap(map: Record<string, PresenceState>): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    localStorage.setItem(this.storageKey, JSON.stringify(map));
-    this.presenceSubject.next(map);
-
-    if (this.channel) {
-      this.channel.postMessage({
-        type: 'presence-update',
-        payload: map
-      });
-    }
-  }
-
-  private loadFromStorage(): void {
-    this.presenceSubject.next(this.readPresenceMap());
+  private generateTabId(): string {
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   }
 }

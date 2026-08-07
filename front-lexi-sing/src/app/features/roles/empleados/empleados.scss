@@ -24,10 +24,21 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-size: 32px;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto 30px;
+}
+
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.logo-name {
+  font-size: 20px;
+  font-weight: 700;
   color: white;
-  margin-bottom: 30px;
 }
 
 nav {

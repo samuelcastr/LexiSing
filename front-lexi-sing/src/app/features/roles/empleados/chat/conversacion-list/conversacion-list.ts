@@ -31,6 +31,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   selectedUserUid: string = '';
   conversations: any[] = [];
   uid: string = '';
+  currentUser: any | null = null;
   showNewConvForm = false;
   showCameraModal = false;
   cameraActive = false;
@@ -48,9 +49,17 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     private activityService: ActivityService
   ) { }
 
+  private getDisplayName(): string {
+    if (!this.currentUser) {
+      return 'Usuario';
+    }
+    return this.currentUser.nombre?.trim() || this.currentUser.email?.split('@')[0] || 'Usuario';
+  }
+
   ngOnInit(): void {
     this.auth.getCurrentUser().subscribe(user => {
       if (user?.uid) {
+        this.currentUser = user;
         this.uid = user.uid;
       } else {
         this.uid = 'supervisor-demo';
@@ -111,12 +120,8 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.convService.createConversation([this.uid, this.selectedUserUid])
       .then(() => {
 
-        const currentUser = this.users.find(
-          u => u.uid === this.uid
-        );
-
         this.activityService.addActivity(
-          currentUser?.nombre || 'Usuario',
+          this.getDisplayName(),
           'inició una conversación'
         );
 
@@ -192,12 +197,8 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       senderUid: this.uid
     }).then(() => {
 
-      const currentUser = this.users.find(
-        u => u.uid === this.uid
-      );
-
       this.activityService.addActivity(
-        currentUser?.nombre || 'Usuario',
+        this.getDisplayName(),
         'envió un mensaje'
       );
 

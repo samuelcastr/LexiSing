@@ -50,22 +50,101 @@
   <mat-tab-group class="charts-container" (selectedIndexChange)="onTabChange($event)">
     <!-- Tab 1: Estado de Usuarios -->
     <mat-tab label="Estado de Usuarios">
-      <div id="grafico-usuarios" class="chart-wrapper"></div>
+      <div class="chart-row">
+        <div class="chart-left">
+          <div id="grafico-usuarios" class="chart-wrapper"></div>
+        </div>
+        <div class="chart-right">
+          <div class="chart-info-card">
+            <h3>Estado de usuarios</h3>
+            <p>Este gráfico muestra la proporción de usuarios activos e inactivos en el sistema. El número total ayuda a supervisar la adopción y el uso real de la plataforma.</p>
+            <div class="info-table">
+              <div><span>Usuarios totales</span><strong>{{ totalUsuarios }}</strong></div>
+              <div><span>Activos</span><strong>{{ usuariosActivos }}</strong></div>
+              <div><span>Inactivos</span><strong>{{ totalUsuarios - usuariosActivos }}</strong></div>
+            </div>
+            <p class="note">Los puntos azules representan usuarios activos y los grises los inactivos. El diseño 3D permite visualizar la distribución del estado del usuario.</p>
+          </div>
+        </div>
+      </div>
     </mat-tab>
 
     <!-- Tab 2: Conversaciones por Participantes -->
     <mat-tab label="Conversaciones">
-      <div id="grafico-conversaciones" class="chart-wrapper"></div>
+      <div class="chart-row">
+        <div class="chart-left">
+          <div id="grafico-conversaciones" class="chart-wrapper"></div>
+        </div>
+        <div class="chart-right">
+          <div class="chart-info-card">
+            <h3>Conversaciones</h3>
+            <p>Este reporte muestra cuántas conversaciones tienen distintos tamaños de participantes. Es ideal para saber si hay conversaciones individuales o colectivos activos.</p>
+            <div class="info-table">
+              <div><span>Total conversaciones</span><strong>{{ totalConversaciones }}</strong></div>
+              <div><span>Mensajes totales</span><strong>{{ totalMensajes }}</strong></div>
+              <div><span>Promedio participantes</span><strong>Calculado visualmente</strong></div>
+            </div>
+            <p class="note">La barra indica la cantidad de conversaciones según su número de participantes. Úsalo para identificar tendencias de interacción.</p>
+          </div>
+        </div>
+      </div>
     </mat-tab>
 
     <!-- Tab 3: Actividad 3D -->
     <mat-tab label="Actividad 3D">
-      <div id="grafico-3d" class="chart-wrapper chart-3d"></div>
+      <div class="chart-row">
+        <div class="chart-left">
+          <div id="grafico-3d" class="chart-wrapper chart-3d"></div>
+        </div>
+        <div class="chart-right">
+          <div class="chart-info-card">
+            <h3>Actividad 3D</h3>
+            <p>Este gráfico muestra la actividad de conversaciones a lo largo del tiempo. Cada eje representa una dimensión distinta para facilitar la comparación.</p>
+            <div class="info-table">
+              <div><span>Conversaciones totales</span><strong>{{ totalConversaciones }}</strong></div>
+              <div><span>Días analizados</span><strong>{{ mensajesDays }}</strong></div>
+              <div><span>Formato</span><strong>Visualización 3D</strong></div>
+            </div>
+            <p class="note">Puedes usar esta vista para detectar picos de actividad y comparar días con mayor número de conversaciones.</p>
+          </div>
+        </div>
+      </div>
     </mat-tab>
 
     <!-- Tab 4: Mensajes por Hora -->
     <mat-tab label="Mensajes por Hora">
-      <div id="grafico-mensajes" class="chart-wrapper"></div>
+      <div class="chart-row">
+        <div class="chart-left">
+          <div id="grafico-mensajes" class="chart-wrapper"></div>
+        </div>
+        <div class="chart-right">
+          <div class="chart-info-card">
+            <h3>Mensajes por hora</h3>
+            <p>Este panel muestra la cantidad de mensajes enviados en cada hora del día. Es útil para ver los picos de uso y saber cuándo hay más actividad.</p>
+            <div class="info-table">
+              <div><span>Días analizados</span><strong>{{ mensajesDays }}</strong></div>
+              <div><span>Mensajes totales</span><strong>{{ totalMensajes }}</strong></div>
+            </div>
+            <div class="hourly-table-wrapper">
+              <table class="hourly-table">
+                <thead>
+                  <tr>
+                    <th>Hora</th>
+                    <th>Mensajes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of mensajesPorHora">
+                    <td>{{ row.hour }}</td>
+                    <td>{{ row.count }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="note">Revisa qué horas tienen más mensajes para optimizar recursos y atención de la sala.</p>
+          </div>
+        </div>
+      </div>
     </mat-tab>
   </mat-tab-group>
 </div>
