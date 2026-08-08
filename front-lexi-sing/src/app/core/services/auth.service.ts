@@ -4,7 +4,7 @@ import { Auth } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, serverTimestamp, getDoc, collection, getDocs, updateDoc } from '@angular/fire/firestore';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile as fbUpdateProfile, updateEmail as fbUpdateEmail, updatePassword as fbUpdatePassword, reauthenticateWithCredential, EmailAuthProvider } from '@angular/fire/auth';
 import { from, Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { AuthResponse } from '../models/auth-response.model';
 import { UserApiService } from './user-api.service';
@@ -273,7 +273,26 @@ register(
 
   updateUserRole(uid: string, newRole: string): Observable<void> {
     const ref = doc(this.firestore, 'usuarios', uid);
-    return from(updateDoc(ref, { rol: newRole } as any));
+    return from(updateDoc(ref, { rol: newRole } as any)).pipe(
+      tap(() => {
+        if (this.auth.currentUser?.uid === uid) {
+          this.navigateToRoleHome(newRole);
+        }
+      })
+    );
+  }
+
+  navigateToRoleHome(rol: string): void {
+    const roleRoutes: Record<string, string> = {
+      admin: '/roles/admin',
+      supervisor: '/roles/supervisor',
+      empleado: '/roles/empleados',
+      usuario: '/roles/usuario',
+      sordomudo: '/roles/sordomudo',
+    };
+
+    const target = roleRoutes[rol] || '/login';
+    this.router.navigate([target]);
   }
 
   updateUserProfile(data: { nombre?: string; email?: string }): Observable<void> {

@@ -10,10 +10,16 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
 
     return authService.getCurrentUser().pipe(
       map(user => {
-        if (!user || !allowedRoles.includes(user.rol)) {
-          router.navigate(['/dashboard']);
+        if (!user) {
+          router.navigate(['/login']);
           return false;
         }
+
+        if (!allowedRoles.includes(user.rol)) {
+          authService.navigateToRoleHome(user.rol || 'usuario');
+          return false;
+        }
+
         return true;
       })
     );
