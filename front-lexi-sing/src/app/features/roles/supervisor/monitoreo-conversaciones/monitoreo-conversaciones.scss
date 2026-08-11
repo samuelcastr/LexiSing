@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .monitoreo-container {
   padding: 20px;
   background: #f5f5f7;
@@ -36,7 +41,7 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .full-width-table {
@@ -86,4 +91,19 @@
 .empty-state p {
   margin: 0;
   font-size: 16px;
+}
+
+@media (max-width: 480px) {
+  .monitoreo-container {
+    padding: 12px;
+  }
+
+  .header {
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
 }

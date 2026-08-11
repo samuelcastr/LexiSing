@@ -1,12 +1,12 @@
 <div class="dashboard-layout">
-  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen" [class.mobile-open]="mobileMenuOpen">
     <div>
       <div class="logo" [class.collapsed]="!sidebarOpen">
         <img src="/logo.png" alt="LexiSing" class="logo-icon">
         <span class="logo-name">LexiSing</span>
       </div>
 
-      <nav>
+      <nav (click)="closeMobileMenu()">
         <a routerLink="/roles/supervisor/dashboard" routerLinkActive="active">
           <mat-icon>dashboard</mat-icon>
           <span *ngIf="sidebarOpen">Monitoreo</span>
@@ -67,4 +67,6 @@
       <router-outlet></router-outlet>
     </div>
   </main>
+
+  <div class="sidebar-backdrop" [class.visible]="mobileMenuOpen" (click)="closeMobileMenu()"></div>
 </div>

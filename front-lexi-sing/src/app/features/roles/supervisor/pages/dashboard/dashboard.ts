@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { DashboardService } from '../../../../../core/services/dashboard.service';
 import { ActivityService } from '../../../../../core/services/activity.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-supervisor-dashboard-page',
@@ -12,11 +14,12 @@ import { ActivityService } from '../../../../../core/services/activity.service';
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
-export class SupervisorDashboardPageComponent implements OnInit {
+export class SupervisorDashboardPageComponent implements OnInit, OnDestroy {
   usuariosSordos = 0;
   conversacionesHoy = 0;
   usuariosActivos = 0;
   recentActivities: any[] = [];
+  private destroy$ = new Subject<void>();
 
   constructor(
     private dashboardService: DashboardService,
@@ -24,17 +27,22 @@ export class SupervisorDashboardPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.dashboardService.getUsuarios().subscribe(users => {
+    this.dashboardService.getUsuarios().pipe(takeUntil(this.destroy$)).subscribe(users => {
       this.usuariosSordos = users.filter(u => u.activo).length;
       this.usuariosActivos = users.length;
     });
 
-    this.dashboardService.getConversaciones().subscribe(c => {
+    this.dashboardService.getConversaciones().pipe(takeUntil(this.destroy$)).subscribe(c => {
       this.conversacionesHoy = c.length;
     });
 
-    this.activityService.getRecentActivities().subscribe(data => {
+    this.activityService.getRecentActivities().pipe(takeUntil(this.destroy$)).subscribe(data => {
       this.recentActivities = data;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

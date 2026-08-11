@@ -1,3 +1,4 @@
+@use './app/features/roles/admin/variables' as *;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 html, body {
@@ -13,3 +14,43 @@ a { color: #5b21b6; text-decoration: none }
 
 /* Utilities */
 .text-center { text-align:center }
+
+/* ===== Tema global del panel de mat-select (overlay de Material) ===== */
+.mat-mdc-select-panel {
+	background: $card !important;
+	border: 1px solid $border;
+	border-radius: 12px !important;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, .14);
+	max-height: 280px;
+}
+
+.mat-mdc-option {
+	color: $text;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.mat-mdc-option:hover:not(.mat-mdc-option-disabled) {
+	background: #EDE9FE !important;
+	color: $primary;
+}
+
+.mat-mdc-option.mat-mdc-selected,
+.mat-mdc-option[aria-selected="true"] {
+	background: #F3F1FF !important;
+	color: $primary !important;
+	font-weight: 600;
+}
+
+.mat-mdc-select-panel::-webkit-scrollbar {
+	width: 8px;
+}
+
+.mat-mdc-select-panel::-webkit-scrollbar-thumb {
+	background: $primary;
+	border-radius: 20px;
+}
+
+.mat-mdc-select-panel::-webkit-scrollbar-track {
+	background: #E5E7EB;
+}

@@ -24,6 +24,7 @@ export class Admin implements OnInit {
 
   userName: string = 'Usuario';
   sidebarOpen = true;
+  mobileMenuOpen = false;
 
   constructor(
     private authService: AuthService,
@@ -39,13 +40,19 @@ export class Admin implements OnInit {
   }
 
   toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      this.mobileMenuOpen = !this.mobileMenuOpen;
+    } else {
+      this.sidebarOpen = !this.sidebarOpen;
+    }
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
   }
 
   logout() {
-    this.authService.logout().subscribe(() => {
-      console.log('Sesión cerrada');
-    });
+    this.authService.logout().subscribe();
   }
 
   private extractNameFromEmail(email: string): string {

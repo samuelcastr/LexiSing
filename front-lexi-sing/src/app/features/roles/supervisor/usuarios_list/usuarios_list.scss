@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .usuarios-list-layout {
   padding: 24px;
 }
@@ -93,5 +98,11 @@
 @media (max-width: 800px) {
   .usuarios-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .usuarios-list-layout {
+    padding: 16px;
   }
 }

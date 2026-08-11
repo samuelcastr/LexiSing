@@ -16,6 +16,7 @@ import { User } from '../../../core/models/user.model';
 export class Empleados implements OnInit {
   userName = 'Usuario';
   sidebarOpen = true;
+  mobileMenuOpen = false;
 
   constructor(private authService: AuthService) {}
 
@@ -26,7 +27,15 @@ export class Empleados implements OnInit {
   }
 
   toggleSidebar(): void {
-    this.sidebarOpen = !this.sidebarOpen;
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      this.mobileMenuOpen = !this.mobileMenuOpen;
+    } else {
+      this.sidebarOpen = !this.sidebarOpen;
+    }
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
 
   logout(): void {

@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DashboardService } from '../../../../core/services/dashboard.service';
@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-reportes',
@@ -16,7 +18,7 @@ import { MatTabsModule } from '@angular/material/tabs';
   templateUrl: './reportes.html',
   styleUrls: ['./reportes.scss']
 })
-export class Reportes implements OnInit, AfterViewInit {
+export class Reportes implements OnInit, OnDestroy, AfterViewInit {
   totalUsuarios = 0;
   totalConversaciones = 0;
   totalMensajes = 0;
@@ -26,6 +28,7 @@ export class Reportes implements OnInit, AfterViewInit {
 
   private Plotly: any;
   private datosGraficos: any = {};
+  private destroy$ = new Subject<void>();
 
   constructor(
     private dashboardService: DashboardService,
@@ -36,6 +39,11 @@ export class Reportes implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.loadEstadisticas();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngAfterViewInit(): void {
@@ -50,18 +58,18 @@ export class Reportes implements OnInit, AfterViewInit {
   }
 
   loadEstadisticas(): void {
-    this.dashboardService.getUsuarios().subscribe(users => {
+    this.dashboardService.getUsuarios().pipe(takeUntil(this.destroy$)).subscribe(users => {
       this.totalUsuarios = users.length;
       this.usuariosActivos = users.filter(u => u.activo).length;
       this.datosGraficos.users = users;
     });
 
-    this.convService.getAllConversations().subscribe(conversations => {
+    this.convService.getAllConversations().pipe(takeUntil(this.destroy$)).subscribe(conversations => {
       this.totalConversaciones = conversations.length;
       this.datosGraficos.conversations = conversations;
     });
 
-    this.dashboardService.getMensajes().subscribe(messages => {
+    this.dashboardService.getMensajes().pipe(takeUntil(this.destroy$)).subscribe(messages => {
       this.totalMensajes = messages.length;
       this.datosGraficos.messages = messages;
       this.mensajesPorHora = this.calculateMessagesByHour(messages);

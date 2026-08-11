@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ConversationService } from '../../../core/services/conversation.service';
@@ -10,6 +10,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../core/models/user.model';
 import { ErrorService } from '../../../core/services/error.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-chat',
@@ -18,7 +20,7 @@ import { ErrorService } from '../../../core/services/error.service';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnInit, AfterViewChecked {
+export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   
   convId!: string;
@@ -29,6 +31,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   editingMessage: any | null = null;
   private sending = false;
   private shouldScroll = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
@@ -38,20 +41,26 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const id = params.get('id');
       if (!id) return;
       this.convId = id;
-      this.auth.getCurrentUser().subscribe(user => {
+      this.messages = [];
+      this.auth.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
         if (!user) return;
         this.uid = user.uid;
         this.currentUser = user;
-        this.convService.getMessages(this.convId).subscribe(list => {
+        this.convService.getMessages(this.convId).pipe(takeUntil(this.destroy$)).subscribe(list => {
           this.messages = list.filter(msg => !msg.deleted);
           this.shouldScroll = true;
         });
       });
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngAfterViewChecked(): void {

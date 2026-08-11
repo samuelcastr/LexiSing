@@ -1,7 +1,7 @@
 <div class="dashboard-layout">
 
   <!-- Sidebar -->
-  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen" [class.mobile-open]="mobileMenuOpen">
 
     <div>
 
@@ -10,7 +10,7 @@
         <span class="logo-name">LexiSing</span>
       </div>
 
-      <nav>
+      <nav (click)="closeMobileMenu()">
 
         <a routerLink="/roles/admin/dashboard" routerLinkActive="active">
           <mat-icon>dashboard</mat-icon>
@@ -87,4 +87,5 @@
 
   </main>
 
+  <div class="sidebar-backdrop" [class.visible]="mobileMenuOpen" (click)="closeMobileMenu()"></div>
 </div>

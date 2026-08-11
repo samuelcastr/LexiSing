@@ -1,35 +1,36 @@
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { Observable, from } from 'rxjs';
 import { Auth, authState } from '@angular/fire/auth';
-import { switchMap, take, mergeMap } from 'rxjs/operators';
+import { inject } from '@angular/core';
+import { switchMap, take } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
-@Injectable()
-export class FirebaseTokenInterceptor implements HttpInterceptor {
-  constructor(private auth: Auth) {}
+export function firebaseTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
+  const apiUrl = environment.apiUrl;
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return authState(this.auth).pipe(
-      take(1),
-      mergeMap(user => {
-        if (!user) {
-          // No hay usuario autenticado, pasar request tal cual
-          return next.handle(req);
-        }
-        
-        // Obtener ID token del usuario
-        return from(user.getIdToken()).pipe(
-          switchMap(token => {
-            // Clonar request y agregar token en header Authorization
-            const cloned = req.clone({
-              setHeaders: {
-                Authorization: `Bearer ${token}`
-              }
-            });
-            return next.handle(cloned);
-          })
-        );
-      })
-    );
+  if (!req.url.startsWith(apiUrl)) {
+    return next(req);
   }
+
+  const auth = inject(Auth);
+
+  return authState(auth).pipe(
+    take(1),
+    switchMap(user => {
+      if (!user) {
+        return next(req);
+      }
+
+      return from(user.getIdToken()).pipe(
+        switchMap(token => {
+          const cloned = req.clone({
+            setHeaders: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          return next(cloned);
+        })
+      );
+    })
+  );
 }

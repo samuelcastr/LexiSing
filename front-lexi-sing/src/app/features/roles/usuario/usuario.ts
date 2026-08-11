@@ -8,6 +8,7 @@ import { UserApiService } from '../../../core/services/user-api.service';
 import { ConversationService } from '../../../core/services/conversation.service';
 import { Subject } from 'rxjs';
 import { takeUntil, map } from 'rxjs/operators';
+import { parseDate } from '../../../core/utils/parse-date';
 
 @Component({
   selector: 'app-usuario-role',
@@ -83,25 +84,11 @@ export class Usuario implements OnInit, OnDestroy {
     this.authService.getAllUsers().pipe(takeUntil(this.destroy$)).subscribe((users: any[]) => {
       const waitingUsers = users
         .filter(u => u.rol === 'usuario')
-        .sort((a, b) => this.parseDate(a.fechaCreacion).getTime() - this.parseDate(b.fechaCreacion).getTime());
+        .sort((a, b) => parseDate(a.fechaCreacion).getTime() - parseDate(b.fechaCreacion).getTime());
 
       const index = waitingUsers.findIndex(u => u.uid === uid);
       this.queuePosition = index >= 0 ? index + 1 : null;
     });
   }
 
-  private parseDate(value: any): Date {
-    if (!value) return new Date(0);
-    if (typeof value === 'string' || typeof value === 'number') {
-      const date = new Date(value);
-      return isNaN(date.getTime()) ? new Date(0) : date;
-    }
-    if (value.seconds !== undefined) return new Date(value.seconds * 1000);
-    if (value._seconds !== undefined) return new Date(value._seconds * 1000);
-    if (typeof value.toDate === 'function') {
-      const date = value.toDate();
-      return date instanceof Date && !isNaN(date.getTime()) ? date : new Date(0);
-    }
-    return new Date(0);
-  }
 }

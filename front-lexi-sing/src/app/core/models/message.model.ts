@@ -10,9 +10,4 @@ export interface Message {
   editedAt?: any;
 }
 
-export interface Conversation {
-  id?: string;
-  participants: string[];
-  lastMessage?: string;
-  updatedAt?: any; // Firestore Timestamp
-}
+export type { Conversation } from './conversation.model';

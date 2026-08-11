@@ -20,16 +20,23 @@
         <th mat-header-cell *matHeaderCellDef>{{ showPendingBadge ? 'Estado' : 'Rol' }}</th>
         <td mat-cell *matCellDef="let user">
           <span class="badge pending" *ngIf="showPendingBadge && user.rol === 'usuario'">Pendiente</span>
-          <span class="badge role" *ngIf="!showPendingBadge">{{user.rol}}</span>
+          <mat-select *ngIf="!showPendingBadge"
+            [value]="selectedRoles[user.uid] ?? currentRole(user)"
+            (selectionChange)="onRoleChange(user.uid, $event.value)">
+            <mat-option *ngFor="let role of availableRoles" [value]="role">{{ getRoleLabel(role) }}</mat-option>
+          </mat-select>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="nuevoRol">
         <th mat-header-cell *matHeaderCellDef>{{ showPendingBadge ? 'Asignar rol' : 'Cambiar Rol' }}</th>
         <td mat-cell *matCellDef="let user">
-          <mat-select [value]="selectedRoles[user.uid]" (selectionChange)="onRoleChange(user.uid, $event.value)">
-            <mat-option *ngFor="let role of availableRoles" [value]="role">{{role}}</mat-option>
-          </mat-select>
+          <div class="role-change-cell">
+            <span class="current-role">Rol actual: <strong>{{ getCurrentRoleLabel(user) }}</strong></span>
+            <mat-select [value]="selectedRoles[user.uid]" (selectionChange)="onRoleChange(user.uid, $event.value)">
+              <mat-option *ngFor="let role of availableRoles" [value]="role">{{ getRoleLabel(role) }}</mat-option>
+            </mat-select>
+          </div>
         </td>
       </ng-container>
 

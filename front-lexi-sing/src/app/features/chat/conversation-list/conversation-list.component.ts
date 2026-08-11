@@ -52,11 +52,13 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   activeMessageMenuId: string | null = null;
   participantPresence: 'online' | 'offline' = 'offline';
   userRole: string = '';
+  mobileSidebarOpen = false;
   private sending = false;
   private destroy$ = new Subject<void>();
   private convSub?: Subscription;
   private usersSub?: Subscription;
   private presenceSub?: Subscription;
+  private messagesSub?: Subscription;
 
   constructor(
     private convService: ConversationService,
@@ -78,6 +80,10 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (typeof window !== 'undefined' && window.innerWidth < 1025) {
+      this.mobileSidebarOpen = true;
+    }
+
     this.auth.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
       if (user?.uid) {
         this.currentUser = user;
@@ -96,6 +102,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.convSub?.unsubscribe();
     this.usersSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
+    this.messagesSub?.unsubscribe();
     this.stopCamera();
   }
 
@@ -138,6 +145,37 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     if (this.showNewConvForm) {
       this.loadUsers();
     }
+  }
+
+  toggleMobileSidebar(): void {
+    this.mobileSidebarOpen = !this.mobileSidebarOpen;
+  }
+
+  openMobileSidebar(): void {
+    this.mobileSidebarOpen = true;
+  }
+
+  closeMobileSidebar(): void {
+    this.mobileSidebarOpen = false;
+  }
+
+  onEmptyStateClick(): void {
+    if (typeof window !== 'undefined' && window.innerWidth < 1025) {
+      this.openMobileSidebar();
+      return;
+    }
+    if (this.conversations.length === 0) {
+      this.toggleNewConvForm();
+    }
+  }
+
+  get emptyStateHint(): string {
+    if (typeof window !== 'undefined' && window.innerWidth < 1025) {
+      return 'Toca para abrir la lista de conversaciones';
+    }
+    return this.conversations.length === 0
+      ? 'Crea una nueva conversación'
+      : 'Selecciona una conversación a la izquierda';
   }
 
   filterUsers(): void {
@@ -224,6 +262,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
   selectConversation(conversation: any): void {
     this.selectedConversation = conversation;
+    this.closeMobileSidebar();
     this.loadMessages(conversation.id);
 
     const otherUid = conversation.participants?.find((p: string) => p !== this.uid);
@@ -242,7 +281,9 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   loadMessages(convId: string): void {
-    this.convService.getMessages(convId).pipe(takeUntil(this.destroy$)).subscribe(msgs => {
+    this.messagesSub?.unsubscribe();
+    this.messages = [];
+    this.messagesSub = this.convService.getMessages(convId).pipe(takeUntil(this.destroy$)).subscribe(msgs => {
       this.messages = msgs.filter(msg => !msg.deleted);
       this.scrollToBottom();
     });
@@ -260,15 +301,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
-  deselectConversation(): void {
-    this.selectedConversation = null;
-    this.participantPresence = 'offline';
-    if (this.userRole === 'sordomudo' && this.cameraActive) {
-      this.stopCamera();
-    }
-  }
-
-
   goBack(): void {
     if (this.router.url.includes('/roles/supervisor/conversations')) {
       this.router.navigate(['/roles/supervisor/dashboard']);
@@ -279,7 +311,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     } else if (this.router.url.includes('/roles/sordomudo/conversations')) {
       this.router.navigate(['/roles/sordomudo/dashboard']);
     } else if (this.router.url.includes('/roles/usuario/conversations')) {
-      this.router.navigate(['/roles/usuario/dashboard']);
+      this.router.navigate(['/roles/usuario']);
     } else {
       this.router.navigate(['/dashboard']);
     }

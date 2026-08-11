@@ -1,6 +1,7 @@
 export interface Conversation {
   id?: string;
-  titulo: string;
-  fechaCreacion: any;
-  activa: boolean;
+  participants: string[];
+  lastMessage?: string;
+  updatedAt?: any;
+  activa?: boolean;
 }

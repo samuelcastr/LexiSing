@@ -9,6 +9,7 @@ import {
   limit,
   serverTimestamp
 } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
 
 import { Observable } from 'rxjs';
 
@@ -17,7 +18,7 @@ import { Observable } from 'rxjs';
 })
 export class ActivityService {
 
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore, private auth: Auth) {}
 
   addActivity(
     userName: string,
@@ -32,6 +33,7 @@ export class ActivityService {
     return addDoc(ref, {
       userName,
       action,
+      uid: this.auth.currentUser?.uid ?? null,
       timestamp: serverTimestamp()
     });
   }

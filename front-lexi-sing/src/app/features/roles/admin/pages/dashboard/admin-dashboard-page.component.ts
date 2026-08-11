@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { StatCardComponent } from '../../components/stat-card/stat-card.component';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { User } from '../../../../../core/models/user.model';
+import { parseDate as parseDateUtil } from '../../../../../core/utils/parse-date';
 
 @Component({
   selector: 'app-admin-dashboard-page',
@@ -50,27 +51,16 @@ export class AdminDashboardPageComponent implements OnInit {
         this.ultimasSolicitudes = users
           .filter(u => u.rol === 'usuario')
           .slice()
-          .sort((a, b) => this.parseDate(b.fechaCreacion).getTime() - this.parseDate(a.fechaCreacion).getTime())
+          .sort((a, b) => parseDateUtil(b.fechaCreacion).getTime() - parseDateUtil(a.fechaCreacion).getTime())
           .slice(0, 5);
       },
       error: (err) => console.error('Error al cargar usuarios', err)
     });
   }
 
-   parseDate(value: any): Date {
-    if (!value) return new Date(0);
-    if (typeof value === 'string' || typeof value === 'number') {
-      const date = new Date(value);
-      return isNaN(date.getTime()) ? new Date(0) : date;
-    }
-    if (value.seconds !== undefined) return new Date(value.seconds * 1000);
-    if (value._seconds !== undefined) return new Date(value._seconds * 1000);
-    if (typeof value.toDate === 'function') {
-      const date = value.toDate();
-      return date instanceof Date && !isNaN(date.getTime()) ? date : new Date(0);
-    }
-    return new Date(0);
+  parseDate(value: any): Date {
+    return parseDateUtil(value);
   }
-  
+
 }
 

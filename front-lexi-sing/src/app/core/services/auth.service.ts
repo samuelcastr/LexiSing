@@ -39,8 +39,6 @@ register(
 
       const uid = cred.user.uid;
 
-      console.log('UID creado:', uid);
-
       const userData: User = {
         uid,
         nombre,
@@ -62,10 +60,6 @@ register(
 
         map(() => {
 
-          console.log(
-            'Usuario guardado en Firestore'
-          );
-
           return {
             user: userData,
             message: 'Registro exitoso'
@@ -77,11 +71,6 @@ register(
     }),
 
     catchError(err => {
-
-      console.error(
-        'ERROR REGISTER:',
-        err
-      );
 
       return of({
         user: null,
@@ -140,7 +129,6 @@ register(
         );
       }),
       catchError(err => {
-        console.error('Google login error', err);
         let message = err?.message || 'Error al autenticar con Google';
 
         if (err?.code === 'auth/unauthorized-domain') {
@@ -217,7 +205,6 @@ register(
         );
       }),
       catchError(err => {
-        console.error('Error processing redirect result', err);
         return of({ user: null, message: traducirErrorFirebase(err, 'Error al procesar redirect de Google'), code: err?.code || null, error: err } as AuthResponse);
       })
     );

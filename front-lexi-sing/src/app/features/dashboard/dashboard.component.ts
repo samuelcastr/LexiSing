@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,8 @@ import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { ActivityService } from '../../core/services/activity.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,16 +24,18 @@ import { ActivityService } from '../../core/services/activity.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
   userName: string = 'Usuario';
   sidebarOpen = true;
+  mobileMenuOpen = false;
   empleadosActivos = 0;
   conversacionesHoy = 0;
   mensajesEnviados = 0;
   recentActivities: any[] = [];
   onlineUsers = 0;
   messagesSent = 0;
+  private destroy$ = new Subject<void>();
 
 
   constructor(
@@ -44,7 +48,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
 
-    this.authService.getCurrentUser().subscribe((user: User | null) => {
+    this.authService.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe((user: User | null) => {
       if (user) {
         this.userName = user.nombre || user.email || 'Usuario';
       }
@@ -54,16 +58,23 @@ export class DashboardComponent implements OnInit {
     this.loadActivities();
 
 
-    this.dashboardService.getUsuarios().subscribe(users => {
+    this.dashboardService.getUsuarios().pipe(takeUntil(this.destroy$)).subscribe(users => {
 
       this.empleadosActivos =
         users.filter(
           user => user.activo
         ).length;
+
+      this.onlineUsers =
+        users.filter(
+          user => user.activo === true
+        ).length;
+
     });
 
     this.dashboardService
       .getConversaciones()
+      .pipe(takeUntil(this.destroy$))
       .subscribe(conversaciones => {
 
         this.conversacionesHoy =
@@ -73,36 +84,41 @@ export class DashboardComponent implements OnInit {
 
     this.dashboardService
       .getMensajes()
+      .pipe(takeUntil(this.destroy$))
       .subscribe(messages => {
 
         this.mensajesEnviados =
           messages.length;
 
       });
-    this.dashboardService.getUsuarios().subscribe(users => {
-
-      this.onlineUsers =
-        users.filter(
-          user => user.activo === true
-        ).length;
-
-    });
 
   }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   loadActivities(): void {
-    this.activityService.getRecentActivities().subscribe(data => {
+    this.activityService.getRecentActivities().pipe(takeUntil(this.destroy$)).subscribe(data => {
       this.recentActivities = data;
     });
   }
 
   toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      this.mobileMenuOpen = !this.mobileMenuOpen;
+    } else {
+      this.sidebarOpen = !this.sidebarOpen;
+    }
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
   }
 
   logout() {
-    this.authService.logout().subscribe(() => {
-      console.log('Sesión cerrada');
-    });
+    this.authService.logout().subscribe();
   }
 
 }

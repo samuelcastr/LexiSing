@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -23,7 +23,7 @@ import { User } from '../../../../../core/models/user.model';
   templateUrl: './user-table.component.html',
   styleUrls: ['./user-table.component.scss']
 })
-export class UserTableComponent {
+export class UserTableComponent implements OnInit {
   @Input() users: User[] = [];
   @Input() availableRoles: string[] = ['usuario', 'empleado', 'supervisor', 'admin', 'sordomudo'];
   @Input() showPendingBadge: boolean = false;
@@ -32,8 +32,34 @@ export class UserTableComponent {
 
   @Output() roleChanged = new EventEmitter<{uid: string, currentRole: string, newRole: string}>();
 
-  selectedRoles: { [uid: string]: string } = {};
-  displayedColumns: string[] = ['nombre', 'email', 'rol', 'nuevoRol', 'accion'];
+  selectedRoles: { [uid: string]: string | undefined } = {};
+  displayedColumns: string[] = [];
+
+  private readonly ROLE_LABELS: Record<string, string> = {
+    admin: 'Administrador',
+    supervisor: 'Supervisor',
+    empleado: 'Empleado',
+    usuario: 'Usuario',
+    sordomudo: 'Sordomudo',
+  };
+
+  ngOnInit(): void {
+    this.displayedColumns = this.showPendingBadge
+      ? ['nombre', 'email', 'rol', 'nuevoRol', 'accion']
+      : ['nombre', 'email', 'rol', 'accion'];
+  }
+
+  currentRole(user: User): string {
+    return user.rol || 'usuario';
+  }
+
+  getCurrentRoleLabel(user: User): string {
+    return this.ROLE_LABELS[user.rol] || (user.rol || 'Usuario');
+  }
+
+  getRoleLabel(role: string): string {
+    return this.ROLE_LABELS[role] || role;
+  }
 
   onRoleChange(uid: string, role: string): void {
     this.selectedRoles[uid] = role;

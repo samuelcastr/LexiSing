@@ -1,6 +1,6 @@
 <div class="conversation-container">
   <!-- Sidebar izquierdo - Conversaciones + Cámara -->
-  <aside class="sidebar-left">
+  <aside class="sidebar-left" [class.mobile-open]="mobileSidebarOpen">
     <div class="sidebar-header">
       <div class="sidebar-title">
         <div class="title-icon">
@@ -45,15 +45,19 @@
     </div>
   </aside>
 
+  <!-- Backdrop para el drawer en móvil/tablet -->
+  <div class="mobile-backdrop" [class.visible]="mobileSidebarOpen" (click)="toggleMobileSidebar()"></div>
+
   <!-- Centro/Derecha - Chat -->
   <div class="chat-panel">
     <div *ngIf="selectedConversation" class="chat-container">
       <!-- Header del chat -->
       <div class="chat-header">
+        <button mat-icon-button class="mobile-menu-btn" (click)="toggleMobileSidebar()"
+          aria-label="Ver conversaciones">
+          <mat-icon>menu</mat-icon>
+        </button>
         <div class="chat-user-info">
-          <button mat-icon-button class="back-chat-btn" (click)="deselectConversation()">
-            <mat-icon>arrow_back</mat-icon>
-          </button>
           <div class="header-avatar">{{ selectedConversation.participantName?.charAt(0)?.toUpperCase() || 'C' }}</div>
           <div>
             <h3>{{ selectedConversation.participantName }}</h3>
@@ -126,9 +130,17 @@
       </div>
     </div>
 
-    <div *ngIf="!selectedConversation" class="chat-empty">
-      <mat-icon>chat_bubble_outline</mat-icon>
-      <p>Selecciona una conversación para comenzar</p>
+    <div *ngIf="!selectedConversation" class="chat-empty" (click)="onEmptyStateClick()" role="button"
+      tabindex="0" (keydown.enter)="onEmptyStateClick()"
+      (keydown.space)="onEmptyStateClick(); $event.preventDefault()" [attr.aria-label]="emptyStateHint">
+      <div class="empty-orb">
+        <mat-icon>{{ conversations.length === 0 ? 'add_comment' : 'chat_bubble_outline' }}</mat-icon>
+      </div>
+      <p class="empty-title">{{ conversations.length === 0 ? 'Aún no tienes conversaciones' : 'Tus chats están aquí' }}</p>
+      <span class="empty-hint">
+        <mat-icon>{{ conversations.length === 0 ? 'add' : 'format_list_bulleted' }}</mat-icon>
+        {{ emptyStateHint }}
+      </span>
     </div>
   </div>
 

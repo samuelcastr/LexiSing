@@ -15,8 +15,13 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
           return false;
         }
 
+        if (!user.rol) {
+          router.navigate(['/login']);
+          return false;
+        }
+
         if (!allowedRoles.includes(user.rol)) {
-          authService.navigateToRoleHome(user.rol || 'usuario');
+          authService.navigateToRoleHome(user.rol);
           return false;
         }
 

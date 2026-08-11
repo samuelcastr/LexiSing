@@ -1,7 +1,7 @@
 <div class="dashboard-layout">
 
   <!-- Sidebar -->
-  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen" [class.mobile-open]="mobileMenuOpen">
 
     <div>
 
@@ -9,7 +9,7 @@
         <mat-icon>pan_tool</mat-icon>
       </div>
 
-      <nav>
+      <nav (click)="closeMobileMenu()">
 
         <a class="active">
           <mat-icon>home</mat-icon>
@@ -52,10 +52,10 @@
 
   </aside>
 
+  <div class="sidebar-backdrop" [class.visible]="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+
   <!-- Contenido -->
   <main class="content">
-
-    <!-- Topbar -->
     <div class="topbar">
 
       <div class="topbar-left">
