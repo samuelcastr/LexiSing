@@ -14,15 +14,11 @@
         <div class="profile-avatar">
           <mat-icon>person</mat-icon>
         </div>
-
-        <button mat-mini-fab class="camera-btn">
-          <mat-icon>photo_camera</mat-icon>
-        </button>
       </div>
 
-      <h2>{{ nombre }}</h2>
+      <h2>{{ nombre || 'Usuario' }}</h2>
 
-      <span class="profile-role">Sordomudo</span>
+      <span class="profile-role">{{ rolFormateado }}</span>
 
       <p>
         Gestiona tu información personal y protege tu cuenta actualizando los datos cuando sea necesario.
@@ -34,8 +30,8 @@
           <strong>{{ email || '—' }}</strong>
         </div>
         <div>
-          <small>Rol</small>
-          <strong>{{ user?.rol || '—' }}</strong>
+          <small>Estado</small>
+          <strong>{{ user?.activo ? 'Activo' : 'Inactivo' }}</strong>
         </div>
       </div>
     </mat-card>
@@ -49,11 +45,6 @@
           <input type="text" placeholder="Tu nombre" [(ngModel)]="nombre" name="nombre">
         </div>
 
-        <div class="profile-field">
-          <label>Teléfono</label>
-          <input type="text" placeholder="3001234567">
-        </div>
-
         <div class="profile-field full">
           <label>Email</label>
           <input type="email" placeholder="tu@email.com" [(ngModel)]="email" name="email">
@@ -65,18 +56,22 @@
       <h3 class="section-title">Seguridad</h3>
 
       <div class="form-grid">
-        <div class="profile-field">
+        <div class="profile-field full">
           <label>Contraseña actual</label>
-          <input type="password" placeholder="********" [(ngModel)]="currentPassword" name="currentPassword">
+          <input type="password" placeholder="Ingresa tu contraseña actual solo si vas a cambiarla" [(ngModel)]="currentPassword" name="currentPassword">
         </div>
         <div class="profile-field">
           <label>Nueva contraseña</label>
-          <input type="password" placeholder="********" [(ngModel)]="nuevoPassword" name="nuevoPassword">
+          <input type="password" placeholder="Mínimo 6 caracteres" [(ngModel)]="nuevoPassword" name="nuevoPassword">
         </div>
-        <div class="profile-field full">
+        <div class="profile-field">
           <label>Confirmar contraseña</label>
-          <input type="password" placeholder="********" [(ngModel)]="confirmarPassword" name="confirmarPassword">
+          <input type="password" placeholder="Repite la nueva contraseña" [(ngModel)]="confirmarPassword" name="confirmarPassword">
         </div>
+      </div>
+
+      <div class="status-message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'" *ngIf="message">
+        {{ message }}
       </div>
 
       <div class="buttons">
@@ -88,10 +83,7 @@
           {{ saving ? 'Guardando...' : 'Guardar cambios' }}
         </button>
       </div>
-
-      <div class="status-message" *ngIf="message">
-        {{ message }}
-      </div>
     </mat-card>
+
   </div>
 </div>

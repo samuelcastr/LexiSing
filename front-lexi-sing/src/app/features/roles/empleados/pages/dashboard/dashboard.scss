@@ -113,6 +113,7 @@
 }
 
 .chart-card {
+  min-width: 0;
   background: white;
   border-radius: 20px;
   padding: 18px;
@@ -130,9 +131,14 @@
   }
 }
 
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 480px) {
   .stats-grid {
-    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 

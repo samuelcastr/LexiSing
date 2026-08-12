@@ -1,11 +1,12 @@
-@use '../../variables' as *;
-
 :host {
   display: block;
   width: 100%;
 }
 
 .config-layout {
+  padding: 28px;
+  max-width: 1250px;
+  margin: auto;
   animation: fadeIn .4s ease;
 }
 
@@ -17,12 +18,12 @@
   margin: 0;
   font-size: 30px;
   font-weight: 700;
-  color: $text;
+  color: #0F172A;
 }
 
 .config-header p {
   margin-top: 4px;
-  color: $text-light;
+  color: #6B7280;
 }
 
 .config-grid {
@@ -31,18 +32,12 @@
   gap: 24px;
 }
 
-.forms-column {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
 .profile-card,
 .profile-form-card {
-  background: $card;
+  background: white;
   border-radius: 24px;
   padding: 28px;
-  box-shadow: $shadow;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, .07);
 }
 
 .profile-card {
@@ -57,7 +52,7 @@
   left: 0;
   width: 100%;
   height: 6px;
-  background: linear-gradient(90deg, $primary, $secondary);
+  background: linear-gradient(90deg, #6D4CFF, #8B5CF6);
 }
 
 .avatar-container {
@@ -78,12 +73,12 @@
 
 .profile-avatar mat-icon {
   font-size: 55px;
-  color: $primary;
+  color: #6D4CFF;
 }
 
 .profile-card h2 {
   margin: 0;
-  color: $text;
+  color: #0F172A;
 }
 
 .profile-role {
@@ -92,13 +87,13 @@
   padding: 6px 16px;
   border-radius: 30px;
   background: #F1EEFF;
-  color: $primary;
+  color: #6D4CFF;
   font-weight: 600;
   font-size: 13px;
 }
 
 .profile-card p {
-  color: $text-light;
+  color: #6B7280;
   line-height: 1.6;
 }
 
@@ -127,7 +122,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: $text;
+  color: #0F172A;
 }
 
 .form-grid {
@@ -154,7 +149,7 @@
 
 .profile-field input {
   height: 50px;
-  border: 1px solid $border;
+  border: 1px solid #E5E7EB;
   border-radius: 14px;
   padding: 0 16px;
   font-size: 14px;
@@ -163,8 +158,34 @@
 
 .profile-field input:focus {
   outline: none;
-  border-color: $primary;
-  box-shadow: 0 0 0 4px rgba(91, 75, 255, .10);
+  border-color: #6D4CFF;
+  box-shadow: 0 0 0 4px rgba(109, 76, 255, .10);
+}
+
+.divider {
+  height: 1px;
+  background: #ECECEC;
+  margin: 5px 0;
+}
+
+.status-message {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.status-message.success {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.status-message.error {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
 }
 
 .buttons {
@@ -175,9 +196,9 @@
 }
 
 .cancel-btn {
-  color: $primary;
-  border: 1px solid $primary;
-  background: rgba(91, 75, 255, 0.08);
+  color: #6D4CFF;
+  border: 1px solid #6D4CFF;
+  background: rgba(109, 76, 255, 0.08);
   border-radius: 14px;
   padding: 0 24px;
   height: 48px;
@@ -186,7 +207,7 @@
 }
 
 .cancel-btn:hover {
-  background: rgba(91, 75, 255, 0.18);
+  background: rgba(109, 76, 255, 0.18);
   transform: translateY(-1px);
 }
 
@@ -194,12 +215,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: $primary;
+  background: #6D4CFF;
   color: white;
   border-radius: 14px;
   padding: 0 24px;
   height: 48px;
-  box-shadow: 0 10px 25px rgba(91, 75, 255, .25);
+  box-shadow: 0 10px 25px rgba(109, 76, 255, .25);
   font-weight: 600;
   transition: transform .2s, box-shadow .2s;
   border: none;
@@ -207,7 +228,7 @@
 
 .save-info-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(91, 75, 255, .30);
+  box-shadow: 0 12px 30px rgba(109, 76, 255, .30);
 }
 
 .save-info-btn mat-icon {

@@ -5,8 +5,22 @@
   </div>
 </div>
 
+<div class="search-bar">
+  <mat-icon>search</mat-icon>
+  <input
+    type="text"
+    placeholder="Buscar solicitud por nombre o correo..."
+    [(ngModel)]="searchTerm"
+    (input)="filterSolicitudes()"
+  />
+</div>
+
+<div class="no-results" *ngIf="pendingUsers.length > 0 && filteredPending.length === 0">
+  No se encontraron solicitudes que coincidan con la búsqueda.
+</div>
+
 <app-user-table
-  [users]="pendingUsers"
+  [users]="filteredPending"
   [showPendingBadge]="true"
   [showActionForRole]="'usuario'"
   actionButtonLabel="Aprobar"

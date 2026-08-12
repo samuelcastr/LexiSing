@@ -11,21 +11,25 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()">
 
-      <div class="input-group">
+      <div class="input-group" [class.has-error]="email?.invalid && email?.touched">
         <span class="icon"></span>
         <input
           type="email"
           placeholder="Correo Electrónico"
-          formControlName="email">
+          formControlName="email"
+          [class.invalid-input]="email?.invalid && email?.touched">
       </div>
+      <app-field-error [control]="email"></app-field-error>
 
-      <div class="input-group">
+      <div class="input-group" [class.has-error]="password?.invalid && password?.touched">
         <span class="icon"></span>
         <input
           type="password"
           placeholder="Contraseña"
-          formControlName="password">
+          formControlName="password"
+          [class.invalid-input]="password?.invalid && password?.touched">
       </div>
+      <app-field-error [control]="password"></app-field-error>
 
       <div class="forgot">
         <a routerLink="/forgot-password">
@@ -37,7 +41,7 @@
         class="main-btn" 
         type="submit"
         [disabled]="loading">
-        {{ loading ? 'Cargando...' : 'Iniciar Sesión' }}
+        {{ loading ? (connecting$ | async) ? 'Verificando conexión...' : 'Iniciando sesión...' : 'Iniciar Sesión' }}
       </button>
 
       <div *ngIf="error" class="error-message">

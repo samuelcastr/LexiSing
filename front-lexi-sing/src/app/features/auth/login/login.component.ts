@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -7,25 +7,44 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil, debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, RouterModule, FieldErrorComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
   form!: FormGroup;
 
   loading = false;
   error: string | null = null;
+  connecting$!: Observable<boolean>;
+  private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+    this.connecting$ = this.authService.connecting$;
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
     });
+  }
+
+  ngOnInit(): void {
+    this.authService.ensureAuthServerReachable();
+    this.form.valueChanges.pipe(
+      debounceTime(400),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.authService.ensureAuthServerReachable());
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get email() { return this.form.get('email'); }
@@ -39,7 +58,7 @@ export class LoginComponent {
     }
     this.loading = true;
     const { email, password } = this.form.value;
-    this.authService.login(email!, password!).subscribe({
+    this.authService.login(email!, password!).pipe(takeUntil(this.destroy$)).subscribe({
       next: res => {
         this.loading = false;
         if (res.user) {

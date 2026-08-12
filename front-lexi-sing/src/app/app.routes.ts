@@ -19,7 +19,7 @@ export const APP_ROUTES: Routes = [
       { path: 'usuarios', loadComponent: () => import('./features/roles/supervisor/usuarios_list/usuarios_list').then(m => m.SupervisorUsuariosList) },
       { path: 'monitoreo-conversaciones', loadComponent: () => import('./features/roles/supervisor/monitoreo-conversaciones/monitoreo-conversaciones').then(m => m.MonitoreoConversaciones) },
       { path: 'reportes', loadComponent: () => import('./features/roles/supervisor/reportes/reportes').then(m => m.Reportes) },
-      { path: 'configuracion', loadComponent: () => import('./features/roles/supervisor/configuracion/configuracion').then(m => m.SupervisorConfiguracion) },
+      { path: 'configuracion', loadComponent: () => import('./shared/components/configuracion-perfil/configuracion-perfil.component').then(m => m.ConfiguracionPerfilComponent) },
     ]
   },
   //empleados
@@ -31,7 +31,7 @@ export const APP_ROUTES: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', loadComponent: () => import('./features/roles/empleados/pages/dashboard/dashboard').then(m => m.EmpleadosDashboardPageComponent) },
       { path: 'conversations', loadComponent: () => import('./features/chat/conversation-list/conversation-list.component').then(m => m.ConversationListComponent) },
-      { path: 'configuracion', loadComponent: () => import('./features/roles/supervisor/configuracion/configuracion').then(m => m.SupervisorConfiguracion) },
+      { path: 'configuracion', loadComponent: () => import('./shared/components/configuracion-perfil/configuracion-perfil.component').then(m => m.ConfiguracionPerfilComponent) },
     ]
   },
   //admin
@@ -45,7 +45,7 @@ export const APP_ROUTES: Routes = [
       { path: 'usuarios', loadComponent: () => import('./features/roles/admin/pages/usuarios/admin-usuarios-page.component').then(m => m.AdminUsuariosPageComponent) },
       { path: 'solicitudes', loadComponent: () => import('./features/roles/admin/pages/solicitudes/admin-solicitudes-page.component').then(m => m.AdminSolicitudesPageComponent) },
       { path: 'conversations', loadComponent: () => import('./features/chat/conversation-list/conversation-list.component').then(m => m.ConversationListComponent) },
-      { path: 'configuracion', loadComponent: () => import('./features/roles/admin/pages/configuracion/admin-config-page.component').then(m => m.AdminConfigPageComponent) },
+      { path: 'configuracion', loadComponent: () => import('./shared/components/configuracion-perfil/configuracion-perfil.component').then(m => m.ConfiguracionPerfilComponent) },
       { path: 'reportes', loadComponent: () => import('./features/roles/admin/pages/reportes/admin-reportes-page.component').then(m => m.AdminReportesPageComponent) },
     ]
   },
@@ -66,7 +66,7 @@ export const APP_ROUTES: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', loadComponent: () => import('./features/roles/sordomudo/pages/dashboard/dashboard').then(m => m.SordomudoDashboardPageComponent) },
       { path: 'conversations', loadComponent: () => import('./features/chat/conversation-list/conversation-list.component').then(m => m.ConversationListComponent) },
-      { path: 'configuracion', loadComponent: () => import('./features/roles/sordomudo/configuracion/configuracion').then(m => m.SordomudoConfiguracion) },
+      { path: 'configuracion', loadComponent: () => import('./shared/components/configuracion-perfil/configuracion-perfil.component').then(m => m.ConfiguracionPerfilComponent) },
     ]
   },
 

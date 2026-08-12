@@ -1,226 +1,24 @@
+@use 'dashboard-shell' as shell;
+
 * {
   box-sizing: border-box;
 }
 
-.dashboard-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #f5f5f7;
-}
+@include shell.dashboard-shell($logo-as-icon: true, $with-page-content: false);
 
-/* ===== Mobile-first (base 320–480px): sidebar como drawer off-canvas ===== */
+/* ===== Ajustes específicos del dashboard compartido ===== */
 .sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 1000;
-  width: min(85vw, 280px);
-  background: #0f1225;
-  color: white;
   padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow-y: auto;
-  transform: translateX(-100%);
-  transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
-}
-
-.sidebar.mobile-open {
-  transform: translateX(0);
-}
-
-.sidebar.mobile-open nav a {
-  animation: sidebar-link-in 0.4s ease backwards;
-}
-
-.sidebar.mobile-open nav a:nth-child(1) { animation-delay: 0.04s; }
-.sidebar.mobile-open nav a:nth-child(2) { animation-delay: 0.08s; }
-.sidebar.mobile-open nav a:nth-child(3) { animation-delay: 0.12s; }
-.sidebar.mobile-open nav a:nth-child(4) { animation-delay: 0.16s; }
-.sidebar.mobile-open nav a:nth-child(5) { animation-delay: 0.2s; }
-.sidebar.mobile-open nav a:nth-child(6) { animation-delay: 0.24s; }
-
-@keyframes sidebar-link-in {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.sidebar-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  background: rgba(15, 18, 37, 0.55);
-  backdrop-filter: blur(2px);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.sidebar-backdrop.visible {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: 32px;
-  color: white;
-  margin-bottom: 30px;
-}
-
-.logo mat-icon {
-  flex-shrink: 0;
-}
-
-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-nav a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 15px;
-  color: #d1d5db;
-  font-size: 13px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: 0.3s;
-  min-height: 44px;
-  min-width: 0;
-  overflow: hidden;
-}
-
-nav a span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-nav a mat-icon {
-  font-size: 20px;
-  color: #c7d2fe;
-  flex-shrink: 0;
-}
-
-nav a:hover mat-icon,
-nav a.active mat-icon {
-  color: white;
-}
-
-nav a:hover,
-nav a.active {
-  background: #6d4cff;
-  color: white;
-}
-
-.logout-btn {
-  height: 48px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 0 18px;
-  border-radius: 18px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, background 0.3s, border-color 0.3s;
-}
-
-.logout-btn:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.content {
-  flex: 1;
-  min-width: 0;
-  padding: 12px;
-  transition: all 0.3s ease;
-}
-
-/* ===== TOPBAR ===== */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.topbar-left > div {
-  min-width: 0;
-}
-
-.topbar h1 {
-  margin: 0;
-  font-size: 18px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.topbar p {
-  color: #777;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .topbar-right {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  flex-shrink: 0;
-}
-
-.search-box {
-  display: none;
 }
 
 .notification,
 .profile,
 .menu-toggle {
-  border: 0;
-  background: #fff;
-  border-radius: 999px;
-  width: 44px;
-  height: 44px;
   min-width: 44px;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .notification mat-icon {
@@ -230,11 +28,34 @@ nav a.active {
   color: #0f1225;
 }
 
-.profile mat-icon {
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
-  color: #6d4cff;
+.search-box {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .search-box {
+    display: flex;
+    align-items: center;
+    width: 200px;
+    height: 44px;
+    background: white;
+    border-radius: 12px;
+    padding: 0 15px;
+  }
+
+  .search-box input {
+    border: none;
+    outline: none;
+    margin-left: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (min-width: 1025px) {
+  .search-box {
+    width: 230px;
+  }
 }
 
 /* ===== TARJETAS ===== */
@@ -333,184 +154,6 @@ nav a.active {
 
 .actions-card button:hover {
   background: #f3f4f6;
-}
-
-/* ===== Phablet (481–767px) ===== */
-@media (min-width: 481px) {
-  .content {
-    padding: 16px;
-  }
-
-  .topbar h1 {
-    font-size: 20px;
-  }
-}
-
-/* ===== Tablet (768–1024px): rail de iconos, buscador visible ===== */
-@media (min-width: 768px) {
-  .dashboard-layout {
-    flex-direction: row;
-  }
-
-  .sidebar-backdrop {
-    display: none;
-  }
-
-  .sidebar {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    align-self: flex-start;
-    transform: none;
-    width: 85px;
-    min-width: 85px;
-    padding: 25px 10px;
-    overflow: hidden;
-  }
-
-  .sidebar nav a {
-    justify-content: center;
-    padding: 15px 0;
-    min-height: 0;
-  }
-
-  .sidebar nav a span {
-    display: none;
-  }
-
-  .sidebar mat-icon {
-    margin: 0;
-  }
-
-  .sidebar .logout-btn {
-    justify-content: center;
-    padding: 0;
-  }
-
-  .sidebar .logout-btn span {
-    display: none;
-  }
-
-  .sidebar .logo {
-    justify-content: center;
-  }
-
-  .content {
-    padding: 16px;
-  }
-
-  .topbar h1 {
-    font-size: 22px;
-  }
-
-  .search-box {
-    display: flex;
-    align-items: center;
-    width: 200px;
-    height: 44px;
-    background: white;
-    border-radius: 12px;
-    padding: 0 15px;
-  }
-
-  .search-box input {
-    border: none;
-    outline: none;
-    margin-left: 10px;
-    width: 100%;
-    min-width: 0;
-  }
-}
-
-/* ===== Laptop (1025–1440px) y escritorio (1441px+) ===== */
-@media (min-width: 1025px) {
-  .sidebar {
-    width: 280px;
-    min-width: 280px;
-    padding: 10px;
-  }
-
-  .sidebar nav a {
-    justify-content: flex-start;
-    padding: 10px 12px;
-    min-height: 0;
-  }
-
-  .sidebar nav a span {
-    display: inline;
-  }
-
-  .sidebar .logout-btn {
-    justify-content: center;
-    padding: 0 18px;
-  }
-
-  .sidebar .logout-btn span {
-    display: inline;
-  }
-
-  .sidebar .logo {
-    justify-content: center;
-  }
-
-  .sidebar.collapsed {
-    width: 85px;
-    min-width: 85px;
-    padding: 25px 10px;
-  }
-
-  .sidebar.collapsed nav a {
-    justify-content: center;
-    padding: 15px 0;
-  }
-
-  .sidebar.collapsed nav a span {
-    display: none;
-  }
-
-  .sidebar.collapsed .logout-btn {
-    justify-content: center;
-    padding: 0;
-  }
-
-  .sidebar.collapsed .logout-btn span {
-    display: none;
-  }
-
-  .sidebar.collapsed .logo {
-    justify-content: center;
-  }
-
-  .content {
-    padding: 20px;
-  }
-
-  .topbar {
-    margin-bottom: 18px;
-  }
-
-  .topbar h1 {
-    font-size: 28px;
-  }
-
-  .topbar p {
-    font-size: 13px;
-  }
-
-  .search-box {
-    width: 230px;
-  }
-
-  .sidebar:not(.collapsed) nav a {
-    animation: sidebar-link-in 0.4s ease backwards;
-  }
-
-  .sidebar:not(.collapsed) nav a:nth-child(1) { animation-delay: 0.04s; }
-  .sidebar:not(.collapsed) nav a:nth-child(2) { animation-delay: 0.08s; }
-  .sidebar:not(.collapsed) nav a:nth-child(3) { animation-delay: 0.12s; }
-  .sidebar:not(.collapsed) nav a:nth-child(4) { animation-delay: 0.16s; }
-  .sidebar:not(.collapsed) nav a:nth-child(5) { animation-delay: 0.2s; }
-  .sidebar:not(.collapsed) nav a:nth-child(6) { animation-delay: 0.24s; }
 }
 
 /* ===== Escritorio ancho: dos columnas de la sección inferior ===== */

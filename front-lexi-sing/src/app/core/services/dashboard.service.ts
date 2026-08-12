@@ -99,6 +99,21 @@ export class DashboardService {
   }
 
   /**
+   * Actividad reciente del propio usuario (filtrada por uid a nivel de Firestore).
+   * Se ordena y limita del lado del cliente para no requerir un índice compuesto.
+   */
+  getRecentActivityPorUsuario(uid: string): Observable<any[]> {
+    const ref = collection(this.firestore, 'activities');
+    const q = query(ref, where('uid', '==', uid));
+
+    return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+      map(list => [...list]
+        .sort((a, b) => (obtenerTimestamp(b, 'timestamp')?.getTime() ?? 0) - (obtenerTimestamp(a, 'timestamp')?.getTime() ?? 0))
+        .slice(0, 5))
+    );
+  }
+
+  /**
    * Conversaciones por hora del día.
    * Si se pasa `uid`, la consulta se filtra a nivel de Firestore
    * (participants array-contains uid): el empleado solo recibe sus propias conversaciones.

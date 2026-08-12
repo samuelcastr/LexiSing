@@ -88,6 +88,7 @@
 
 .chart-left,
 .chart-right {
+  min-width: 0;
   background: #ffffff;
   border-radius: 16px;
 }
@@ -95,10 +96,14 @@
 .chart-wrapper {
   padding: 20px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 auto;
+  overflow: hidden;
 }
 
 .chart-right {
@@ -212,6 +217,10 @@
     min-width: 120px !important;
     padding: 0 16px !important;
     font-weight: 500;
+  }
+
+  .mat-tab-body-content {
+    overflow-x: hidden;
   }
 
   .plotly-graph-div {

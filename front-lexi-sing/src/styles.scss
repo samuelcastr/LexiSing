@@ -1,4 +1,5 @@
 @use './app/features/roles/admin/variables' as *;
+@use './styles/buttons';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 html, body {
@@ -14,6 +15,20 @@ a { color: #5b21b6; text-decoration: none }
 
 /* Utilities */
 .text-center { text-align:center }
+
+/* ===== Validación de formularios (patrón compartido) ===== */
+.field-error {
+	color: #ef4444;
+	font-size: 11px;
+	line-height: 1.4;
+	margin-top: -8px;
+	margin-bottom: 12px;
+}
+
+.input-group.has-error {
+	border-color: #ef4444 !important;
+	background: #fff5f5;
+}
 
 /* ===== Tema global del panel de mat-select (overlay de Material) ===== */
 .mat-mdc-select-panel {

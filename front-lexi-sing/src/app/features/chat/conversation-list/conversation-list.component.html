@@ -10,7 +10,7 @@
           <h2>Chats</h2>
         </div>
       </div>
-      <button mat-icon-button class="new-conv-icon-btn" matTooltip="Nueva conversación" aria-label="Nueva conversación"
+      <button mat-icon-button class="app-icon-btn app-icon-btn--primary" matTooltip="Nueva conversación" aria-label="Nueva conversación"
         (click)="toggleNewConvForm()">
         <mat-icon>add</mat-icon>
       </button>
@@ -53,7 +53,7 @@
     <div *ngIf="selectedConversation" class="chat-container">
       <!-- Header del chat -->
       <div class="chat-header">
-        <button mat-icon-button class="mobile-menu-btn" (click)="toggleMobileSidebar()"
+        <button mat-icon-button class="app-icon-btn mobile-menu-btn" (click)="toggleMobileSidebar()"
           aria-label="Ver conversaciones">
           <mat-icon>menu</mat-icon>
         </button>
@@ -64,53 +64,52 @@
             <span>{{ participantPresence === 'online' ? 'En línea' : 'Sin conexión' }}</span>
           </div>
         </div>
-        <button mat-icon-button class="header-camera-btn" (click)="showCameraModal = true" *ngIf="!showCameraModal">
-          <mat-icon>videocam</mat-icon>
-        </button>
-        <button mat-icon-button class="header-camera-btn" (click)="showCameraModal = false" *ngIf="showCameraModal">
-          <mat-icon>videocam_off</mat-icon>
+        <button mat-icon-button class="app-icon-btn" (click)="toggleCamera()"
+          [matTooltip]="cameraActive ? 'Apagar cámara' : 'Encender cámara'"
+          [attr.aria-label]="cameraActive ? 'Apagar cámara' : 'Encender cámara'">
+          <mat-icon>{{ cameraActive ? 'videocam_off' : 'videocam' }}</mat-icon>
         </button>
       </div>
 
       <!-- Mensajes con Cámara a la izquierda -->
       <div class="messages-wrapper">
-        <!-- Cámara flotante a la izquierda -->
-        <div class="camera-side-video">
+        <!-- Cámara (fullscreen en móvil, recuadro en tablet, panel en escritorio) -->
+        <div class="camera-box" [class.active]="cameraActive" [class.paused]="cameraPaused">
           <video #videoElement autoplay playsinline muted></video>
 
-          <div class="camera-side-controls">
-            <button *ngIf="!cameraActive" class="camera-toggle-btn" (click)="startCamera()">
-              <mat-icon>videocam</mat-icon>
-              Iniciar cámara
-            </button>
+          <div class="camera-paused-overlay" *ngIf="cameraPaused">
+            <mat-icon>videocam_off</mat-icon>
+          </div>
 
-            <button *ngIf="cameraActive" class="camera-toggle-btn stop" (click)="stopCamera()">
-              <mat-icon>videocam_off</mat-icon>
-              Detener cámara
+          <div class="camera-controls">
+            <button *ngIf="cameraActive" class="camera-toggle-btn" [class.paused]="cameraPaused"
+              (click)="toggleCameraPause()">
+              <mat-icon>{{ cameraPaused ? 'play_arrow' : 'pause' }}</mat-icon>
+              <span>{{ cameraPaused ? 'Reanudar cámara' : 'Pausar cámara' }}</span>
             </button>
           </div>
         </div>
 
         <!-- Mensajes -->
-        <div class="messages-container" #messagesContainer [class.with-camera]="showCameraModal">
+        <div class="messages-container" #messagesContainer>
           <div *ngFor="let msg of messages" class="message" [class.received]="msg.senderUid !== uid"
             [class.sent]="msg.senderUid === uid">
             <div *ngIf="editingMessageId !== msg.id; else editMode">
               <p (contextmenu)="msg.senderUid === uid ? onMessageContextMenu($event, msg) : null">{{ msg.content }} <span *ngIf="msg.edited" class="edited-badge">(editado)</span></p>
               <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}</small>
               <div class="message-actions" *ngIf="msg.senderUid === uid && activeMessageMenuId === msg.id">
-                <button mat-stroked-button color="primary" (click)="startEditMessage(msg)">Editar</button>
-                <button mat-stroked-button color="warn" (click)="deleteMessage(msg)">Eliminar</button>
+                <button class="app-btn app-btn--outline app-btn--sm" (click)="startEditMessage(msg)">Editar</button>
+                <button class="app-btn app-btn--danger app-btn--sm" (click)="deleteMessage(msg)">Eliminar</button>
               </div>
             </div>
             <ng-template #editMode>
               <div class="edit-message-box">
                 <input type="text" [(ngModel)]="editingText" />
                 <div class="edit-actions">
-                  <button mat-icon-button color="primary" (click)="saveEditMessage(msg)">
+                  <button class="app-icon-btn" (click)="saveEditMessage(msg)">
                     <mat-icon>check</mat-icon>
                   </button>
-                  <button mat-icon-button (click)="cancelEditMessage()">
+                  <button class="app-icon-btn" (click)="cancelEditMessage()">
                     <mat-icon>close</mat-icon>
                   </button>
                 </div>
@@ -124,7 +123,7 @@
       <div class="chat-input-area">
         <input type="text" placeholder="Escribe un mensaje..." class="chat-input" [(ngModel)]="messageText"
           (keyup.enter)="sendMessage()" />
-        <button mat-icon-button color="primary" (click)="sendMessage()">
+        <button class="app-icon-btn app-icon-btn--primary" (click)="sendMessage()">
           <mat-icon>send</mat-icon>
         </button>
       </div>
@@ -184,11 +183,11 @@
         <p>No se encontraron usuarios</p>
       </div>
       <div class="modal-actions">
-        <button mat-raised-button color="primary" (click)="createConversation()">
+        <button class="app-btn app-btn--primary" (click)="createConversation()">
           <mat-icon>check</mat-icon>
           Crear
         </button>
-        <button mat-stroked-button (click)="toggleNewConvForm()">
+        <button class="app-btn app-btn--outline" (click)="toggleNewConvForm()">
           <mat-icon>close</mat-icon>
           Cancelar
         </button>

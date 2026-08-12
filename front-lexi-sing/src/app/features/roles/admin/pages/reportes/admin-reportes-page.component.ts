@@ -24,6 +24,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
   usuariosActivos = 0;
   mensajesPorHora: { hour: string; count: number }[] = [];
   mensajesDays = 0;
+  activeTab = 0;
 
   private Plotly: any;
   private datosGraficos: any = {};
@@ -48,9 +49,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
     if (isPlatformBrowser(this.platformId)) {
       import('plotly.js-dist').then(plotly => {
         this.Plotly = plotly;
-        setTimeout(() => {
-          this.crearTodosGraficos();
-        }, 1000);
+        this.renderChartForActiveTab();
       });
     }
   }
@@ -60,11 +59,13 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
       this.totalUsuarios = users.length;
       this.usuariosActivos = users.filter(u => u.activo).length;
       this.datosGraficos.users = users;
+      this.renderChartForActiveTab();
     });
 
     this.convService.getAllConversations().pipe(takeUntil(this.destroy$)).subscribe(conversations => {
       this.totalConversaciones = conversations.length;
       this.datosGraficos.conversations = conversations;
+      this.renderChartForActiveTab();
     });
 
     this.dashboardService.getMensajes().pipe(takeUntil(this.destroy$)).subscribe((messages: any[]) => {
@@ -72,6 +73,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
       this.datosGraficos.messages = messages;
       this.mensajesPorHora = this.calculateMessagesByHour(messages);
       this.mensajesDays = this.calculateMessageDays(messages);
+      this.renderChartForActiveTab();
     });
   }
 
@@ -107,27 +109,24 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
     return daySet.size;
   }
 
-  crearTodosGraficos(): void {
-    if (!this.Plotly) return;
-    if (this.datosGraficos.users) {
-      this.crearGraficoUsuarios(this.datosGraficos.users);
-    }
+  onTabChange(index: number): void {
+    this.activeTab = index;
+    this.renderChartForActiveTab();
   }
 
-  onTabChange(index: number): void {
+  private renderChartForActiveTab(): void {
     if (!this.Plotly) return;
 
-    setTimeout(() => {
-      if (index === 0 && this.datosGraficos.users) {
-        this.crearGraficoUsuarios(this.datosGraficos.users);
-      } else if (index === 1 && this.datosGraficos.conversations) {
-        this.crearGraficoConversaciones(this.datosGraficos.conversations);
-      } else if (index === 2 && this.datosGraficos.conversations) {
-        this.crearGrafico3DActividad(this.datosGraficos.conversations);
-      } else if (index === 3 && this.datosGraficos.messages) {
-        this.crearGraficoMensajes(this.datosGraficos.messages);
-      }
-    }, 100);
+    const data = this.datosGraficos;
+    if (this.activeTab === 0 && data.users) {
+      this.crearGraficoUsuarios(data.users);
+    } else if (this.activeTab === 1 && data.conversations) {
+      this.crearGraficoConversaciones(data.conversations);
+    } else if (this.activeTab === 2 && data.conversations) {
+      this.crearGrafico3DActividad(data.conversations);
+    } else if (this.activeTab === 3 && data.messages) {
+      this.crearGraficoMensajes(data.messages);
+    }
   }
 
   crearGraficoUsuarios(users: any[]): void {
@@ -146,7 +145,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
       const y = Math.sin(angulo) * 5;
       const z = Math.sin(angulo * 2) * 2;
 
-      const porcentajeActivos = activos / total;
+      const porcentajeActivos = total > 0 ? activos / total : 0;
       const esActivo = (i / numPuntos) < porcentajeActivos;
 
       puntos.push({ x, y, z, activo: esActivo });
@@ -194,7 +193,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
       legend: { x: 0.7, y: 0.9, bgcolor: 'rgba(0,0,0,0.5)', bordercolor: '#fff', borderwidth: 1 }
     };
 
-    this.Plotly.newPlot('admin-grafico-usuarios', [trace1, trace2], layout, { responsive: true });
+    this.Plotly.react('admin-grafico-usuarios', [trace1, trace2], layout, { responsive: true });
   }
 
   crearGraficoConversaciones(conversations: any[]): void {
@@ -224,7 +223,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
       height: 450
     };
 
-    this.Plotly.newPlot('admin-grafico-conversaciones', [trace], layout, { responsive: true });
+    this.Plotly.react('admin-grafico-conversaciones', [trace], layout, { responsive: true });
   }
 
   crearGrafico3DActividad(conversations: any[]): void {
@@ -262,7 +261,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
       height: 500
     };
 
-    this.Plotly.newPlot('admin-grafico-3d', [trace], layout, { responsive: true });
+    this.Plotly.react('admin-grafico-3d', [trace], layout, { responsive: true });
   }
 
   crearGraficoMensajes(messages: any[]): void {
@@ -295,6 +294,6 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
       height: 450
     };
 
-    this.Plotly.newPlot('admin-grafico-mensajes', [trace], layout, { responsive: true });
+    this.Plotly.react('admin-grafico-mensajes', [trace], layout, { responsive: true });
   }
 }

@@ -5,5 +5,8 @@
 
 .hourly-chart {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 320px;
+  margin: 0 auto;
 }

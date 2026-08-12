@@ -3,17 +3,24 @@ import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, serverTimestamp, getDoc, collection, getDocs, updateDoc } from '@angular/fire/firestore';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile as fbUpdateProfile, updateEmail as fbUpdateEmail, updatePassword as fbUpdatePassword, reauthenticateWithCredential, EmailAuthProvider } from '@angular/fire/auth';
-import { from, Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, defer, from, MonoTypeOperatorFunction, Observable, of, throwError, timer } from 'rxjs';
+import { catchError, concatMap, finalize, first, map, retry, switchMap, take, tap } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { AuthResponse } from '../models/auth-response.model';
 import { UserApiService } from './user-api.service';
 import { PresenceService } from './presence.service';
 import { traducirErrorFirebase } from '../utils/firebase-errors';
 
+const MSG_AUTH_NO_ALCANZABLE = 'El servidor de autenticación no responde. Espera unos segundos e inténtalo de nuevo, o conéctate con VPN/otra red.';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readyPromise: Promise<void>;
+  private authReachableAt = 0;
+  private probeInFlight = false;
+  private connectingSubject = new BehaviorSubject<boolean>(false);
+
+  readonly connecting$ = this.connectingSubject.asObservable();
 
   constructor(private auth: Auth, private firestore: Firestore, private router: Router, private userApi: UserApiService, private presenceService: PresenceService) {
     this.readyPromise = typeof window !== 'undefined'
@@ -21,81 +28,150 @@ export class AuthService {
       : Promise.resolve();
   }
 
-register(
-  email: string,
-  password: string,
-  nombre: string
-): Observable<AuthResponse> {
+  private retryOnNetworkErrors<T>(): MonoTypeOperatorFunction<T> {
+    return retry<T>({
+      count: 2,
+      delay: (error) => {
+        if (error?.code !== 'auth/network-request-failed') throw error;
+        return timer(1200);
+      },
+    });
+  }
 
-  return from(
-    createUserWithEmailAndPassword(
-      this.auth,
-      email,
-      password
-    )
-  ).pipe(
+  ensureAuthServerReachable(): void {
+    if (typeof window === 'undefined') return;
+    if (this.probeInFlight) return;
+    if (Date.now() - this.authReachableAt < 8000) return;
+    this.probeInFlight = true;
+    this.probeAuthServer().then(ok => {
+      this.probeInFlight = false;
+      if (ok) this.authReachableAt = Date.now();
+    });
+  }
 
-    switchMap(cred => {
-
-      const uid = cred.user.uid;
-
-      const userData: User = {
-        uid,
-        nombre,
-        email,
-        rol: 'usuario',
-        fechaCreacion: serverTimestamp(),
-        activo: true,
-      } as unknown as User;
-
-      const ref = doc(
-        this.firestore,
-        'usuarios',
-        uid
+  private probeAuthServer(): Promise<boolean> {
+    return new Promise(resolve => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      fetch('https://identitytoolkit.googleapis.com/', {
+        method: 'GET',
+        mode: 'no-cors',
+        cache: 'no-store',
+        signal: controller.signal,
+      }).then(
+        () => { clearTimeout(timeoutId); resolve(true); },
+        () => { clearTimeout(timeoutId); resolve(false); }
       );
+    });
+  }
 
-      return from(
-        setDoc(ref, userData)
-      ).pipe(
-
-        map(() => {
-
-          return {
-            user: userData,
-            message: 'Registro exitoso'
-          };
-        })
-
+  private waitUntilAuthReachable(): Observable<boolean> {
+    return defer(() => {
+      if (Date.now() - this.authReachableAt < 8000) {
+        return of(true);
+      }
+      this.connectingSubject.next(true);
+      return timer(0, 1200).pipe(
+        concatMap(() => from(this.probeAuthServer())),
+        take(4),
+        map(ok => {
+          if (ok) this.authReachableAt = Date.now();
+          return ok;
+        }),
+        first(ok => ok, false),
+        finalize(() => this.connectingSubject.next(false))
       );
+    });
+  }
 
-    }),
-
-    catchError(err => {
-
-      return of({
-        user: null,
-        message:
-          traducirErrorFirebase(err, 'Error al registrar'),
-        error: err
-      });
-
-    })
-  );
-}
-
-  login(email: string, password: string): Observable<AuthResponse> {
-    return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
-      switchMap(cred => {
-        const uid = cred.user.uid;
-        const ref = doc(this.firestore, 'usuarios', uid);
-        return from(getDoc(ref)).pipe(
-          map(snapshot => {
-            const user = snapshot.exists() ? (snapshot.data() as User) : { uid, nombre: cred.user.displayName ?? '', email: cred.user.email ?? '', rol: 'usuario' } as User;
-            return { user, message: 'Login exitoso' } as AuthResponse;
+  register(
+    email: string,
+    password: string,
+    nombre: string
+  ): Observable<AuthResponse> {
+    return this.waitUntilAuthReachable().pipe(
+      switchMap(reachable => {
+        if (!reachable) {
+          return of({ user: null, message: MSG_AUTH_NO_ALCANZABLE, code: 'auth/network-request-failed', error: null } as AuthResponse);
+        }
+        return from(
+          createUserWithEmailAndPassword(
+            this.auth,
+            email,
+            password
+          )
+        ).pipe(
+          switchMap(cred => {
+            const uid = cred.user.uid;
+            const userData: User = {
+              uid,
+              nombre,
+              email,
+              rol: 'usuario',
+              fechaCreacion: serverTimestamp(),
+              activo: true,
+            } as unknown as User;
+            const ref = doc(this.firestore, 'usuarios', uid);
+            return from(setDoc(ref, userData)).pipe(
+              map(() => {
+                return {
+                  user: userData,
+                  message: 'Registro exitoso'
+                };
+              })
+            );
           })
         );
       }),
-      catchError(err => of({ user: null, message: traducirErrorFirebase(err, 'Error al autenticar'), error: err } as AuthResponse))
+      this.retryOnNetworkErrors(),
+      catchError(err => {
+        this.connectingSubject.next(false);
+        return of({
+          user: null,
+          message: traducirErrorFirebase(err, 'Error al registrar'),
+          error: err
+        });
+      })
+    );
+  }
+
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.waitUntilAuthReachable().pipe(
+      switchMap(reachable => {
+        if (!reachable) {
+          return of({ user: null, message: MSG_AUTH_NO_ALCANZABLE, code: 'auth/network-request-failed', error: null } as AuthResponse);
+        }
+        return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
+          switchMap(cred => {
+            const uid = cred.user.uid;
+            const ref = doc(this.firestore, 'usuarios', uid);
+            return from(getDoc(ref)).pipe(
+              map(snapshot => {
+                let user: User;
+                if (snapshot.exists()) {
+                  user = snapshot.data() as User;
+                } else {
+                  user = {
+                    uid,
+                    nombre: cred.user.displayName ?? '',
+                    email: cred.user.email ?? '',
+                    rol: 'usuario',
+                    fechaCreacion: serverTimestamp(),
+                    activo: true,
+                  } as unknown as User;
+                  setDoc(ref, user).catch(() => undefined);
+                }
+                return { user, message: 'Login exitoso' } as AuthResponse;
+              })
+            );
+          })
+        );
+      }),
+      this.retryOnNetworkErrors(),
+      catchError(err => {
+        this.connectingSubject.next(false);
+        return of({ user: null, message: traducirErrorFirebase(err, 'Error al autenticar'), error: err } as AuthResponse);
+      })
     );
   }
 
@@ -242,7 +318,14 @@ register(
         const ref = doc(this.firestore, 'usuarios', fbUser.uid);
         return from(getDoc(ref)).pipe(
           map(snapshot => {
-            if (!snapshot.exists()) return null;
+            if (!snapshot.exists()) {
+              return {
+                uid: fbUser.uid,
+                nombre: fbUser.displayName ?? '',
+                email: fbUser.email ?? '',
+                rol: 'usuario',
+              } as User;
+            }
             return { ...(snapshot.data() as User), uid: fbUser.uid } as User;
           }),
           catchError(() => of(null))

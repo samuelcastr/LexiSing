@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, Input, OnChanges, SimpleChanges, ViewChild, AfterViewInit, PLATFORM_ID } from '@angular/core';
+import { Component, ElementRef, Inject, Input, OnChanges, SimpleChanges, ViewChild, AfterViewInit, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { DatoPorHora } from '../../../core/services/dashboard.service';
 
@@ -9,7 +9,7 @@ import { DatoPorHora } from '../../../core/services/dashboard.service';
   templateUrl: './hourly-bar-chart.component.html',
   styleUrls: ['./hourly-bar-chart.component.scss']
 })
-export class HourlyBarChartComponent implements OnChanges, AfterViewInit {
+export class HourlyBarChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() title = 'Actividad por hora';
   @Input() seriesName = 'Registros';
   @Input() data: DatoPorHora[] = [];
@@ -18,25 +18,45 @@ export class HourlyBarChartComponent implements OnChanges, AfterViewInit {
 
   private Plotly: any;
   private datosPendientes = false;
+  private resizeObserver?: ResizeObserver;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   ngAfterViewInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      this.observarCambioTamanio();
       import('plotly.js-dist').then(plotly => {
         this.Plotly = plotly;
         if (this.datosPendientes) {
           this.datosPendientes = false;
           this.render();
         }
+      }).catch(() => {
+        this.datosPendientes = true;
       });
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && !changes['data'].firstChange) {
+    if (changes['data']) {
       this.render();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+  }
+
+  private observarCambioTamanio(): void {
+    const el = this.chartEl?.nativeElement;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+
+    this.resizeObserver = new ResizeObserver(() => {
+      if (this.Plotly) {
+        this.render();
+      }
+    });
+    this.resizeObserver.observe(el);
   }
 
   private render(): void {
@@ -46,6 +66,11 @@ export class HourlyBarChartComponent implements OnChanges, AfterViewInit {
     }
 
     const el = this.chartEl.nativeElement;
+    if (!el.clientWidth || !el.clientHeight) {
+      this.datosPendientes = true;
+      return;
+    }
+
     const horas = Array.from({ length: 24 }, (_, h) => h);
     const mapa = new Map<number, number>(this.data.map(d => [d.hour, d.count]));
     const valores = horas.map(h => mapa.get(h) || 0);

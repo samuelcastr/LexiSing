@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ConversationService } from '../../../core/services/conversation.service';
@@ -42,8 +42,9 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   uid: string = '';
   currentUser: any | null = null;
   showNewConvForm = false;
-  showCameraModal = false;
   cameraActive = false;
+  cameraPaused = false;
+  isMobile = false;
   selectedConversation: any = null;
   messageText: string = '';
   messages: any[] = [];
@@ -80,8 +81,9 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (typeof window !== 'undefined' && window.innerWidth < 1025) {
-      this.mobileSidebarOpen = true;
+    if (typeof window !== 'undefined') {
+      this.isMobile = window.innerWidth < 768;
+      this.mobileSidebarOpen = this.isMobile;
     }
 
     this.auth.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
@@ -94,6 +96,12 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       }
       this.loadUsers();
     });
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    if (typeof window === 'undefined') return;
+    this.isMobile = window.innerWidth < 768;
   }
 
   ngOnDestroy(): void {
@@ -160,7 +168,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   onEmptyStateClick(): void {
-    if (typeof window !== 'undefined' && window.innerWidth < 1025) {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
       this.openMobileSidebar();
       return;
     }
@@ -170,7 +178,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   get emptyStateHint(): string {
-    if (typeof window !== 'undefined' && window.innerWidth < 1025) {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
       return 'Toca para abrir la lista de conversaciones';
     }
     return this.conversations.length === 0
@@ -240,13 +248,53 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       });
   }
 
+  toggleCamera(): void {
+    if (this.cameraActive) {
+      this.stopCamera();
+    } else {
+      this.startCamera();
+    }
+  }
+
+  toggleCameraPause(): void {
+    const video = this.videoElement?.nativeElement;
+    if (!video) return;
+
+    if (this.cameraPaused) {
+      video.play().then(() => {
+        this.cameraPaused = false;
+      }).catch(() => {
+        this.errorService.mostrarError(null, 'No se pudo reanudar la cámara.');
+      });
+    } else {
+      video.pause();
+      this.cameraPaused = true;
+    }
+  }
+
   async startCamera(): Promise<void> {
     try {
       await this.cameraService.startCamera(this.videoElement.nativeElement);
       this.cameraActive = true;
+      this.cameraPaused = false;
     } catch (error) {
-      this.errorService.mostrarError(error, 'No se pudo acceder a la cámara. Verifica los permisos.');
+      this.cameraActive = false;
+      this.errorService.mostrarError(null, this.getCameraErrorMessage(error));
     }
+  }
+
+  private getCameraErrorMessage(error: unknown): string {
+    const name = String((error as any)?.name ?? '');
+    if (/NotAllowed|PermissionDenied/i.test(name)) {
+      return 'Permiso de cámara denegado. Actívalo desde la configuración del navegador.';
+    }
+    if (/NotFound|DevicesNotFound|Overconstrained/i.test(name)) {
+      return 'No se encontró una cámara disponible en este dispositivo.';
+    }
+    if (/NotReadable|TrackStart/i.test(name)) {
+      return 'La cámara está en uso por otra aplicación. Ciérrala e inténtalo de nuevo.';
+    }
+    return 'No se pudo acceder a la cámara. Verifica los permisos e inténtalo de nuevo.';
   }
 
   stopCamera(): void {
@@ -254,6 +302,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       this.cameraService.stopCamera(this.videoElement.nativeElement);
     }
     this.cameraActive = false;
+    this.cameraPaused = false;
   }
 
   trackByUid(index: number, user: any): string {

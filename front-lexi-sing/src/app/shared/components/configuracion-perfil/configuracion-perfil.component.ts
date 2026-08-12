@@ -1,36 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-
-import { AuthService } from '../../../../core/services/auth.service';
-import { User } from '../../../../core/models/user.model';
+import { AuthService } from '../../../core/services/auth.service';
+import { User } from '../../../core/models/user.model';
 
 @Component({
-  selector: 'app-supervisor-configuracion',
+  selector: 'app-configuracion-perfil',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSnackBarModule
-  ],
-  templateUrl: './configuracion.html',
-  styleUrls: ['./configuracion.scss']
+  imports: [CommonModule, FormsModule, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule],
+  templateUrl: './configuracion-perfil.component.html',
+  styleUrls: ['./configuracion-perfil.component.scss']
 })
-export class SupervisorConfiguracion implements OnInit {
+export class ConfiguracionPerfilComponent implements OnInit {
   nombre = '';
   email = '';
   currentPassword = '';
@@ -38,6 +23,7 @@ export class SupervisorConfiguracion implements OnInit {
   confirmarPassword = '';
   saving = false;
   message = '';
+  messageType: 'success' | 'error' = 'success';
   user: User | null = null;
 
   constructor(
@@ -47,6 +33,11 @@ export class SupervisorConfiguracion implements OnInit {
 
   ngOnInit(): void {
     this.loadUser();
+  }
+
+  get rolFormateado(): string {
+    const rol = this.user?.rol || '';
+    return rol ? rol.charAt(0).toUpperCase() + rol.slice(1) : 'Sin rol';
   }
 
   loadUser(): void {
@@ -65,8 +56,18 @@ export class SupervisorConfiguracion implements OnInit {
       return;
     }
 
+    if (this.nuevoPassword && this.nuevoPassword.length < 6) {
+      this.snackBar.open('La nueva contraseña debe tener al menos 6 caracteres', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
     if (this.nuevoPassword && this.nuevoPassword !== this.confirmarPassword) {
       this.snackBar.open('Las contraseñas no coinciden', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    if (this.nuevoPassword && !this.currentPassword) {
+      this.snackBar.open('Ingresa tu contraseña actual para cambiarla', 'Cerrar', { duration: 3000 });
       return;
     }
 
@@ -97,11 +98,6 @@ export class SupervisorConfiguracion implements OnInit {
     }
 
     if (this.nuevoPassword) {
-      if (!this.currentPassword) {
-        this.saving = false;
-        this.snackBar.open('Ingresa tu contraseña actual para cambiarla', 'Cerrar', { duration: 3000 });
-        return;
-      }
       tasks.push(
         new Promise((resolve, reject) => {
           this.authService.changePassword(this.currentPassword, this.nuevoPassword).subscribe({
@@ -121,6 +117,7 @@ export class SupervisorConfiguracion implements OnInit {
     Promise.all(tasks).then(() => {
       this.saving = false;
       this.message = 'Los cambios se han guardado correctamente.';
+      this.messageType = 'success';
       this.currentPassword = '';
       this.nuevoPassword = '';
       this.confirmarPassword = '';
@@ -129,6 +126,7 @@ export class SupervisorConfiguracion implements OnInit {
     }).catch(err => {
       this.saving = false;
       this.message = err?.message || 'Error al guardar los cambios.';
+      this.messageType = 'error';
       this.snackBar.open(this.message, 'Cerrar', { duration: 5000 });
     });
   }

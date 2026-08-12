@@ -65,7 +65,7 @@
           <mat-icon>menu</mat-icon>
         </button>
 
-        <div>
+        <div *ngIf="showGreeting">
           <h1>¡Hola, {{ userName }}!</h1>
           <p>Panel de Administración</p>
         </div>

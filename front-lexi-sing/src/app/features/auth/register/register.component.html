@@ -16,43 +16,60 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()">
 
-      <div class="input-group">
+      <div class="input-group" [class.has-error]="nombre?.invalid && nombre?.touched">
         <span class="icon"></span>
         <input
           type="text"
           placeholder="Nombre"
-          formControlName="nombre">
+          formControlName="nombre"
+          [class.invalid-input]="nombre?.invalid && nombre?.touched">
       </div>
+      <app-field-error [control]="nombre"></app-field-error>
 
-      <div class="input-group">
+      <div class="input-group" [class.has-error]="email?.invalid && email?.touched">
         <span class="icon"></span>
         <input
           type="email"
           placeholder="Correo Electrónico"
-          formControlName="email">
+          formControlName="email"
+          [class.invalid-input]="email?.invalid && email?.touched">
       </div>
+      <app-field-error [control]="email" [customMessages]="{ emailExiste: 'Este correo ya está registrado. Intenta iniciar sesión.' }"></app-field-error>
 
-      <div class="input-group">
+      <div class="input-group" [class.has-error]="password?.invalid && password?.touched">
         <span class="icon"></span>
         <input
           type="password"
           placeholder="Contraseña"
-          formControlName="password">
+          formControlName="password"
+          (focus)="onPasswordFocus()"
+          (blur)="onPasswordBlur()"
+          [class.invalid-input]="password?.invalid && password?.touched">
       </div>
+      <app-field-error [control]="password" [customMessages]="{ pattern: 'Debe incluir al menos una mayúscula, una minúscula, un número y un símbolo.' }"></app-field-error>
 
-      <div class="input-group">
+      <ul class="password-checks" *ngIf="passwordFocused || password?.touched">
+        <li *ngFor="let check of passwordChecks" [class.valid]="check.ok">
+          <mat-icon>{{ check.ok ? 'check_circle' : 'cancel' }}</mat-icon>
+          <span>{{ check.label }}</span>
+        </li>
+      </ul>
+
+      <div class="input-group" [class.has-error]="confirmPassword?.invalid && confirmPassword?.touched">
         <span class="icon"></span>
         <input
           type="password"
           placeholder="Confirmar Contraseña"
-          formControlName="confirmPassword">
+          formControlName="confirmPassword"
+          [class.invalid-input]="confirmPassword?.invalid && confirmPassword?.touched">
       </div>
+      <app-field-error [control]="confirmPassword" [mostrarSiempre]="true" [customMessages]="{ passwordsMismatch: 'Las contraseñas no coinciden.' }"></app-field-error>
 
       <button
         class="main-btn"
         type="submit"
         [disabled]="loading">
-        {{ loading ? 'Cargando...' : 'Registrarse' }}
+        {{ loading ? (connecting$ | async) ? 'Verificando conexión...' : 'Registrando...' : 'Registrarse' }}
       </button>
 
       <div *ngIf="error" class="error-message">

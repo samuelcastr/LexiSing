@@ -36,7 +36,7 @@
         <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
           <mat-icon>menu</mat-icon>
         </button>
-        <div>
+        <div *ngIf="showGreeting">
           <h1>¡Hola, {{ userName }}!</h1>
           <p>Espacio de trabajo</p>
         </div>

@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models/user.model';
+import { esRutaDashboard } from '../../../core/utils/greeting';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -36,14 +37,7 @@ export class Supervisor implements OnInit, OnDestroy {
       filter(event => event instanceof NavigationEnd),
       takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
-      const hideRoutes = [
-        '/roles/supervisor/usuarios',
-        '/roles/supervisor/reportes',
-        '/roles/supervisor/conversations',
-        '/roles/supervisor/monitoreo-conversaciones',
-        '/roles/supervisor/configuracion'
-      ];
-      this.showGreeting = !hideRoutes.some(route => event.urlAfterRedirects.includes(route));
+      this.showGreeting = esRutaDashboard(event.urlAfterRedirects);
     });
   }
 
