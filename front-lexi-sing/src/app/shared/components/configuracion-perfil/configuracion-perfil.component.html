@@ -62,13 +62,20 @@
         </div>
         <div class="profile-field">
           <label>Nueva contraseña</label>
-          <input type="password" placeholder="Mínimo 6 caracteres" [(ngModel)]="nuevoPassword" name="nuevoPassword">
+          <input type="password" placeholder="Mínimo 8: mayúscula, minúscula, número y símbolo" [(ngModel)]="nuevoPassword" name="nuevoPassword" (focus)="onPasswordFocus()" (blur)="onPasswordBlur()">
         </div>
         <div class="profile-field">
           <label>Confirmar contraseña</label>
           <input type="password" placeholder="Repite la nueva contraseña" [(ngModel)]="confirmarPassword" name="confirmarPassword">
         </div>
       </div>
+
+      <ul class="password-checks" *ngIf="passwordFocused || nuevoPassword">
+        <li *ngFor="let check of passwordChecks" [class.valid]="check.ok">
+          <mat-icon>{{ check.ok ? 'check_circle' : 'cancel' }}</mat-icon>
+          <span>{{ check.label }}</span>
+        </li>
+      </ul>
 
       <div class="status-message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'" *ngIf="message">
         {{ message }}

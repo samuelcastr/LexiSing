@@ -8,6 +8,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models/user.model';
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])/;
+
 @Component({
   selector: 'app-configuracion-perfil',
   standalone: true,
@@ -25,6 +27,7 @@ export class ConfiguracionPerfilComponent implements OnInit {
   message = '';
   messageType: 'success' | 'error' = 'success';
   user: User | null = null;
+  passwordFocused = false;
 
   constructor(
     private authService: AuthService,
@@ -38,6 +41,25 @@ export class ConfiguracionPerfilComponent implements OnInit {
   get rolFormateado(): string {
     const rol = this.user?.rol || '';
     return rol ? rol.charAt(0).toUpperCase() + rol.slice(1) : 'Sin rol';
+  }
+
+  get passwordChecks(): { label: string; ok: boolean }[] {
+    const value = this.nuevoPassword ?? '';
+    return [
+      { label: 'Mínimo 8 caracteres', ok: value.length >= 8 },
+      { label: 'Una letra mayúscula (A-Z)', ok: /[A-Z]/.test(value) },
+      { label: 'Una letra minúscula (a-z)', ok: /[a-z]/.test(value) },
+      { label: 'Un número (0-9)', ok: /[0-9]/.test(value) },
+      { label: 'Un símbolo (ej. !@#$%)', ok: /[^A-Za-z0-9]/.test(value) },
+    ];
+  }
+
+  onPasswordFocus(): void {
+    this.passwordFocused = true;
+  }
+
+  onPasswordBlur(): void {
+    this.passwordFocused = false;
   }
 
   loadUser(): void {
@@ -56,8 +78,8 @@ export class ConfiguracionPerfilComponent implements OnInit {
       return;
     }
 
-    if (this.nuevoPassword && this.nuevoPassword.length < 6) {
-      this.snackBar.open('La nueva contraseña debe tener al menos 6 caracteres', 'Cerrar', { duration: 3000 });
+    if (this.nuevoPassword && (this.nuevoPassword.length < 8 || !PASSWORD_REGEX.test(this.nuevoPassword))) {
+      this.snackBar.open('La nueva contraseña debe tener mínimo 8 caracteres con mayúscula, minúscula, número y símbolo', 'Cerrar', { duration: 4000 });
       return;
     }
 
