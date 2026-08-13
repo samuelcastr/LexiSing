@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { DashboardService } from '../../../../core/services/dashboard.service';
 import { User } from '../../../../core/models/user.model';
-import { Subject } from 'rxjs';
+import { Subject, combineLatest } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -26,9 +26,17 @@ export class SupervisorUsuariosList implements OnInit, OnDestroy {
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
-    this.dashboardService.getUsuarios().pipe(takeUntil(this.destroy$)).subscribe(users => {
-      this.usuarios = users;
-      this.filteredUsuarios = users;
+    combineLatest([
+      this.dashboardService.getUsuarios(),
+      this.dashboardService.getConversaciones()
+    ]).pipe(takeUntil(this.destroy$)).subscribe(([users, conversaciones]) => {
+      const uidsConParticipacion = new Set<string>();
+      conversaciones.forEach(conv => {
+        (conv.participants || []).forEach((uid: string) => uidsConParticipacion.add(uid));
+      });
+
+      this.usuarios = users.filter(u => u.uid && uidsConParticipacion.has(u.uid));
+      this.filteredUsuarios = this.usuarios;
     });
   }
 

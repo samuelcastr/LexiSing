@@ -261,9 +261,9 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     if (!video) return;
 
     if (this.cameraPaused) {
-      video.play().then(() => {
-        this.cameraPaused = false;
-      }).catch(() => {
+      this.cameraPaused = false;
+      video.play().catch(() => {
+        this.cameraPaused = true;
         this.errorService.mostrarError(null, 'No se pudo reanudar la cámara.');
       });
     } else {

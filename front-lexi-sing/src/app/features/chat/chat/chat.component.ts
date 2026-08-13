@@ -142,6 +142,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     if (diffMins < 1) return 'Ahora';
     if (diffMins < 60) return `${diffMins}m`;
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h`;
-    return date.toLocaleDateString();
+    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 }

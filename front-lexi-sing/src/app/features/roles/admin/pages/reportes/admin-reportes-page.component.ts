@@ -114,74 +114,75 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
     this.renderChartForActiveTab();
   }
 
-  private renderChartForActiveTab(): void {
+  private renderChartForActiveTab(retry = 0): void {
     if (!this.Plotly) return;
 
     const data = this.datosGraficos;
-    if (this.activeTab === 0 && data.users) {
-      this.crearGraficoUsuarios(data.users);
-    } else if (this.activeTab === 1 && data.conversations) {
-      this.crearGraficoConversaciones(data.conversations);
-    } else if (this.activeTab === 2 && data.conversations) {
-      this.crearGrafico3DActividad(data.conversations);
-    } else if (this.activeTab === 3 && data.messages) {
-      this.crearGraficoMensajes(data.messages);
+    const elementId =
+      this.activeTab === 0 && data.users ? 'admin-grafico-usuarios'
+      : this.activeTab === 1 && data.conversations ? 'admin-grafico-conversaciones'
+      : this.activeTab === 2 && data.conversations ? 'admin-grafico-3d'
+      : this.activeTab === 3 && data.messages ? 'admin-grafico-mensajes'
+      : null;
+
+    if (!elementId) return;
+
+    const el = document.getElementById(elementId);
+    if (!el || !el.clientWidth || !el.clientHeight) {
+      if (retry < 40) {
+        setTimeout(() => this.renderChartForActiveTab(retry + 1), 50);
+      }
+      return;
+    }
+
+    switch (elementId) {
+      case 'admin-grafico-usuarios':
+        this.crearGraficoUsuarios(data.users);
+        break;
+      case 'admin-grafico-conversaciones':
+        this.crearGraficoConversaciones(data.conversations);
+        break;
+      case 'admin-grafico-3d':
+        this.crearGrafico3DActividad(data.conversations);
+        break;
+      case 'admin-grafico-mensajes':
+        this.crearGraficoMensajes(data.messages);
+        break;
     }
   }
 
   crearGraficoUsuarios(users: any[]): void {
     if (!document.getElementById('admin-grafico-usuarios')) return;
 
-    const activos = users.filter(u => u.activo).length;
-    const inactivos = users.length - activos;
-    const total = users.length;
-
-    const puntos = [];
-    const numPuntos = 100;
-
-    for (let i = 0; i < numPuntos; i++) {
-      const angulo = (i / numPuntos) * Math.PI * 2;
-      const x = Math.cos(angulo) * 5;
-      const y = Math.sin(angulo) * 5;
-      const z = Math.sin(angulo * 2) * 2;
-
-      const porcentajeActivos = total > 0 ? activos / total : 0;
-      const esActivo = (i / numPuntos) < porcentajeActivos;
-
-      puntos.push({ x, y, z, activo: esActivo });
-    }
-
-    const activosData = puntos.filter(p => p.activo);
-    const inactivosData = puntos.filter(p => !p.activo);
+    const activos = users.filter(u => u.activo);
+    const inactivos = users.filter(u => !u.activo);
 
     const trace1 = {
-      x: activosData.map(p => p.x),
-      y: activosData.map(p => p.y),
-      z: activosData.map(p => p.z),
+      x: activos.map((_, i) => i),
+      y: activos.map(() => 1),
+      z: activos.map(u => this.obtenerMs(u.fechaCreacion)),
       type: 'scatter3d',
-      mode: 'lines+markers',
-      name: `Activos (${activos})`,
-      line: { color: '#6d4cff', width: 4 },
-      marker: { size: 6, color: '#6d4cff', opacity: 0.9 }
+      mode: 'markers',
+      name: `Activos (${activos.length})`,
+      marker: { size: 8, color: '#6d4cff', opacity: 0.9 }
     };
 
     const trace2 = {
-      x: inactivosData.map(p => p.x),
-      y: inactivosData.map(p => p.y),
-      z: inactivosData.map(p => p.z),
+      x: inactivos.map((_, i) => i),
+      y: inactivos.map(() => 0),
+      z: inactivos.map(u => this.obtenerMs(u.fechaCreacion)),
       type: 'scatter3d',
-      mode: 'lines+markers',
-      name: `Inactivos (${inactivos})`,
-      line: { color: '#e5e7eb', width: 4 },
-      marker: { size: 6, color: '#e5e7eb', opacity: 0.8 }
+      mode: 'markers',
+      name: `Inactivos (${inactivos.length})`,
+      marker: { size: 8, color: '#e5e7eb', opacity: 0.8 }
     };
 
     const layout = {
       title: 'Estado de Usuarios 3D',
       scene: {
-        xaxis: { title: '' },
-        yaxis: { title: '' },
-        zaxis: { title: '' },
+        xaxis: { title: 'Usuarios' },
+        yaxis: { title: 'Estado' },
+        zaxis: { title: 'Fecha de creación' },
         camera: { eye: { x: 1.5, y: 1.5, z: 1.3 } }
       },
       font: { family: 'Arial', size: 12 },
@@ -194,6 +195,17 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
     };
 
     this.Plotly.react('admin-grafico-usuarios', [trace1, trace2], layout, { responsive: true });
+  }
+
+  private obtenerMs(fecha: any): number {
+    if (!fecha) return 0;
+    if (typeof fecha.toDate === 'function') {
+      const d = fecha.toDate();
+      return d instanceof Date ? d.getTime() : 0;
+    }
+    if (fecha.seconds !== undefined) return fecha.seconds * 1000;
+    if (fecha instanceof Date) return fecha.getTime();
+    return 0;
   }
 
   crearGraficoConversaciones(conversations: any[]): void {

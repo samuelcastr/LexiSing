@@ -47,6 +47,10 @@
   pointer-events: auto;
 }
 
+.mobile-back-btn {
+  display: inline-flex;
+}
+
 .sidebar-header {
   padding: 20px 18px 16px;
   position: sticky;
@@ -421,6 +425,11 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
 }
 
+.camera-close-btn {
+  background: rgba(254, 226, 226, 0.95);
+  color: #b91c1c;
+}
+
 .camera-box.paused video {
   display: none;
 }
@@ -749,7 +758,8 @@
   }
 
   .mobile-backdrop,
-  .mobile-menu-btn {
+  .mobile-menu-btn,
+  .mobile-back-btn {
     display: none;
   }
 

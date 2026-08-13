@@ -38,7 +38,7 @@
         <div class="conversation-item-content">
           <h4>{{ c.participantName || 'Conversación' }}</h4>
           <p class="last-message">{{ c.lastMessage || 'Inicia una conversación...' }}</p>
-          <small class="time" *ngIf="c.updatedAt">{{ c.updatedAt?.toDate ? (c.updatedAt.toDate() | date:'short') :
+          <small class="time" *ngIf="c.updatedAt">{{ c.updatedAt?.toDate ? (c.updatedAt.toDate() | date:'d MMM yyyy, HH:mm') :
             'Ahora' }}</small>
         </div>
       </div>
@@ -53,6 +53,9 @@
     <div *ngIf="selectedConversation" class="chat-container">
       <!-- Header del chat -->
       <div class="chat-header">
+        <button mat-icon-button class="app-icon-btn mobile-back-btn" (click)="goBack()" aria-label="Volver al inicio">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
         <button mat-icon-button class="app-icon-btn mobile-menu-btn" (click)="toggleMobileSidebar()"
           aria-label="Ver conversaciones">
           <mat-icon>menu</mat-icon>
@@ -82,6 +85,10 @@
           </div>
 
           <div class="camera-controls">
+            <button *ngIf="cameraActive" class="camera-toggle-btn camera-close-btn" (click)="toggleCamera()">
+              <mat-icon>videocam_off</mat-icon>
+              <span>Apagar cámara</span>
+            </button>
             <button *ngIf="cameraActive" class="camera-toggle-btn" [class.paused]="cameraPaused"
               (click)="toggleCameraPause()">
               <mat-icon>{{ cameraPaused ? 'play_arrow' : 'pause' }}</mat-icon>
@@ -96,7 +103,7 @@
             [class.sent]="msg.senderUid === uid">
             <div *ngIf="editingMessageId !== msg.id; else editMode">
               <p (contextmenu)="msg.senderUid === uid ? onMessageContextMenu($event, msg) : null">{{ msg.content }} <span *ngIf="msg.edited" class="edited-badge">(editado)</span></p>
-              <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'short') : 'Ahora' }}</small>
+              <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'d MMM yyyy, HH:mm') : 'Ahora' }}</small>
               <div class="message-actions" *ngIf="msg.senderUid === uid && activeMessageMenuId === msg.id">
                 <button class="app-btn app-btn--outline app-btn--sm" (click)="startEditMessage(msg)">Editar</button>
                 <button class="app-btn app-btn--danger app-btn--sm" (click)="deleteMessage(msg)">Eliminar</button>
