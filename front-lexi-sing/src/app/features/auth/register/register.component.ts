@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,11 +29,12 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   loading = false;
   error: string | null = null;
+  successMessage: string | null = null;
   passwordFocused = false;
   connecting$!: Observable<boolean>;
   private destroy$ = new Subject<void>();
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(private fb: FormBuilder, private authService: AuthService) {
     this.connecting$ = this.authService.connecting$;
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
@@ -86,6 +87,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   submit() {
     this.error = null;
+    this.successMessage = null;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -96,7 +98,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
       next: res => {
         this.loading = false;
         if (res.user) {
-          this.router.navigate(['/login']);
+          this.successMessage = res.message || 'Registro exitoso. Revisa tu correo para confirmar tu cuenta antes de iniciar sesión.';
+          this.form.reset();
+          this.passwordFocused = false;
         } else {
           if (res.error?.code === 'auth/email-already-in-use') {
             this.email?.setErrors({ emailExiste: true });

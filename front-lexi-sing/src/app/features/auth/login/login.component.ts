@@ -74,6 +74,34 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
+  loginWithGoogle(): void {
+    this.startSocialLogin(this.authService.loginWithGoogle());
+  }
+
+  loginWithMicrosoft(): void {
+    this.startSocialLogin(this.authService.loginWithMicrosoft());
+  }
+
+  private startSocialLogin(request: Observable<any>): void {
+    this.error = null;
+    this.loading = true;
+
+    request.pipe(takeUntil(this.destroy$)).subscribe({
+      next: res => {
+        this.loading = false;
+        if (res.user) {
+          this.navigateToRoleHome(res.user.rol);
+        } else if (res.message && res.code !== 'auth/popup-closed-by-user') {
+          this.error = res.message;
+        }
+      },
+      error: err => {
+        this.loading = false;
+        this.error = err?.message || 'Error al iniciar sesión';
+      }
+    });
+  }
+
   private navigateToRoleHome(rol: string): void {
     const roleRoutes: Record<string, string> = {
       admin: '/roles/admin',

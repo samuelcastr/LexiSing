@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, serverTimestamp, getDoc, collection, getDocs, updateDoc } from '@angular/fire/firestore';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile as fbUpdateProfile, updateEmail as fbUpdateEmail, updatePassword as fbUpdatePassword, reauthenticateWithCredential, EmailAuthProvider } from '@angular/fire/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, sendEmailVerification, GoogleAuthProvider, OAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile as fbUpdateProfile, updateEmail as fbUpdateEmail, updatePassword as fbUpdatePassword, reauthenticateWithCredential, EmailAuthProvider,linkWithCredential } from '@angular/fire/auth';
 import { BehaviorSubject, from, MonoTypeOperatorFunction, Observable, of, throwError, timer } from 'rxjs';
 import { catchError, map, retry, switchMap, tap } from 'rxjs/operators';
 import { User } from '../models/user.model';
@@ -103,13 +103,13 @@ export class AuthService {
               activo: true,
             } as unknown as User;
             const ref = doc(this.firestore, 'usuarios', uid);
-            return from(setDoc(ref, userData)).pipe(
-              map(() => {
-                return {
-                  user: userData,
-                  message: 'Registro exitoso'
-                };
-              })
+            return from(sendEmailVerification(cred.user)).pipe(
+              switchMap(() => from(setDoc(ref, userData))),
+              switchMap(() => from(signOut(this.auth))),
+              map(() => ({
+                user: userData,
+                message: 'Registro exitoso. Te enviamos un correo de confirmación. Revisa tu bandeja de entrada y confirma tu correo antes de iniciar sesión.'
+              }))
             );
           })
         )
@@ -130,6 +130,17 @@ export class AuthService {
     return this.startConnectivityProbe().pipe(
       switchMap(() => from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
           switchMap(cred => {
+            if (!cred.user.emailVerified) {
+              return from(signOut(this.auth)).pipe(
+                map(() => ({
+                  user: null,
+                  message: 'Debes confirmar tu correo electrónico antes de iniciar sesión.',
+                  code: 'auth/email-not-verified',
+                  error: { code: 'auth/email-not-verified' }
+                } as AuthResponse))
+              );
+            }
+
             const uid = cred.user.uid;
             const ref = doc(this.firestore, 'usuarios', uid);
             return from(getDoc(ref)).pipe(
@@ -228,6 +239,266 @@ export class AuthService {
 
         return of(errorResponse);
       })
+    );
+  }
+
+loginWithMicrosoft(): Observable<AuthResponse> {
+  const microsoftProvider = new OAuthProvider('microsoft.com');
+  microsoftProvider.setCustomParameters({
+    prompt: 'select_account'
+  });
+
+  return from(signInWithPopup(this.auth, microsoftProvider)).pipe(
+    switchMap(cred => {
+      return this.finishSocialLogin(cred.user, 'Microsoft');
+    }),
+
+    catchError(err => {
+      console.log('Error Microsoft:', err);
+
+      // La cuenta ya existe con otro proveedor.
+      if (err?.code === 'auth/account-exists-with-different-credential') {
+        const pendingCredential =
+          OAuthProvider.credentialFromError(err);
+
+        if (!pendingCredential) {
+          return of({
+            user: null,
+            message: 'No se pudo obtener la credencial pendiente de Microsoft.',
+            code: err?.code,
+            error: err
+          } as AuthResponse);
+        }
+
+        /*
+         * Guardamos temporalmente la credencial Microsoft.
+         * No guardamos tokens manualmente en localStorage.
+         */
+        return this.completeMicrosoftAccountLink(
+          pendingCredential,
+          err?.customData?.email || err?.email || ''
+        );
+      }
+
+      let message = traducirErrorFirebase(
+        err,
+        'Error al autenticar con Microsoft'
+      );
+
+      if (err?.code === 'auth/unauthorized-domain') {
+        message =
+          'Dominio no autorizado: agrega localhost en Firebase Authentication > Authorized domains.';
+      } else if (err?.code === 'auth/operation-not-allowed') {
+        message =
+          'Microsoft no está habilitado: activa Microsoft en Firebase Authentication > Sign-in method.';
+      } else if (err?.code === 'auth/popup-blocked') {
+        message =
+          'El navegador bloqueó la ventana de Microsoft.';
+      } else if (err?.code === 'auth/popup-closed-by-user') {
+        message =
+          'La ventana de Microsoft fue cerrada.';
+      }
+
+      return of({
+        user: null,
+        message,
+        code: err?.code || null,
+        error: err
+      } as AuthResponse);
+    })
+  );
+}
+
+private completeMicrosoftAccountLink(
+  pendingCredential: any,
+  email: string
+): Observable<AuthResponse> {
+
+  const googleProvider = new GoogleAuthProvider();
+
+  googleProvider.setCustomParameters({
+    prompt: 'select_account'
+  });
+
+  return from(
+    signInWithPopup(this.auth, googleProvider)
+  ).pipe(
+
+    switchMap(googleResult => {
+
+      const existingUser = googleResult.user;
+
+      return from(
+        linkWithCredential(
+          existingUser,
+          pendingCredential
+        )
+      ).pipe(
+
+        switchMap(linkResult => {
+
+          const linkedUser = linkResult.user;
+
+          return this.saveSocialUser(
+            linkedUser,
+            'Microsoft'
+          );
+
+        })
+
+      );
+
+    }),
+
+    catchError(err => {
+
+      console.error(
+        'Error vinculando Microsoft:',
+        err
+      );
+
+      let message =
+        'No se pudo vincular Microsoft con tu cuenta.';
+
+      if (err?.code === 'auth/popup-closed-by-user') {
+        message =
+          'Se canceló el inicio de sesión con Google.';
+      }
+
+      if (err?.code === 'auth/credential-already-in-use') {
+        message =
+          'Esta cuenta de Microsoft ya está vinculada a otra cuenta de Firebase.';
+      }
+
+      if (err?.code === 'auth/provider-already-linked') {
+        message =
+          'Microsoft ya está vinculado a esta cuenta.';
+      }
+
+      if (err?.code === 'auth/wrong-password') {
+        message =
+          'La contraseña de Google/esta cuenta no es correcta.';
+      }
+
+      return of({
+        user: null,
+        message,
+        code: err?.code || null,
+        error: err
+      } as AuthResponse);
+
+    })
+  );
+}
+
+private saveSocialUser(
+  fbUser: any,
+  providerName: string
+): Observable<AuthResponse> {
+
+  const uid = fbUser.uid;
+  const ref = doc(this.firestore, 'usuarios', uid);
+
+  return from(getDoc(ref)).pipe(
+
+    switchMap(snapshot => {
+
+      const userData: User = {
+        uid,
+        nombre: fbUser.displayName ?? '',
+        email: fbUser.email ?? '',
+        rol: 'usuario',
+        fechaCreacion: serverTimestamp(),
+        activo: true,
+      } as unknown as User;
+
+      if (!snapshot.exists()) {
+
+        return from(
+          setDoc(ref, userData)
+        ).pipe(
+
+          map(() => ({
+            user: userData,
+            message:
+              `Cuenta vinculada correctamente con ${providerName}`
+          } as AuthResponse))
+
+        );
+
+      }
+
+      const existingUser =
+        snapshot.data() as User;
+
+      return of({
+        user: {
+          ...existingUser,
+          uid
+        },
+        message:
+          `Cuenta vinculada correctamente con ${providerName}`
+      } as AuthResponse);
+
+    })
+  );
+}
+
+  private finishSocialLogin(fbUser: any, providerName: string): Observable<AuthResponse> {
+    const uid = fbUser.uid;
+    const ref = doc(this.firestore, 'usuarios', uid);
+
+    return from(getDoc(ref)).pipe(
+      switchMap(snapshot => {
+        const userData: User = {
+          uid,
+          nombre: fbUser.displayName ?? '',
+          email: fbUser.email ?? '',
+          rol: 'usuario',
+          fechaCreacion: serverTimestamp(),
+          activo: true,
+        } as unknown as User;
+
+        if (!snapshot.exists()) {
+          return from(setDoc(ref, userData)).pipe(
+            map(() => ({
+              user: userData,
+              message: `Login con ${providerName} exitoso`
+            } as AuthResponse))
+          );
+        }
+
+        return of({
+          user: { ...(snapshot.data() as User), uid },
+          message: `Login con ${providerName} exitoso`
+        } as AuthResponse);
+      })
+    );
+  }
+
+  getCurrentAuthEmail(): string {
+    return this.auth.currentUser?.email ?? '';
+  }
+
+  sendVerificationEmail(): Observable<void> {
+    const fbUser = this.auth.currentUser;
+    if (!fbUser) {
+      return throwError(() => new Error('No hay una cuenta pendiente de verificación.'));
+    }
+
+    return from(sendEmailVerification(fbUser)).pipe(
+      map(() => undefined),
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  reloadCurrentUser(): Observable<boolean> {
+    const fbUser = this.auth.currentUser;
+    if (!fbUser) return of(false);
+
+    return from(fbUser.reload()).pipe(
+      map(() => !!this.auth.currentUser?.emailVerified),
+      catchError(() => of(false))
     );
   }
 
