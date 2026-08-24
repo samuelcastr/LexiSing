@@ -151,51 +151,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
     }
   }
 
-  crearGraficoUsuarios(users: any[]): void {
-    if (!document.getElementById('admin-grafico-usuarios')) return;
-
-    const activos = users.filter(u => u.activo);
-    const inactivos = users.filter(u => !u.activo);
-
-    const trace1 = {
-      x: activos.map((_, i) => i),
-      y: activos.map(() => 1),
-      z: activos.map(u => this.obtenerMs(u.fechaCreacion)),
-      type: 'scatter3d',
-      mode: 'markers',
-      name: `Activos (${activos.length})`,
-      marker: { size: 8, color: '#6d4cff', opacity: 0.9 }
-    };
-
-    const trace2 = {
-      x: inactivos.map((_, i) => i),
-      y: inactivos.map(() => 0),
-      z: inactivos.map(u => this.obtenerMs(u.fechaCreacion)),
-      type: 'scatter3d',
-      mode: 'markers',
-      name: `Inactivos (${inactivos.length})`,
-      marker: { size: 8, color: '#e5e7eb', opacity: 0.8 }
-    };
-
-    const layout = {
-      title: 'Estado de Usuarios 3D',
-      scene: {
-        xaxis: { title: 'Usuarios' },
-        yaxis: { title: 'Estado' },
-        zaxis: { title: 'Fecha de creación' },
-        camera: { eye: { x: 1.5, y: 1.5, z: 1.3 } }
-      },
-      font: { family: 'Arial', size: 12 },
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      plot_bgcolor: 'rgba(0,0,0,0)',
-      height: 450,
-      margin: { l: 0, r: 0, t: 40, b: 0 },
-      showlegend: true,
-      legend: { x: 0.7, y: 0.9, bgcolor: 'rgba(0,0,0,0.5)', bordercolor: '#fff', borderwidth: 1 }
-    };
-
-    this.Plotly.react('admin-grafico-usuarios', [trace1, trace2], layout, { responsive: true });
-  }
+  // crearGraficoUsuarios (anterior con 3D simulado) eliminado para evitar doble render y sombras.
 
   private obtenerMs(fecha: any): number {
     if (!fecha) return 0;
@@ -211,28 +167,43 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
   crearGraficoConversaciones(conversations: any[]): void {
     if (!document.getElementById('admin-grafico-conversaciones')) return;
 
-    const participantCount: { [key: string]: number } = {};
+    // Agrupar conversaciones por fecha (YYYY-MM-DD)
+    const dateCount: { [date: string]: number } = {};
     conversations.forEach(conv => {
-      const count = conv.participants?.length || 0;
-      const key = `${count} participantes`;
-      participantCount[key] = (participantCount[key] || 0) + 1;
+      let fecha: Date | null = null;
+      if (conv.updatedAt?.toDate) fecha = conv.updatedAt.toDate();
+      else if (conv.fechaCreacion?.toDate) fecha = conv.fechaCreacion.toDate();
+      else if (conv.updatedAt) fecha = new Date(conv.updatedAt);
+      else if (conv.createdAt) fecha = new Date(conv.createdAt);
+
+      if (!fecha || !(fecha instanceof Date) || isNaN(fecha.getTime())) return;
+      const key = fecha.toISOString().slice(0, 10); // YYYY-MM-DD
+      dateCount[key] = (dateCount[key] || 0) + 1;
     });
 
+    const dates = Object.keys(dateCount).sort();
+    const counts = dates.map(d => dateCount[d]);
+
     const trace = {
-      x: Object.keys(participantCount),
-      y: Object.values(participantCount),
-      type: 'bar',
-      marker: { color: '#8b5cf6' }
+      x: dates,
+      y: counts,
+      type: 'scatter',
+      mode: 'lines+markers',
+      name: 'Conversaciones',
+      line: { color: '#6d4cff', width: 3 },
+      marker: { size: 6, color: '#8b5cf6' },
+      hovertemplate: '%{x}<br><b>%{y}</b> conversaciones<extra></extra>'
     };
 
     const layout = {
-      title: 'Conversaciones por Participantes',
-      xaxis: { title: 'Tipo' },
-      yaxis: { title: 'Cantidad' },
+      title: 'Conversaciones por Fecha',
+      xaxis: { title: 'Fecha', type: 'date', tickformat: '%d %b', automargin: true },
+      yaxis: { title: 'Cantidad de conversaciones', autorange: true, rangemode: 'tozero', gridcolor: 'rgba(148,163,184,0.12)' },
       font: { family: 'Arial', size: 12 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
-      height: 450
+      height: 420,
+      margin: { l: 60, r: 30, t: 50, b: 60 }
     };
 
     this.Plotly.react('admin-grafico-conversaciones', [trace], layout, { responsive: true });
@@ -255,7 +226,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
     const x = Array.from({ length: dias.length }, (_, i) => i);
 
     const trace = {
-      x,
+      x: x,
       y: Array(dias.length).fill(0).map((_, i) => i % 3),
       z: valores,
       type: 'scatter3d',
@@ -274,6 +245,39 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
     };
 
     this.Plotly.react('admin-grafico-3d', [trace], layout, { responsive: true });
+  }
+
+  crearGraficoUsuarios(users: any[]): void {
+    if (!document.getElementById('admin-grafico-usuarios')) return;
+
+    const activos = users.filter(u => u.activo).length;
+    const inactivos = users.filter(u => !u.activo).length;
+
+    const labels = ['Activos', 'Inactivos'];
+    const values = [activos, inactivos];
+
+    const trace = {
+      labels,
+      values,
+      type: 'pie',
+      hole: 0.38,
+      textinfo: 'label+percent',
+      hovertemplate: '%{label}: <b>%{value}</b> (%{percent})<extra></extra>',
+      marker: { colors: ['#6d4cff', '#e5e7eb'], line: { color: '#ffffff', width: 2 } }
+    };
+
+    const layout = {
+      title: `Estado de Usuarios (${activos + inactivos})`,
+      height: 420,
+      font: { family: 'Arial', size: 12 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { l: 20, r: 20, t: 50, b: 20 },
+      showlegend: true,
+      legend: { orientation: 'v', x: 1.02, y: 0.5 }
+    };
+
+    this.Plotly.react('admin-grafico-usuarios', [trace], layout, { responsive: true, displayModeBar: false });
   }
 
   crearGraficoMensajes(messages: any[]): void {
