@@ -43,7 +43,8 @@
       </div>
       <div class="topbar-right">
         <a class="profile" routerLink="/roles/empleados/configuracion">
-          <mat-icon>account_circle</mat-icon>
+          <img *ngIf="photoURL" [src]="photoURL" alt="Perfil">
+          <mat-icon *ngIf="!photoURL">account_circle</mat-icon>
         </a>
       </div>
     </div>

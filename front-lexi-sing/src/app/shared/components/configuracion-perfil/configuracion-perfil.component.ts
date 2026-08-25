@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models/user.model';
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])/;
+const MAX_PHOTO_SIZE_BYTES = 700 * 1024;
 
 @Component({
   selector: 'app-configuracion-perfil',
@@ -28,6 +29,7 @@ export class ConfiguracionPerfilComponent implements OnInit {
   messageType: 'success' | 'error' = 'success';
   user: User | null = null;
   passwordFocused = false;
+  photoURL = '';
 
   constructor(
     private authService: AuthService,
@@ -68,8 +70,37 @@ export class ConfiguracionPerfilComponent implements OnInit {
         this.user = user;
         this.nombre = user.nombre || '';
         this.email = user.email || '';
+        this.photoURL = user.photoURL || '';
       }
     });
+  }
+
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.snackBar.open('Selecciona un archivo de imagen válido', 'Cerrar', { duration: 3000 });
+      input.value = '';
+      return;
+    }
+
+    if (file.size > MAX_PHOTO_SIZE_BYTES) {
+      this.snackBar.open('La imagen no puede superar los 700 KB', 'Cerrar', { duration: 4000 });
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.photoURL = typeof reader.result === 'string' ? reader.result : '';
+    };
+    reader.onerror = () => {
+      this.snackBar.open('No se pudo leer la imagen', 'Cerrar', { duration: 3000 });
+      input.value = '';
+    };
+    reader.readAsDataURL(file);
   }
 
   saveChanges(): void {
@@ -112,6 +143,17 @@ export class ConfiguracionPerfilComponent implements OnInit {
       tasks.push(
         new Promise((resolve, reject) => {
           this.authService.updateUserProfile({ email: this.email.trim() }).subscribe({
+            next: resolve,
+            error: reject
+          });
+        })
+      );
+    }
+
+    if (this.photoURL !== (this.user?.photoURL || '')) {
+      tasks.push(
+        new Promise((resolve, reject) => {
+          this.authService.updateUserProfile({ photoURL: this.photoURL }).subscribe({
             next: resolve,
             error: reject
           });

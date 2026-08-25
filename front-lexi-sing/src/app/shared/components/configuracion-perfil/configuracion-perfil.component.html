@@ -12,8 +12,14 @@
     <mat-card class="profile-card">
       <div class="avatar-container">
         <div class="profile-avatar">
-          <mat-icon>person</mat-icon>
+          <img *ngIf="photoURL" [src]="photoURL" alt="Imagen de perfil">
+          <mat-icon *ngIf="!photoURL">person</mat-icon>
         </div>
+        <label class="photo-upload" for="profile-photo">
+          <mat-icon>photo_camera</mat-icon>
+          Cambiar imagen
+        </label>
+        <input id="profile-photo" type="file" accept="image/*" (change)="onPhotoSelected($event)">
       </div>
 
       <h2>{{ nombre || 'Usuario' }}</h2>

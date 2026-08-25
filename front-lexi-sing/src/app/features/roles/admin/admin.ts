@@ -26,6 +26,7 @@ import { filter, takeUntil } from 'rxjs/operators';
 export class Admin implements OnInit, OnDestroy {
 
   userName: string = 'Usuario';
+  photoURL = '';
   sidebarOpen = true;
   mobileMenuOpen = false;
   showGreeting = true;
@@ -40,6 +41,7 @@ export class Admin implements OnInit, OnDestroy {
     this.authService.getCurrentUser().subscribe((user: User | null) => {
       if (user) {
         this.userName = user.nombre || this.extractNameFromEmail(user.email) || 'Usuario';
+        this.photoURL = user.photoURL || '';
       }
     });
 

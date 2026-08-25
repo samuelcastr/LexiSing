@@ -74,7 +74,8 @@
 
       <div class="topbar-right">
         <a class="profile" routerLink="/roles/admin/configuracion">
-          <mat-icon>account_circle</mat-icon>
+          <img *ngIf="photoURL" [src]="photoURL" alt="Perfil">
+          <mat-icon *ngIf="!photoURL">account_circle</mat-icon>
         </a>
       </div>
 

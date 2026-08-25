@@ -101,6 +101,7 @@ export class AuthService {
               rol: 'usuario',
               fechaCreacion: serverTimestamp(),
               activo: true,
+              photoURL:"",
             } as unknown as User;
             const ref = doc(this.firestore, 'usuarios', uid);
             return from(sendEmailVerification(cred.user)).pipe(
@@ -156,6 +157,7 @@ export class AuthService {
                     rol: 'usuario',
                     fechaCreacion: serverTimestamp(),
                     activo: true,
+                    photoURL: cred.user.photoURL ?? '',
                   } as unknown as User;
                   setDoc(ref, user).catch(() => undefined);
                 }
@@ -190,6 +192,7 @@ export class AuthService {
               rol: 'usuario',
               fechaCreacion: serverTimestamp(),
               activo: true,
+              photoURL: fbUser.photoURL ?? '',
             } as unknown as User;
 
             if (!snapshot.exists()) {
@@ -410,6 +413,7 @@ private saveSocialUser(
         rol: 'usuario',
         fechaCreacion: serverTimestamp(),
         activo: true,
+        photoURL: fbUser.photoURL ?? '',
       } as unknown as User;
 
       if (!snapshot.exists()) {
@@ -457,6 +461,7 @@ private saveSocialUser(
           rol: 'usuario',
           fechaCreacion: serverTimestamp(),
           activo: true,
+          photoURL: fbUser.photoURL ?? '',
         } as unknown as User;
 
         if (!snapshot.exists()) {
@@ -524,6 +529,7 @@ private saveSocialUser(
               rol: 'usuario',
               fechaCreacion: serverTimestamp(),
               activo: true,
+              photoURL: fbUser.photoURL ?? '',
             } as unknown as User;
 
             if (!snapshot.exists()) {
@@ -582,6 +588,7 @@ private saveSocialUser(
                 nombre: fbUser.displayName ?? '',
                 email: fbUser.email ?? '',
                 rol: 'usuario',
+                photoURL: fbUser.photoURL ?? '',
               } as User;
             }
             return { ...(snapshot.data() as User), uid: fbUser.uid } as User;
@@ -623,13 +630,14 @@ private saveSocialUser(
     this.router.navigate([target]);
   }
 
-  updateUserProfile(data: { nombre?: string; email?: string }): Observable<void> {
+  updateUserProfile(data: { nombre?: string; email?: string; photoURL?: string }): Observable<void> {
     const fbUser = this.auth.currentUser;
     if (!fbUser) return throwError(() => new Error('No hay usuario autenticado'));
 
     const firestoreUpdates: any = {};
     if (data.nombre) firestoreUpdates.nombre = data.nombre;
     if (data.email) firestoreUpdates.email = data.email;
+    if (data.photoURL) firestoreUpdates.photoURL = data.photoURL;
 
     const tasks: Promise<any>[] = [];
 

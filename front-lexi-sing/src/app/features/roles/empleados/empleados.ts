@@ -18,6 +18,7 @@ import { filter, takeUntil } from 'rxjs/operators';
 })
 export class Empleados implements OnInit, OnDestroy {
   userName = 'Usuario';
+  photoURL = '';
   sidebarOpen = true;
   mobileMenuOpen = false;
   showGreeting = true;
@@ -28,6 +29,7 @@ export class Empleados implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.authService.getCurrentUser().subscribe((user: User | null) => {
       this.userName = user?.nombre || this.extractNameFromEmail(user?.email || '') || 'Usuario';
+      this.photoURL = user?.photoURL || '';
     });
 
     this.router.events.pipe(

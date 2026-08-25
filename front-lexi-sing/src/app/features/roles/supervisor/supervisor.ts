@@ -19,6 +19,7 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class Supervisor implements OnInit, OnDestroy {
   userName = 'Usuario';
+  photoURL = '';
   sidebarOpen = true;
   showGreeting = true;
   mobileMenuOpen = false;
@@ -30,6 +31,7 @@ export class Supervisor implements OnInit, OnDestroy {
     this.authService.getCurrentUser().subscribe((user: User | null) => {
       if (user) {
         this.userName = user.nombre || this.extractNameFromEmail(user.email) || 'Usuario';
+        this.photoURL = user.photoURL || '';
       }
     });
 
