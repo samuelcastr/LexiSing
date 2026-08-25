@@ -76,24 +76,94 @@
 
       <!-- Mensajes con Cámara a la izquierda -->
       <div class="messages-wrapper">
-        <!-- Cámara (fullscreen en móvil, recuadro en tablet, panel en escritorio) -->
-        <div class="camera-box" [class.active]="cameraActive" [class.paused]="cameraPaused">
-          <video #videoElement autoplay playsinline muted></video>
+        <!-- Columna de cámara + traducción -->
+        <div class="camera-column" [class.active]="cameraActive">
+          <!-- Cámara -->
+          <div class="camera-box" [class.active]="cameraActive" [class.paused]="cameraPaused">
+            <video #videoElement autoplay playsinline muted></video>
+            <canvas #landmarksCanvas class="landmarks-canvas"></canvas>
 
-          <div class="camera-paused-overlay" *ngIf="cameraPaused">
-            <mat-icon>videocam_off</mat-icon>
+            <div class="camera-paused-overlay" *ngIf="cameraPaused">
+              <mat-icon>videocam_off</mat-icon>
+            </div>
+
+            <div class="model-loading" *ngIf="modeloCargando">
+              <div class="spinner"></div>
+              <span>Cargando modelo…</span>
+            </div>
+
+            <div class="hand-lost-banner" *ngIf="manoPerdida && !cameraPaused">
+              <mat-icon>pan_tool</mat-icon>
+              <span>Mano no detectada — muestra la mano a la cámara</span>
+            </div>
+
+            <div class="practice-overlay" *ngIf="modoPractica && cameraActive && !cameraPaused">
+              <div class="practice-gesture-name" *ngIf="gestoEnCurso">
+                {{ gestoEnCurso | titlecase }}
+              </div>
+              <div class="practice-id" *ngIf="gestoEnCurso">{{ gestoEnCurso }}</div>
+              <div class="practice-hint" *ngIf="!gestoEnCurso">Muestra una seña…</div>
+            </div>
+
+            <div class="camera-controls">
+              <button *ngIf="cameraActive" class="camera-toggle-btn camera-close-btn" (click)="toggleCamera()">
+                <mat-icon>videocam_off</mat-icon>
+              </button>
+              <button *ngIf="cameraActive" class="camera-toggle-btn" [class.paused]="cameraPaused"
+                (click)="toggleCameraPause()">
+                <mat-icon>{{ cameraPaused ? 'play_arrow' : 'pause' }}</mat-icon>
+              </button>
+              <button *ngIf="cameraActive && !mostrarPreview" class="camera-toggle-btn camera-translate-btn"
+                [class.active]="senasDetectando" (click)="abrirPreviewTraduccion()">
+                <mat-icon>translate</mat-icon>
+              </button>
+              <button *ngIf="cameraActive" class="camera-toggle-btn camera-practice-btn"
+                [class.active]="modoPractica" (click)="togglePractica()"
+                [matTooltip]="modoPractica ? 'Salir de práctica' : 'Modo práctica'">
+                <mat-icon>school</mat-icon>
+              </button>
+            </div>
           </div>
 
-          <div class="camera-controls">
-            <button *ngIf="cameraActive" class="camera-toggle-btn camera-close-btn" (click)="toggleCamera()">
-              <mat-icon>videocam_off</mat-icon>
-              <span>Apagar cámara</span>
-            </button>
-            <button *ngIf="cameraActive" class="camera-toggle-btn" [class.paused]="cameraPaused"
-              (click)="toggleCameraPause()">
-              <mat-icon>{{ cameraPaused ? 'play_arrow' : 'pause' }}</mat-icon>
-              <span>{{ cameraPaused ? 'Reanudar cámara' : 'Pausar cámara' }}</span>
-            </button>
+          <!-- Panel de traducción (fuera de la cámara) -->
+          <div class="translation-panel" *ngIf="mostrarPreview">
+            <div class="translation-preview-header">
+              <mat-icon>translate</mat-icon>
+              <span>Traducción de señas</span>
+              <button class="panel-close-btn" (click)="cerrarPreview()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="glosa-row" *ngIf="gestosActuales.length > 0 || gestoEnCurso">
+              <span *ngIf="gestoEnCurso" class="glosa-chip glosa-chip--detectando">{{ gestoEnCurso }}…</span>
+              <span *ngFor="let g of gestosActuales; let i = index" class="glosa-chip"
+                [class.glosa-chip--flash]="gestoConfirmadoFlash === g.id"
+                (click)="eliminarGesto(i)">
+                {{ g.etiqueta }}
+                <mat-icon class="glosa-chip-remove">close</mat-icon>
+              </span>
+            </div>
+            <p *ngIf="gestosActuales.length === 0 && !gestoEnCurso" class="translation-hint">
+              Haz una seña frente a la cámara…
+            </p>
+            <textarea [(ngModel)]="textoTraducido" rows="2" placeholder="Texto detectado..."
+              class="translation-textarea" [readonly]="textoLock"></textarea>
+            <div class="translation-actions">
+              <button class="app-btn app-btn--outline app-btn--sm" (click)="limpiarGestos()">Limpiar</button>
+              <button class="app-btn app-btn--primary app-btn--sm" (click)="enviarTraduccion()"
+                [disabled]="!textoTraducido.trim()">
+                <mat-icon>send</mat-icon> Enviar
+              </button>
+            </div>
+            <details class="sign-guide">
+              <summary class="sign-guide-title">Señas disponibles</summary>
+              <div class="sign-guide-grid">
+                <div class="sign-guide-item" *ngFor="let s of guiaSenas">
+                  <span class="sign-guide-name">{{ s.nombre }}</span>
+                  <span class="sign-guide-desc">{{ s.como }}</span>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
 

@@ -1,0 +1,689 @@
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+
+export interface GestoDetectado {
+  id: string;
+  etiqueta: string;
+}
+
+interface Landmark {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface ManoDetectada {
+  landmarks: Landmark[];
+  handedness: 'Left' | 'Right';
+}
+
+const WASM_PATH = '/mediapipe/wasm';
+const MODEL_PATH = '/mediapipe/models/hand_landmarker.task';
+
+const FRAMES_CONFIRMACION = 3;
+const MAX_GESTOS = 15;
+const HISTORY_SIZE = 15;
+const SMOOTH_FRAMES = 3;
+const GRACE_MS = 500;
+const HAND_LOST_MS = 600;
+const MAX_RETRY = 3;
+
+const CONEXIONES = [
+  [0, 1], [1, 2], [2, 3], [3, 4],
+  [0, 5], [5, 6], [6, 7], [7, 8],
+  [5, 9], [9, 10], [10, 11], [11, 12],
+  [9, 13], [13, 14], [14, 15], [15, 16],
+  [13, 17], [17, 18], [18, 19], [19, 20],
+  [0, 17]
+];
+
+const COLORES_MANO: Record<string, { stroke: string; fill: string; label: string }> = {
+  Right: { stroke: 'rgba(167, 139, 250, 0.6)', fill: '#c4b5fd', label: 'R' },
+  Left:  { stroke: 'rgba(56, 189, 178, 0.6)',  fill: '#5eead4', label: 'L' }
+};
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SignLanguageService {
+  private landmarker: any = null;
+  private video: HTMLVideoElement | null = null;
+  private canvas: HTMLCanvasElement | null = null;
+  private rafId: number | null = null;
+  private ultimoTs = -1;
+
+  private gestoActual: string | null = null;
+  private framesConsecutivos = 0;
+  private ultimoConfirmado: string | null = null;
+  private loggedResult = false;
+
+  private landmarkHistory: ManoDetectada[][] = [];
+  private ultimaVezAmbasManos = 0;
+  private ultimoGestoBimanual: string | null = null;
+  private ultimaManoDetectada = 0;
+
+  readonly gestos$ = new BehaviorSubject<GestoDetectado[]>([]);
+  readonly detectando$ = new BehaviorSubject<boolean>(false);
+  readonly gestoEnCurso$ = new BehaviorSubject<string | null>(null);
+  readonly cargando$ = new BehaviorSubject<boolean>(false);
+  readonly confirmado$ = new BehaviorSubject<string | null>(null);
+  readonly manoPerdida$ = new BehaviorSubject<boolean>(false);
+
+  get detectando(): boolean {
+    return this.detectando$.value;
+  }
+
+  get gestos(): GestoDetectado[] {
+    return this.gestos$.value;
+  }
+
+  async iniciar(video: HTMLVideoElement, canvas?: HTMLCanvasElement): Promise<void> {
+    if (typeof window === 'undefined') {
+      throw new Error('El reconocimiento de señas solo funciona en el navegador.');
+    }
+    this.video = video;
+    this.canvas = canvas || null;
+    if (!this.landmarker) {
+      this.cargando$.next(true);
+      const vision = await import('@mediapipe/tasks-vision');
+      const fileset = await vision.FilesetResolver.forVisionTasks(WASM_PATH);
+
+      for (let intento = 0; intento < MAX_RETRY; intento++) {
+        try {
+          this.landmarker = await vision.HandLandmarker.createFromOptions(fileset, {
+            baseOptions: { modelAssetPath: MODEL_PATH, delegate: 'GPU' },
+            runningMode: 'VIDEO',
+            numHands: 2,
+            minHandDetectionConfidence: 0.3,
+            minHandPresenceConfidence: 0.3,
+            minTrackingConfidence: 0.3
+          });
+          break;
+        } catch {
+          if (intento === MAX_RETRY - 1) {
+            try {
+              this.landmarker = await vision.HandLandmarker.createFromOptions(fileset, {
+                baseOptions: { modelAssetPath: MODEL_PATH, delegate: 'CPU' },
+                runningMode: 'VIDEO',
+                numHands: 2,
+                minHandDetectionConfidence: 0.3,
+                minHandPresenceConfidence: 0.3,
+                minTrackingConfidence: 0.3
+              });
+            } catch (e) {
+              this.cargando$.next(false);
+              throw e;
+            }
+          } else {
+            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, intento)));
+          }
+        }
+      }
+      this.cargando$.next(false);
+    }
+    this.detectando$.next(true);
+    this.bucle();
+  }
+
+  reanudar(): void {
+    if (!this.video || !this.landmarker) {
+      return;
+    }
+    this.detectando$.next(true);
+    this.bucle();
+  }
+
+  pausar(): void {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+    this.detectando$.next(false);
+    this.gestoEnCurso$.next(null);
+  }
+
+  detener(): void {
+    this.pausar();
+    this.video = null;
+    this.canvas = null;
+    this.gestoActual = null;
+    this.framesConsecutivos = 0;
+    this.ultimoConfirmado = null;
+    this.landmarkHistory = [];
+    this.ultimoGestoBimanual = null;
+    this.manoPerdida$.next(false);
+    this.limpiar();
+  }
+
+  limpiar(): void {
+    this.gestos$.next([]);
+  }
+
+  eliminarGesto(index: number): void {
+    const actual = [...this.gestos];
+    if (index >= 0 && index < actual.length) {
+      actual.splice(index, 1);
+      this.gestos$.next(actual);
+    }
+  }
+
+  getHistorial(): ManoDetectada[][] {
+    return this.landmarkHistory;
+  }
+
+  traducirAhora(): string {
+    const palabras = this.gestos.map(g => g.etiqueta.replace(/[.,;:!?]/g, ''));
+    if (palabras.length === 0) {
+      return '';
+    }
+    return palabras
+      .map((p, i) => (i === 0 ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : p.toLowerCase()))
+      .join(' ')
+      + '.';
+  }
+
+  private bucle = (): void => {
+    if (!this.video || !this.landmarker) {
+      this.rafId = null;
+      return;
+    }
+
+    if (this.video.readyState >= 2 && this.video.currentTime !== this.ultimoTs) {
+      this.ultimoTs = this.video.currentTime;
+      try {
+        const resultado = this.landmarker.detectForVideo(this.video, performance.now());
+        this.procesarResultado(resultado);
+      } catch (e) {
+        console.warn('Error en reconocimiento:', e);
+        this.procesarResultado(null);
+      }
+    }
+
+    this.rafId = requestAnimationFrame(this.bucle);
+  };
+
+  private procesarResultado(resultado: any): void {
+    const rawHands: Landmark[][] | undefined = resultado?.landmarks;
+    const rawHandedness: any[][] | undefined = resultado?.handedness;
+
+    if (rawHands && rawHands.length > 0 && !this.loggedResult) {
+      console.log('MediaPipe resultado:', {
+        manosEncontradas: rawHands.length,
+        handedness: rawHandedness?.map((h: any[]) => h[0]?.categoryName)
+      });
+      this.loggedResult = true;
+    }
+
+    const manos: ManoDetectada[] = [];
+    if (rawHands) {
+      for (let i = 0; i < rawHands.length; i++) {
+        const label: 'Left' | 'Right' = rawHandedness?.[i]?.[0]?.categoryName === 'Left' ? 'Left' : 'Right';
+        manos.push({ landmarks: rawHands[i], handedness: label });
+      }
+    }
+
+    this.landmarkHistory.push(manos);
+    if (this.landmarkHistory.length > HISTORY_SIZE) {
+      this.landmarkHistory.shift();
+    }
+
+    const ahora = Date.now();
+
+    if (manos.length >= 2) {
+      this.ultimaVezAmbasManos = ahora;
+      this.ultimaManoDetectada = ahora;
+      const left = manos.find(m => m.handedness === 'Left');
+      const right = manos.find(m => m.handedness === 'Right');
+      if (left && right) {
+        this.ultimoGestoBimanual = evaluarGestoBimanual(left.landmarks, right.landmarks);
+      }
+    } else if (manos.length === 1) {
+      this.ultimaManoDetectada = ahora;
+      this.manoPerdida$.next(false);
+    } else {
+      if (ahora - this.ultimaManoDetectada > HAND_LOST_MS) {
+        this.manoPerdida$.next(true);
+        this.ultimoGestoBimanual = null;
+      }
+    }
+
+    const manosSuavizadas = this.suavizarLandmarks(manos);
+
+    if (manosSuavizadas.length > 0) {
+      this.dibujarLandmarks(manosSuavizadas);
+    } else {
+      this.limpiarCanvas();
+    }
+
+    const gesto = this.evaluarGestos(manosSuavizadas);
+    this.gestoEnCurso$.next(gesto);
+
+    if (gesto && gesto === this.gestoActual) {
+      this.framesConsecutivos++;
+    } else {
+      this.gestoActual = gesto;
+      this.framesConsecutivos = gesto ? 1 : 0;
+    }
+
+    if (gesto && this.framesConsecutivos >= FRAMES_CONFIRMACION && gesto !== this.ultimoConfirmado) {
+      this.confirmarGesto(gesto);
+    }
+
+    if (!gesto || gesto !== this.ultimoConfirmado) {
+      if (!gesto) {
+        this.ultimoConfirmado = null;
+      }
+    }
+  }
+
+  private suavizarLandmarks(manos: ManoDetectada[]): ManoDetectada[] {
+    if (this.landmarkHistory.length < SMOOTH_FRAMES) {
+      return manos;
+    }
+
+    const n = Math.min(this.landmarkHistory.length, SMOOTH_FRAMES);
+    const result: ManoDetectada[] = [];
+
+    for (const mano of manos) {
+      const historialMano = this.landmarkHistory
+        .slice(-n)
+        .map(frame => frame.find(m => m.handedness === mano.handedness))
+        .filter((m): m is ManoDetectada => !!m);
+
+      if (historialMano.length === 0) {
+        result.push(mano);
+        continue;
+      }
+
+      const smoothed: Landmark[] = mano.landmarks.map((lm, i) => {
+        let sx = 0, sy = 0, sz = 0;
+        for (const h of historialMano) {
+          sx += h.landmarks[i].x;
+          sy += h.landmarks[i].y;
+          sz += h.landmarks[i].z;
+        }
+        const count = historialMano.length;
+        return { x: sx / count, y: sy / count, z: sz / count };
+      });
+
+      result.push({ landmarks: smoothed, handedness: mano.handedness });
+    }
+
+    return result;
+  }
+
+  private evaluarGestos(manos: ManoDetectada[]): string | null {
+    const ahora = Date.now();
+    const dentroDeGrace = (ahora - this.ultimaVezAmbasManos) < GRACE_MS;
+
+    if (manos.length === 2) {
+      const left = manos.find(m => m.handedness === 'Left');
+      const right = manos.find(m => m.handedness === 'Right');
+      if (left && right) {
+        const bimanual = evaluarGestoBimanual(left.landmarks, right.landmarks);
+        if (bimanual) return bimanual;
+      }
+    }
+
+    if (manos.length === 1 && dentroDeGrace && this.ultimoGestoBimanual) {
+      return this.ultimoGestoBimanual;
+    }
+
+    if (manos.length < 2) {
+      this.ultimoGestoBimanual = null;
+    }
+
+    for (const mano of manos) {
+      const gestoEstatico = evaluarGesto(mano.landmarks);
+      if (gestoEstatico) return gestoEstatico;
+    }
+
+    const gestoMovimiento = this.detectarMovimiento(manos);
+    if (gestoMovimiento) return gestoMovimiento;
+
+    return null;
+  }
+
+  private detectarMovimiento(manos: ManoDetectada[]): string | null {
+    if (this.landmarkHistory.length < 6) {
+      return null;
+    }
+
+    for (const mano of manos) {
+      const historial = this.landmarkHistory
+        .slice(-8)
+        .map(frame => frame.find(m => m.handedness === mano.handedness))
+        .filter((m): m is ManoDetectada => !!m);
+
+      if (historial.length < 5) continue;
+
+      const wristXs = historial.map(h => h.landmarks[0].x);
+
+      let cruces = 0;
+      const mean = wristXs.reduce((a, b) => a + b, 0) / wristXs.length;
+      for (let i = 1; i < wristXs.length; i++) {
+        if ((wristXs[i] - mean) * (wristXs[i - 1] - mean) < 0) {
+          cruces++;
+        }
+      }
+      if (cruces >= 3) {
+        return 'ONDEO';
+      }
+
+      const idxTip = mano.landmarks[8];
+      const wrist = mano.landmarks[0];
+      const dx = idxTip.x - wrist.x;
+      const dy = idxTip.y - wrist.y;
+      const angle = Math.atan2(-dy, dx);
+
+      if (fingerExtended(mano.landmarks, 8, 6) && !fingerExtended(mano.landmarks, 12, 10)) {
+        if (angle > 0.5 && angle < 1.2) {
+          return 'APUNTAR_ARRIBA';
+        }
+        if (angle < -0.5 && angle > -1.2) {
+          return 'APUNTAR_ABAJO';
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private confirmarGesto(id: string): void {
+    this.ultimoConfirmado = id;
+    const secuencia = [...this.gestos, { id, etiqueta: GESTO_PALABRA[id] ?? id }];
+    this.gestos$.next(secuencia.slice(-MAX_GESTOS));
+    this.confirmado$.next(id);
+    setTimeout(() => this.confirmado$.next(null), 400);
+  }
+
+  private dibujarLandmarks(manos: ManoDetectada[]): void {
+    if (!this.canvas || !this.video) {
+      return;
+    }
+
+    const parent = this.canvas.parentElement;
+    const rect = parent?.getBoundingClientRect();
+    const cw = (rect && rect.width > 0) ? Math.round(rect.width) : 420;
+    const ch = (rect && rect.height > 0) ? Math.round(rect.height) : 315;
+
+    if (this.canvas.width !== cw || this.canvas.height !== ch) {
+      this.canvas.width = cw;
+      this.canvas.height = ch;
+    }
+
+    const ctx = this.canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    ctx.clearRect(0, 0, cw, ch);
+
+    const vw = this.video.videoWidth;
+    const vh = this.video.videoHeight;
+    if (!vw || !vh) {
+      return;
+    }
+
+    ctx.save();
+    ctx.translate(cw, 0);
+    ctx.scale(-1, 1);
+
+    const scale = Math.min(cw / vw, ch / vh);
+    const ox = (cw - vw * scale) / 2;
+    const oy = (ch - vh * scale) / 2;
+
+    for (const mano of manos) {
+      const lm = mano.landmarks;
+      const color = COLORES_MANO[mano.handedness] ?? COLORES_MANO['Right'];
+
+      const px = (i: number) => ox + lm[i].x * vw * scale;
+      const py = (i: number) => oy + lm[i].y * vh * scale;
+
+      ctx.strokeStyle = color.stroke;
+      ctx.lineWidth = 2;
+      for (const [a, b] of CONEXIONES) {
+        ctx.beginPath();
+        ctx.moveTo(px(a), py(a));
+        ctx.lineTo(px(b), py(b));
+        ctx.stroke();
+      }
+
+      for (let i = 0; i < lm.length; i++) {
+        ctx.beginPath();
+        ctx.arc(px(i), py(i), 4, 0, Math.PI * 2);
+        ctx.fillStyle = i === 0 ? '#ef4444' : color.fill;
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      const wristX = px(0);
+      const wristY = py(0);
+      ctx.font = 'bold 13px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillText(color.label, wristX, wristY - 10);
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+      ctx.lineWidth = 2;
+      ctx.strokeText(color.label, wristX, wristY - 10);
+    }
+
+    ctx.restore();
+  }
+
+  private limpiarCanvas(): void {
+    if (!this.canvas) {
+      return;
+    }
+    const ctx = this.canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
+}
+
+export const GESTO_PALABRA: Record<string, string> = {
+  PALMA_ABIERTA: 'Hola',
+  PULGAR_ARRIBA: 'Sí',
+  PULGAR_ABAJO: 'No',
+  VICTORIA: 'Adiós',
+  TE_QUIERO: 'Te quiero',
+  INDICE_ARRIBA: 'Atención',
+  PUÑO_CERRADO: 'Gracias',
+  TRES_DEDOS: 'Por favor',
+  CUATRO_DEDOS: 'Necesito',
+  OK_SIGN: 'Perfecto',
+  PULGAR_MEÑIQUE: 'Llamar',
+  MEÑIQUE_ARRIBA: 'Promesa',
+  PINZA: 'Poco',
+  LETRA_L: 'Letra L',
+  LETRA_O: 'Letra O',
+  NUMERO_3: 'Tres',
+  NUMERO_6: 'Seis',
+  ONDEO: 'Adiós (ondeo)',
+  APUNTAR_ARRIBA: 'Mira arriba',
+  APUNTAR_ABAJO: 'Mira abajo',
+  ORACION: 'Oración',
+  APLAUSO: 'Aplauso',
+  PAZ: 'Paz',
+  CORAZON: 'Amor',
+  PARAR: 'Parar'
+};
+
+function dist(a: Landmark, b: Landmark): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function fingerExtended(lm: Landmark[], tip: number, pip: number): boolean {
+  return dist(lm[tip], lm[0]) > dist(lm[pip], lm[0]);
+}
+
+function thumbExtended(lm: Landmark[]): boolean {
+  return dist(lm[4], lm[9]) > dist(lm[3], lm[9]);
+}
+
+function thumbIndexClose(lm: Landmark[]): boolean {
+  const handSize = dist(lm[0], lm[9]);
+  return dist(lm[4], lm[8]) < handSize * 0.25;
+}
+
+function angleBetween(a: Landmark, vertex: Landmark, b: Landmark): number {
+  const va = { x: a.x - vertex.x, y: a.y - vertex.y };
+  const vb = { x: b.x - vertex.x, y: b.y - vertex.y };
+  const dot = va.x * vb.x + va.y * vb.y;
+  const magA = Math.hypot(va.x, va.y);
+  const magB = Math.hypot(vb.x, vb.y);
+  if (magA === 0 || magB === 0) return 0;
+  return Math.acos(Math.min(1, Math.max(-1, dot / (magA * magB))));
+}
+
+export function evaluarGesto(lm: Landmark[]): string | null {
+  const idx = fingerExtended(lm, 8, 6);
+  const mid = fingerExtended(lm, 12, 10);
+  const ring = fingerExtended(lm, 16, 14);
+  const pink = fingerExtended(lm, 20, 18);
+  const thumb = thumbExtended(lm);
+  const thumbIndexPinch = thumbIndexClose(lm);
+
+  const handSize = dist(lm[0], lm[9]);
+  const allTipsClose = dist(lm[4], lm[8]) < handSize * 0.3 &&
+                       dist(lm[4], lm[12]) < handSize * 0.35 &&
+                       dist(lm[4], lm[16]) < handSize * 0.4;
+
+  const extended = [idx, mid, ring, pink].filter(Boolean).length;
+
+  if (thumb && idx && !mid && !ring && pink) {
+    return 'TE_QUIERO';
+  }
+
+  if (thumbIndexPinch && idx && mid && ring && !pink) {
+    return 'OK_SIGN';
+  }
+
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink) {
+    return 'PINZA';
+  }
+
+  if (idx && mid && !ring && !pink) {
+    return 'VICTORIA';
+  }
+
+  if (idx && !mid && !ring && !pink && !thumb) {
+    return 'INDICE_ARRIBA';
+  }
+
+  if (!idx && !mid && !ring && pink && !thumb) {
+    return 'MEÑIQUE_ARRIBA';
+  }
+
+  if (thumb && !idx && !mid && !ring && pink) {
+    return 'PULGAR_MEÑIQUE';
+  }
+
+  if (thumb && idx && mid && !ring && !pink) {
+    return 'NUMERO_3';
+  }
+
+  if (idx && mid && ring && !pink && !thumb) {
+    return 'TRES_DEDOS';
+  }
+
+  if (idx && mid && ring && pink && !thumb) {
+    return 'CUATRO_DEDOS';
+  }
+
+  if (thumb && idx && !mid && !ring && !pink) {
+    const angulo = angleBetween(lm[4], lm[2], lm[8]);
+    if (angulo > 0.9) {
+      return 'LETRA_L';
+    }
+  }
+
+  if (!idx && !mid && !ring && !pink && !thumb && allTipsClose) {
+    return 'LETRA_O';
+  }
+
+  if (thumb && !idx && !mid && !ring && !pink) {
+    if (thumbIndexClose(lm) && extended === 0) {
+      return 'NUMERO_6';
+    }
+    return lm[4].y < lm[3].y ? 'PULGAR_ARRIBA' : 'PULGAR_ABAJO';
+  }
+
+  if (extended >= 4 && thumb) {
+    return 'PALMA_ABIERTA';
+  }
+
+  if (extended === 0 && !thumb) {
+    return 'PUÑO_CERRADO';
+  }
+
+  return null;
+}
+
+function evaluarGestoBimanual(left: Landmark[], right: Landmark[]): string | null {
+  const lIdx = fingerExtended(left, 8, 6);
+  const lMid = fingerExtended(left, 12, 10);
+  const lRing = fingerExtended(left, 16, 14);
+  const lPink = fingerExtended(left, 20, 18);
+  const lThumb = thumbExtended(left);
+
+  const rIdx = fingerExtended(right, 8, 6);
+  const rMid = fingerExtended(right, 12, 10);
+  const rRing = fingerExtended(right, 16, 14);
+  const rPink = fingerExtended(right, 20, 18);
+  const rThumb = thumbExtended(right);
+
+  const lExtended = [lIdx, lMid, lRing, lPink].filter(Boolean).length;
+  const rExtended = [rIdx, rMid, rRing, rPink].filter(Boolean).length;
+
+  const lOpen = lExtended >= 4 && lThumb;
+  const rOpen = rExtended >= 4 && rThumb;
+
+  const handsClose = dist(left[0], right[0]) < 0.15;
+
+  if (lOpen && rOpen && handsClose) {
+    const palmDist = dist(left[9], right[9]);
+    if (palmDist < 0.12) {
+      return 'ORACION';
+    }
+  }
+
+  if (lOpen && rOpen && !handsClose) {
+    const palmDist = dist(left[9], right[9]);
+    if (palmDist > 0.15 && palmDist < 0.4) {
+      return 'PARAR';
+    }
+  }
+
+  const lVictory = lIdx && lMid && !lRing && !lPink;
+  const rVictory = rIdx && rMid && !rRing && !rPink;
+  if (lVictory && rVictory) {
+    return 'PAZ';
+  }
+
+  if (lOpen && rOpen && handsClose) {
+    return 'APLAUSO';
+  }
+
+  const lHeartThumb = thumbExtended(left);
+  const rHeartThumb = thumbExtended(right);
+  const lHeartIdx = fingerExtended(left, 8, 6);
+  const rHeartIdx = fingerExtended(right, 8, 6);
+  const lHeartClosed = !lMid && !lRing && !lPink;
+  const rHeartClosed = !rMid && !rRing && !rPink;
+
+  if (lHeartThumb && lHeartIdx && lHeartClosed &&
+      rHeartThumb && rHeartIdx && rHeartClosed) {
+    const thumbTouch = dist(left[4], right[4]);
+    const idxTouch = dist(left[8], right[8]);
+    if (thumbTouch < 0.08 && idxTouch < 0.08) {
+      return 'CORAZON';
+    }
+  }
+
+  return null;
+}

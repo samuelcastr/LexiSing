@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ConversationService } from '../../../core/services/conversation.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { CameraService } from '../../../core/services/camera.service';
+import { SignLanguageService, GestoDetectado } from '../../../core/services/sign-language.service';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,6 +31,7 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class ConversationListComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+  @ViewChild('landmarksCanvas') landmarksCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
 
   users: any[] = [];
@@ -54,23 +56,69 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   participantPresence: 'online' | 'offline' = 'offline';
   userRole: string = '';
   mobileSidebarOpen = false;
+  senasDetectando = false;
+  gestosActuales: GestoDetectado[] = [];
+  gestoEnCurso: string | null = null;
+  mostrarPreview = false;
+  textoTraducido = '';
+  gestoConfirmadoFlash: string | null = null;
+  modeloCargando = false;
+  textoLock = false;
+  modoPractica = false;
+  manoPerdida = false;
+  guiaSenas = [
+    { nombre: 'Hola', como: 'Palma abierta' },
+    { nombre: 'Sí', como: 'Pulgar arriba' },
+    { nombre: 'No', como: 'Pulgar abajo' },
+    { nombre: 'Adiós', como: 'Índice + medio en V' },
+    { nombre: 'Te quiero', como: 'Pulgar + índice + meñique' },
+    { nombre: 'Atención', como: 'Solo índice arriba' },
+    { nombre: 'Gracias', como: 'Puño cerrado' },
+    { nombre: 'Por favor', como: 'Índice + medio + anular' },
+    { nombre: 'Necesito', como: '4 dedos arriba' },
+    { nombre: 'Perfecto', como: 'Pulgar toca índice' },
+    { nombre: 'Llamar', como: 'Pulgar + meñique' },
+    { nombre: 'Promesa', como: 'Solo meñique' },
+    { nombre: 'Poco', como: 'Pulgar + índice juntos' },
+    { nombre: 'Letra L', como: 'Pulgar + índice en L' },
+    { nombre: 'Letra O', como: 'Todas las puntas juntas' },
+    { nombre: 'Tres (3)', como: 'Pulgar + índice + medio' },
+    { nombre: 'Seis (6)', como: 'Pulgar + meñique, pinza' },
+    { nombre: 'Oración ✋✋', como: 'Ambas palmas juntas' },
+    { nombre: 'Parar ✋✋', como: 'Ambas palmas adelante' },
+    { nombre: 'Paz ✋✋', como: 'Ambas manos en V' },
+    { nombre: 'Aplauso ✋✋', como: 'Ambas abiertas juntas' },
+    { nombre: 'Amor ✋✋', como: 'Pulgares + índices juntos' },
+    { nombre: 'Ondeando ✋', como: 'Mano de lado a lado' },
+    { nombre: 'Mira arriba ☝', como: 'Índice apunta arriba' },
+    { nombre: 'Mira abajo ☟', como: 'Índice apunta abajo' }
+  ];
   private sending = false;
   private destroy$ = new Subject<void>();
   private convSub?: Subscription;
   private usersSub?: Subscription;
   private presenceSub?: Subscription;
   private messagesSub?: Subscription;
+  private gestosSub?: Subscription;
+  private detectandoSub?: Subscription;
+  private gestoEnCursoSub?: Subscription;
+  private confirmadoSub?: Subscription;
+  private cargandoSub?: Subscription;
+  private manoPerdidaSub?: Subscription;
 
   constructor(
+    private elRef: ElementRef,
     private convService: ConversationService,
     private auth: AuthService,
     private router: Router,
     private location: Location,
     private userApi: UserApiService,
     private cameraService: CameraService,
+    private signLang: SignLanguageService,
     private activityService: ActivityService,
     private presenceService: PresenceService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   private getDisplayName(): string {
@@ -96,6 +144,29 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       }
       this.loadUsers();
     });
+
+    this.gestosSub = this.signLang.gestos$.pipe(takeUntil(this.destroy$)).subscribe(g => {
+      this.gestosActuales = [...g];
+      this.textoLock = true;
+      this.textoTraducido = this.signLang.traducirAhora();
+      setTimeout(() => this.textoLock = false, 200);
+    });
+    this.detectandoSub = this.signLang.detectando$.pipe(takeUntil(this.destroy$)).subscribe(v => {
+      this.senasDetectando = v;
+      if (v && this.cameraActive) {
+        this.mostrarPreview = true;
+      }
+    });
+    this.gestoEnCursoSub = this.signLang.gestoEnCurso$.pipe(takeUntil(this.destroy$)).subscribe(g => this.gestoEnCurso = g);
+    this.confirmadoSub = this.signLang.confirmado$.pipe(takeUntil(this.destroy$)).subscribe(id => {
+      this.gestoConfirmadoFlash = id;
+    });
+    this.cargandoSub = this.signLang.cargando$.pipe(takeUntil(this.destroy$)).subscribe(v => {
+      this.modeloCargando = v;
+    });
+    this.manoPerdidaSub = this.signLang.manoPerdida$.pipe(takeUntil(this.destroy$)).subscribe(v => {
+      this.manoPerdida = v;
+    });
   }
 
   @HostListener('window:resize')
@@ -111,6 +182,12 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.usersSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
     this.messagesSub?.unsubscribe();
+    this.gestosSub?.unsubscribe();
+    this.detectandoSub?.unsubscribe();
+    this.gestoEnCursoSub?.unsubscribe();
+    this.confirmadoSub?.unsubscribe();
+    this.cargandoSub?.unsubscribe();
+    this.manoPerdidaSub?.unsubscribe();
     this.stopCamera();
   }
 
@@ -262,11 +339,12 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
     if (this.cameraPaused) {
       this.cameraPaused = false;
-      video.play().catch(() => {
+      video.play().then(() => this.signLang.reanudar()).catch(() => {
         this.cameraPaused = true;
         this.errorService.mostrarError(null, 'No se pudo reanudar la cámara.');
       });
     } else {
+      this.signLang.pausar();
       video.pause();
       this.cameraPaused = true;
     }
@@ -277,6 +355,13 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       await this.cameraService.startCamera(this.videoElement.nativeElement);
       this.cameraActive = true;
       this.cameraPaused = false;
+      this.cdr.detectChanges();
+      const canvas = this.landmarksCanvas?.nativeElement ??
+        this.elRef.nativeElement.querySelector('canvas.landmarks-canvas');
+      this.signLang.iniciar(this.videoElement.nativeElement, canvas).catch(err => {
+        console.error('Error al cargar modelo de señas:', err);
+        this.errorService.mostrarError(null, 'No se pudo cargar el reconocimiento de señas. Verifica la conexión.');
+      });
     } catch (error) {
       this.cameraActive = false;
       this.errorService.mostrarError(null, this.getCameraErrorMessage(error));
@@ -298,6 +383,9 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   stopCamera(): void {
+    this.signLang.detener();
+    this.mostrarPreview = false;
+    this.textoTraducido = '';
     if (this.videoElement?.nativeElement) {
       this.cameraService.stopCamera(this.videoElement.nativeElement);
     }
@@ -447,6 +535,42 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       .catch(error => {
         this.errorService.mostrarError(error, 'Error al eliminar el mensaje.');
       });
+  }
+
+  abrirPreviewTraduccion(): void {
+    if (!this.textoTraducido) {
+      this.textoTraducido = this.signLang.traducirAhora();
+    }
+    this.mostrarPreview = true;
+  }
+
+  limpiarGestos(): void {
+    this.signLang.limpiar();
+    this.textoTraducido = '';
+  }
+
+  eliminarGesto(index: number): void {
+    this.signLang.eliminarGesto(index);
+  }
+
+  togglePractica(): void {
+    this.modoPractica = !this.modoPractica;
+  }
+
+  cerrarPreview(): void {
+    this.mostrarPreview = false;
+    this.textoTraducido = '';
+  }
+
+  enviarTraduccion(): void {
+    if (!this.textoTraducido.trim()) {
+      return;
+    }
+    this.messageText = this.textoTraducido.trim();
+    this.mostrarPreview = false;
+    this.textoTraducido = '';
+    this.signLang.limpiar();
+    this.sendMessage();
   }
 }
 

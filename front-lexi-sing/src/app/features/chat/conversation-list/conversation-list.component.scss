@@ -371,58 +371,127 @@
   background: linear-gradient(180deg, #fcfbff 0%, #f7f8ff 100%);
 }
 
-.camera-box {
+/* ── Columna cámara + traducción ─────────────────────── */
+.camera-column {
   display: none;
+  flex-direction: column;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100dvh;
+  inset: 0;
   z-index: 2000;
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-  overflow: hidden;
+  background: #0f172a;
 
-  &.active {
-    display: block;
-  }
+  &.active { display: flex; }
+}
+
+/* ── Caja de video ──────────────────────────────────── */
+.camera-box {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  background: #0f172a;
+  overflow: hidden;
 
   video {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transform: scaleX(-1);
+    background: #0f172a;
+  }
+
+  .landmarks-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
   }
 
   .camera-controls {
     position: absolute;
-    bottom: 20px;
+    bottom: 16px;
     left: 0;
     right: 0;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     z-index: 1;
     pointer-events: none;
   }
 
   .camera-controls .camera-toggle-btn {
     pointer-events: auto;
+    padding: 8px 12px;
+    font-size: 0;
+    gap: 0;
+
+    mat-icon { margin: 0; }
   }
+}
+
+.camera-paused-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    padding: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.model-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 5;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .camera-toggle-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
   border: none;
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-weight: 600;
-  font-size: 13px;
+  border-radius: 50%;
   background: rgba(255,255,255,0.92);
   color: #111827;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s;
+
+  &:active { transform: scale(0.92); }
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
 }
 
 .camera-close-btn {
@@ -434,26 +503,293 @@
   display: none;
 }
 
-.camera-paused-overlay {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: #fff;
-
-  mat-icon {
-    font-size: 44px;
-    width: 44px;
-    height: 44px;
-    padding: 20px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.14);
-  }
+.camera-box.paused .landmarks-canvas {
+  display: none;
 }
 
 .camera-toggle-btn.paused {
   background: #fef3c7;
   color: #b45309;
+}
+
+.camera-translate-btn {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #fff;
+
+  &.active {
+    animation: pulse-active 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-active {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+}
+
+.camera-practice-btn {
+  background: rgba(255,255,255,0.92);
+  color: #111827;
+
+  &.active {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #fff;
+  }
+}
+
+.hand-lost-banner {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.88);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 10px;
+  z-index: 5;
+  animation: banner-fade 3s ease forwards;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+@keyframes banner-fade {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+.practice-overlay {
+  position: absolute;
+  bottom: 70px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.practice-gesture-name {
+  padding: 6px 18px;
+  background: rgba(16, 185, 129, 0.92);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  animation: practice-pop 0.2s ease;
+}
+
+@keyframes practice-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.practice-id {
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  font-family: monospace;
+}
+
+.practice-hint {
+  padding: 6px 18px;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  border-radius: 999px;
+}
+
+/* ── Panel de traducción (debajo de la cámara) ────────── */
+.translation-panel {
+  flex-shrink: 0;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.translation-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #6d28d9;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.glosa-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.glosa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f5f3ff;
+  color: #6d28d9;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+
+  &:hover {
+    background: #ede9fe;
+    transform: scale(1.04);
+  }
+
+  &.glosa-chip--detectando {
+    background: #ede9fe;
+    color: #8b5cf6;
+    animation: chip-pulse 0.9s ease-in-out infinite;
+    cursor: default;
+  }
+
+  &.glosa-chip--flash {
+    animation: chip-flash 0.4s ease;
+  }
+}
+
+.glosa-chip-remove {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+
+  .glosa-chip:hover & {
+    opacity: 1;
+  }
+}
+
+@keyframes chip-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes chip-flash {
+  0% { background: #f5f3ff; }
+  30% { background: #c4b5fd; transform: scale(1.08); }
+  100% { background: #f5f3ff; }
+}
+
+.translation-hint {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+  margin: 0;
+}
+
+.translation-textarea {
+  width: 100%;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  resize: none;
+  background: #fff;
+  color: #111827;
+  outline: none;
+  font-family: inherit;
+
+  &:focus { border-color: #8b5cf6; }
+}
+
+.translation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.panel-close-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 50%;
+  display: flex;
+  color: #9ca3af;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(0,0,0,0.06);
+    color: #6d28d9;
+  }
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.sign-guide {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 8px;
+}
+
+.sign-guide-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker { display: none; }
+
+  &::before {
+    content: '▸';
+    margin-right: 4px;
+    display: inline-block;
+    transition: transform 0.15s;
+  }
+}
+
+details[open] .sign-guide-title::before {
+  transform: rotate(90deg);
+}
+
+.sign-guide-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.sign-guide-item {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #faf9ff;
+}
+
+.sign-guide-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6d28d9;
+}
+
+.sign-guide-desc {
+  font-size: 10px;
+  color: #9ca3af;
+  line-height: 1.3;
 }
 
 .messages-container {
@@ -739,7 +1075,7 @@
   }
 }
 
-/* ===== Tablet (768–1024px): dos paneles estáticos + recuadro de cámara ===== */
+/* ===== Tablet (768–1024px): dos columnas + cámara flotante ===== */
 @media (min-width: 768px) {
   .conversation-container {
     display: grid;
@@ -779,22 +1115,30 @@
     padding: 16px;
   }
 
-  .camera-box.active {
+  .camera-column.active {
     position: absolute;
     top: 12px;
     right: 12px;
     bottom: auto;
     left: auto;
-    width: min(46%, 320px);
+    width: min(55%, 380px);
     height: auto;
-    aspect-ratio: 4 / 3;
+    max-height: calc(100% - 24px);
     border-radius: 16px;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.28);
+    overflow: hidden;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
     z-index: 10;
+    border: none;
+    background: #fff;
+  }
+
+  .camera-column.active .camera-box {
+    aspect-ratio: 4 / 3;
+    flex: none;
   }
 }
 
-/* ===== Laptop+ (≥1025px): grid de dos columnas con sidebar estático ===== */
+/* ===== Laptop+ (≥1025px): sidebar + cámara fija a la izquierda ===== */
 @media (min-width: 1025px) {
   .conversation-container {
     display: grid;
@@ -809,20 +1153,30 @@
     padding: 18px 22px;
   }
 
+  .messages-wrapper {
+    flex-direction: row;
+  }
+
   .messages-container {
     padding: 18px;
   }
 
-  .camera-box.active {
+  .camera-column.active {
     position: relative;
-    flex: 0 0 320px;
-    width: 320px;
+    flex: 0 0 380px;
+    width: 380px;
     height: auto;
-    min-height: 0;
-    z-index: auto;
-    border-right: 1px solid #ecebff;
+    max-height: none;
     border-radius: 0;
     box-shadow: none;
+    border-right: 1px solid #ecebff;
+    background: #fff;
+    z-index: auto;
+  }
+
+  .camera-column.active .camera-box {
+    aspect-ratio: 4 / 3;
+    flex: none;
   }
 
   .message {
