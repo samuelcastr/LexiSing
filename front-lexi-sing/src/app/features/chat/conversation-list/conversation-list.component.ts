@@ -5,6 +5,7 @@ import { ConversationService } from '../../../core/services/conversation.service
 import { AuthService } from '../../../core/services/auth.service';
 import { CameraService } from '../../../core/services/camera.service';
 import { SignLanguageService, GestoDetectado } from '../../../core/services/sign-language.service';
+import { TextFormalizerService } from '../../../core/services/text-formalizer.service';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -64,6 +65,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   gestoConfirmadoFlash: string | null = null;
   modeloCargando = false;
   textoLock = false;
+  formalizando = false;
   modoPractica = false;
   manoPerdida = false;
   guiaSenas = [
@@ -115,6 +117,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     private userApi: UserApiService,
     private cameraService: CameraService,
     private signLang: SignLanguageService,
+    private textFormalizer: TextFormalizerService,
     private activityService: ActivityService,
     private presenceService: PresenceService,
     private errorService: ErrorService,
@@ -551,6 +554,30 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
   eliminarGesto(index: number): void {
     this.signLang.eliminarGesto(index);
+  }
+
+  formalizarTexto(): void {
+    if (this.gestosActuales.length === 0 || this.formalizando) {
+      return;
+    }
+
+    this.formalizando = true;
+    this.textoLock = true;
+
+    const gestos = this.gestosActuales.map(g => g.etiqueta);
+
+    this.textFormalizer.formalize(gestos).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        this.textoTraducido = res.texto_formal;
+        this.formalizando = false;
+        setTimeout(() => this.textoLock = false, 200);
+      },
+      error: () => {
+        this.formalizando = false;
+        setTimeout(() => this.textoLock = false, 200);
+        this.errorService.mostrarError(null, 'No se pudo formalizar el texto. Se enviará sin formato.');
+      }
+    });
   }
 
   togglePractica(): void {

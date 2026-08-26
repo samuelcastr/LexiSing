@@ -146,12 +146,19 @@
             <p *ngIf="gestosActuales.length === 0 && !gestoEnCurso" class="translation-hint">
               Haz una seña frente a la cámara…
             </p>
-            <textarea [(ngModel)]="textoTraducido" rows="2" placeholder="Texto detectado..."
-              class="translation-textarea" [readonly]="textoLock"></textarea>
+            <textarea [(ngModel)]="textoTraducido" rows="2"
+              [placeholder]="formalizando ? 'Formalizando texto...' : 'Texto detectado...'"
+              class="translation-textarea" [readonly]="textoLock || formalizando"></textarea>
             <div class="translation-actions">
               <button class="app-btn app-btn--outline app-btn--sm" (click)="limpiarGestos()">Limpiar</button>
+              <button class="app-btn app-btn--outline app-btn--sm" (click)="formalizarTexto()"
+                [disabled]="formalizando || gestosActuales.length === 0"
+                matTooltip="Formalizar texto con IA">
+                <mat-icon>{{ formalizando ? 'hourglass_empty' : 'auto_fix_high' }}</mat-icon>
+                {{ formalizando ? 'Formalizando...' : 'Formalizar' }}
+              </button>
               <button class="app-btn app-btn--primary app-btn--sm" (click)="enviarTraduccion()"
-                [disabled]="!textoTraducido.trim()">
+                [disabled]="!textoTraducido.trim() || formalizando">
                 <mat-icon>send</mat-icon> Enviar
               </button>
             </div>
