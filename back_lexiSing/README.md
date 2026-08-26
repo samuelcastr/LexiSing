@@ -1,40 +1,44 @@
-# back_lexiSing
+# LexiSing - Backend
 
-Backend base creado con Django y Django REST Framework.
+API REST construida con Django 6 y Django REST Framework.
 
-## Instrucciones paso a paso
+## Inicio rapido
 
-1. Crear un entorno virtual:
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-2. Instalar dependencias:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Aplicar migraciones:
-   ```bash
-   python manage.py migrate
-   ```
-4. Ejecutar la aplicación:
-   ```bash
-   python manage.py runserver 0.0.0.0:8000
-   ```
-5. Verificar que el backend está corriendo:
-   ```bash
-   curl -sSf http://127.0.0.1:8000/api/health/
-   ```
+```bash
+# Entorno virtual
+python3 -m venv .venv
+source .venv/bin/activate
 
-## URLs útiles
+# Dependencias
+pip install -r requirements.txt
 
-- `http://127.0.0.1:8000/`
-- `http://127.0.0.1:8000/api/`
-- `http://127.0.0.1:8000/api/health/`
+# Variables de entorno — crear .env
+echo 'GROQ_API_KEY=gsk_tu_clave' > .env
 
-## Notas para quien verifica el proyecto
+# Ejecutar
+python manage.py runserver 0.0.0.0:8000
+```
 
-- Asegurarse de activar el entorno virtual antes de ejecutar los comandos.
-- Si se usan rutas absolutas, estar en la carpeta `back_lexiSing`.
-- El servidor de desarrollo está en el puerto `8000`.
-- Para revisar que la API responde correctamente, usar el endpoint de health.
+## Endpoints
+
+| Metodo | Endpoint | Auth | Descripcion |
+|--------|----------|------|-------------|
+| GET | `/api/health/` | No | Health check |
+| GET | `/api/users/me/` | Si | Perfil del usuario |
+| GET | `/api/users/` | No | Lista de usuarios |
+| GET/POST | `/api/conversations/` | Si | Conversaciones |
+| POST | `/api/text/formalize/` | Si | Formalizar texto con IA |
+
+## Apps Django
+
+- **users** — Perfil de usuarios, listado, health check
+- **text** — Formalizacion de glosas de senas a texto formal (Groq API)
+
+## Dependencias
+
+- Django 6.0.5
+- djangorestframework 3.17.1
+- firebase-admin 6.5.0
+- django-cors-headers 4.3.1
+- python-dotenv 1.1.0
+- requests 2.32.3
