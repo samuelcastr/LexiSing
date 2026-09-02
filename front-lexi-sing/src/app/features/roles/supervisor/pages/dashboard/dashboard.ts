@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { DashboardService } from '../../../../../core/services/dashboard.service';
 import { ActivityService } from '../../../../../core/services/activity.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -23,7 +24,8 @@ export class SupervisorDashboardPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private dashboardService: DashboardService,
-    private activityService: ActivityService
+    private activityService: ActivityService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -36,8 +38,12 @@ export class SupervisorDashboardPageComponent implements OnInit, OnDestroy {
       this.conversacionesHoy = c.length;
     });
 
-    this.activityService.getRecentActivities().pipe(takeUntil(this.destroy$)).subscribe(data => {
-      this.recentActivities = data;
+    this.authService.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
+      if (user) {
+        this.activityService.getRecentActivities().pipe(takeUntil(this.destroy$)).subscribe(data => {
+          this.recentActivities = data;
+        });
+      }
     });
   }
 

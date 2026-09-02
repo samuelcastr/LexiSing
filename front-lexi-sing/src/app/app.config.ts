@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 
 registerLocaleData(localeEs);
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideAuth, getAuth, setPersistence, browserLocalPersistence } from '@angular/fire/auth';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
@@ -21,7 +21,13 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAuth(() => getAuth()),
+    provideAuth(() => {
+      const auth = getAuth();
+      if (typeof window !== 'undefined') {
+        setPersistence(auth, browserLocalPersistence).catch(() => undefined);
+      }
+      return auth;
+    }),
     provideFirestore(() => getFirestore()),
     provideHttpClient(withInterceptors([firebaseTokenInterceptor])),
     provideClientHydration(withEventReplay())

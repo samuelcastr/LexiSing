@@ -51,12 +51,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.authService.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe((user: User | null) => {
       if (user) {
         this.userName = user.nombre || user.email || 'Usuario';
+
+        this.loadActivities();
+
+        this.dashboardService
+          .getMensajesPorUsuario(user.uid)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(messages => {
+            this.mensajesEnviados = messages.length;
+          });
       }
 
     });
-
-    this.loadActivities();
-
 
     this.dashboardService.getUsuarios().pipe(takeUntil(this.destroy$)).subscribe(users => {
 
@@ -79,16 +85,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         this.conversacionesHoy =
           conversaciones.length;
-
-      });
-
-    this.dashboardService
-      .getMensajes()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(messages => {
-
-        this.mensajesEnviados =
-          messages.length;
 
       });
 

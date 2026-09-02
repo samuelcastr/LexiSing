@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, query, where, orderBy, addDoc, doc, serverTimestamp, updateDoc, deleteDoc } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, collectionChanges, query, where, orderBy, addDoc, doc, serverTimestamp, updateDoc, deleteDoc, getDocs } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Conversation, Message } from '../models/message.model';
 
@@ -18,6 +18,30 @@ export class ConversationService {
     return collectionData(col, { idField: 'id' }) as Observable<Conversation[]>;
   }
 
+  /**
+   * Busca una conversación existente entre exactamente los mismos participantes.
+   * Devuelve la conversación encontrada o null si no existe.
+   */
+  async findExistingConversation(participants: string[]): Promise<any | null> {
+    if (!participants || participants.length === 0) return null;
+
+    const col = collection(this.firestore, 'conversaciones');
+    const q = query(col, where('participants', 'array-contains', participants[0]));
+    const snapshot = await getDocs(q);
+
+    const sorted = [...participants].sort();
+    const existing = snapshot.docs
+      .map(d => ({ id: d.id, ...(d.data() as any) }))
+      .find(conv => {
+        const convParticipants = (conv.participants || []) as string[];
+        if (convParticipants.length !== sorted.length) return false;
+        const sortedConv = [...convParticipants].sort();
+        return sorted.every((p, i) => p === sortedConv[i]);
+      });
+
+    return existing ?? null;
+  }
+
   createConversation(participants: string[]): Promise<any> {
     const col = collection(this.firestore, 'conversaciones');
     const payload: Conversation = { participants, updatedAt: serverTimestamp(), lastMessage: '' } as any;
@@ -28,6 +52,16 @@ export class ConversationService {
     const col = collection(this.firestore, `conversaciones/${convId}/mensajes`);
     const q = query(col, orderBy('timestamp', 'asc'));
     return collectionData(q, { idField: 'id' }) as Observable<Message[]>;
+  }
+
+  /**
+   * Cambios en tiempo real de los mensajes de una conversación.
+   * Emite el array de cambios (type 'added' | 'modified' | 'removed') de cada snapshot.
+   */
+  getMessageChanges(convId: string): Observable<any[]> {
+    const col = collection(this.firestore, `conversaciones/${convId}/mensajes`);
+    const q = query(col, orderBy('timestamp', 'asc'));
+    return collectionChanges(q) as Observable<any[]>;
   }
 
   sendMessage(convId: string, message: Partial<Message>) {

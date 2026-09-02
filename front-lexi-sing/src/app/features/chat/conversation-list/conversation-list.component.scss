@@ -817,6 +817,7 @@ details[open] .sign-guide-title::before {
   display: flex;
   flex-direction: column;
   max-width: 78%;
+  min-width: 0;
   gap: 6px;
 }
 
@@ -838,6 +839,11 @@ details[open] .sign-guide-title::before {
   color: #374151;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
   line-height: 1.4;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-line;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .message.sent p {
