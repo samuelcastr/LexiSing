@@ -79,6 +79,16 @@ export class DashboardService {
     );
 
   }
+
+  /**
+   * Mensajes del propio usuario (filtrados por senderUid a nivel de Firestore).
+   */
+  getMensajesPorUsuario(uid: string): Observable<any[]> {
+    const mensajesRef = collectionGroup(this.firestore, 'mensajes');
+    const q = query(mensajesRef, where('senderUid', '==', uid));
+
+    return collectionData(q, { idField: 'id' });
+  }
   getTraduccionesHoy(): Observable<number> {
     return this.getMensajes().pipe(map((mensajes) => mensajes.length));
   }

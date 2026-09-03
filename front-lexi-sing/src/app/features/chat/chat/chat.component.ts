@@ -10,6 +10,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../core/models/user.model';
 import { ErrorService } from '../../../core/services/error.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -37,7 +38,8 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     private route: ActivatedRoute,
     private convService: ConversationService,
     private auth: AuthService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -45,6 +47,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       const id = params.get('id');
       if (!id) return;
       this.convId = id;
+      this.notificationService.setActiveConversation(id);
       this.messages = [];
       this.auth.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
         if (!user) return;
@@ -59,6 +62,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.notificationService.setActiveConversation(null);
     this.destroy$.next();
     this.destroy$.complete();
   }

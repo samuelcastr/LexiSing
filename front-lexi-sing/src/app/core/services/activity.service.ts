@@ -5,13 +5,13 @@ import {
   addDoc,
   collectionData,
   query,
-  orderBy,
-  limit,
+  where,
   serverTimestamp
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +39,8 @@ export class ActivityService {
   }
 
   getRecentActivities(): Observable<any[]> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return of([]);
 
     const ref = collection(
       this.firestore,
@@ -47,14 +49,28 @@ export class ActivityService {
 
     const q = query(
       ref,
-      orderBy('timestamp', 'desc'),
-      limit(10)
+      where('uid', '==', uid)
     );
 
-    return collectionData(
+    return (collectionData(
       q,
       { idField: 'id' }
-    ) as Observable<any[]>;
+    ) as Observable<any[]>).pipe(
+      map(list => [...list]
+        .sort((a, b) => (this.obtenerMs(b.timestamp) - this.obtenerMs(a.timestamp)))
+        .slice(0, 10))
+    );
+  }
+
+  private obtenerMs(fecha: any): number {
+    if (!fecha) return 0;
+    if (typeof fecha.toDate === 'function') {
+      const d = fecha.toDate();
+      return d instanceof Date ? d.getTime() : 0;
+    }
+    if (fecha.seconds !== undefined) return fecha.seconds * 1000;
+    if (fecha instanceof Date) return fecha.getTime();
+    return 0;
   }
 
 }

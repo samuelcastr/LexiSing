@@ -3,6 +3,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { Auth, authState } from '@angular/fire/auth';
 import { AuthService } from './core/services/auth.service';
 import { PresenceService } from './core/services/presence.service';
+import { NotificationService } from './core/services/notification.service';
 import { ErrorToastComponent } from './core/components/error-toast/error-toast.component';
 
 @Component({
@@ -18,6 +19,7 @@ export class App implements OnInit {
     private auth: Auth,
     private authService: AuthService,
     private presenceService: PresenceService,
+    private notificationService: NotificationService,
     private router: Router
   ) {}
 
@@ -25,8 +27,10 @@ export class App implements OnInit {
     authState(this.auth).subscribe(user => {
       if (user?.uid) {
         this.presenceService.startPresence(user.uid);
+        this.notificationService.start(user.uid);
       } else {
         this.presenceService.stopPresence();
+        this.notificationService.stop();
       }
     });
 

@@ -20,6 +20,7 @@ import { UserApiService } from '../../../core/services/user-api.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { PresenceService } from '../../../core/services/presence.service';
 import { ErrorService } from '../../../core/services/error.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -121,6 +122,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     private activityService: ActivityService,
     private presenceService: PresenceService,
     private errorService: ErrorService,
+    private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -179,6 +181,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.notificationService.setActiveConversation(null);
     this.destroy$.next();
     this.destroy$.complete();
     this.convSub?.unsubscribe();
@@ -333,24 +336,42 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.chatUserUids.has(this.selectedUserUid)) {
+if (this.chatUserUids.has(this.selectedUserUid)) {
       this.errorService.mostrarError(null, 'Ya tienes una conversación con este usuario.');
       this.selectedUserUid = '';
       return;
     }
 
-    this.convService.createConversation([this.uid, this.selectedUserUid])
-      .then(() => {
+    const participants = [this.uid, this.selectedUserUid];
 
-        this.activityService.addActivity(
-          this.getDisplayName(),
-          'inició una conversación'
-        );
+    this.convService.findExistingConversation(participants)
+      .then(existing => {
+        if (existing) {
+          this.errorService.mostrarError(null, 'Ya existe una conversación con este usuario. Abriendo el chat existente...');
+          this.selectedUserUid = '';
+          this.showNewConvForm = false;
+          this.loadConversations();
+          const otherUser = this.users.find(u => u.uid === participants[1]);
+          this.selectConversation({
+            ...existing,
+            participantName: otherUser?.nombre || 'Conversación'
+          });
+          return;
+        }
 
-        this.selectedUserUid = '';
-        this.showNewConvForm = false;
-        this.loadConversations();
+        return this.convService.createConversation(participants)
+          .then(() => {
 
+            this.activityService.addActivity(
+              this.getDisplayName(),
+              'inició una conversación'
+            );
+
+            this.selectedUserUid = '';
+            this.showNewConvForm = false;
+            this.loadConversations();
+
+          });
       })
       .catch(error => {
         const msg = error?.message || '';
@@ -437,6 +458,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
   selectConversation(conversation: any): void {
     this.selectedConversation = conversation;
+    this.notificationService.setActiveConversation(conversation.id);
     this.closeMobileSidebar();
     this.loadMessages(conversation.id);
 
