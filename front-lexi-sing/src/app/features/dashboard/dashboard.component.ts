@@ -27,6 +27,8 @@ import { takeUntil } from 'rxjs/operators';
 export class DashboardComponent implements OnInit, OnDestroy {
 
   userName: string = 'Usuario';
+  currentUserUid: string | null = null;
+  currentUserRole: string | null = null;
   sidebarOpen = true;
   mobileMenuOpen = false;
   empleadosActivos = 0;
@@ -51,6 +53,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.authService.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe((user: User | null) => {
       if (user) {
         this.userName = user.nombre || user.email || 'Usuario';
+        this.currentUserUid = user.uid;
+        this.currentUserRole = user.rol;
       }
 
     });
@@ -72,24 +76,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     });
 
+    const canSeeAll = this.currentUserRole === 'supervisor' || this.currentUserRole === 'admin';
+
     this.dashboardService
       .getConversaciones()
       .pipe(takeUntil(this.destroy$))
       .subscribe(conversaciones => {
-
-        this.conversacionesHoy =
-          conversaciones.length;
-
+        const filtered = canSeeAll
+          ? conversaciones
+          : conversaciones.filter(c => c.participants?.includes(this.currentUserUid ?? ''));
+        this.conversacionesHoy = filtered.length;
       });
 
     this.dashboardService
       .getMensajes()
       .pipe(takeUntil(this.destroy$))
       .subscribe(messages => {
-
-        this.mensajesEnviados =
-          messages.length;
-
+        const filtered = canSeeAll
+          ? messages
+          : messages.filter(m => m.senderUid === this.currentUserUid);
+        this.mensajesEnviados = filtered.length;
       });
 
   }

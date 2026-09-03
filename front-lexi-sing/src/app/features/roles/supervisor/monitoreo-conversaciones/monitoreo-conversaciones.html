@@ -7,9 +7,41 @@
     <h1>Monitoreo de Conversaciones</h1>
   </div>
 
+  <!-- Filtros -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline" class="filter-search">
+      <mat-label>Buscar</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Buscar por participante o mensaje..." [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-user">
+      <mat-label>Participante</mat-label>
+      <mat-select [(ngModel)]="selectedUserUid" (ngModelChange)="applyFilters()" panelClass="filter-select-panel">
+        <mat-option value="">Todos</mat-option>
+        <mat-option *ngFor="let user of users" [value]="user.uid">{{ user.nombre || user.email }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-date">
+      <mat-label>Fecha</mat-label>
+      <mat-select [(ngModel)]="dateFilter" (ngModelChange)="applyFilters()" panelClass="filter-select-panel">
+        <mat-option value="todos">Todas</mat-option>
+        <mat-option value="hoy">Hoy</mat-option>
+        <mat-option value="semana">Última semana</mat-option>
+        <mat-option value="mes">Último mes</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button class="app-btn app-btn--outline filter-clear" (click)="clearFilters()">
+      <mat-icon>close</mat-icon>
+      Limpiar filtros
+    </button>
+  </div>
+
   <!-- Tabla de conversaciones -->
   <div class="conversations-table">
-    <table mat-table [dataSource]="conversations" class="full-width-table">
+    <table mat-table [dataSource]="filteredConversations" class="full-width-table">
       <!-- Participantes Column -->
       <ng-container matColumnDef="participantes">
         <th mat-header-cell *matHeaderCellDef>Participantes</th>
@@ -33,9 +65,9 @@
     </table>
 
     <!-- Estado vacío -->
-    <div *ngIf="conversations.length === 0" class="empty-state">
+    <div *ngIf="filteredConversations.length === 0" class="empty-state">
       <mat-icon>chat_bubble_outline</mat-icon>
-      <p>No hay conversaciones</p>
+      <p>No hay conversaciones que coincidan con los filtros</p>
     </div>
   </div>
 </div>

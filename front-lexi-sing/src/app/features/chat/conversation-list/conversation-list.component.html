@@ -34,7 +34,10 @@
 
       <div *ngFor="let c of filteredConversations" class="conversation-item" (click)="selectConversation(c)"
         [class.active]="selectedConversation?.id === c.id">
-        <div class="conversation-avatar">{{ (c.participantName || 'C').charAt(0).toUpperCase() }}</div>
+        <div class="conversation-avatar">
+          <img *ngIf="c.participantPhotoURL" [src]="c.participantPhotoURL" [alt]="c.participantName" />
+          <span *ngIf="!c.participantPhotoURL">{{ (c.participantName || 'C').charAt(0).toUpperCase() }}</span>
+        </div>
         <div class="conversation-item-content">
           <h4>{{ c.participantName || 'Conversación' }}</h4>
           <p class="last-message">{{ c.lastMessage || 'Inicia una conversación...' }}</p>
@@ -61,7 +64,10 @@
           <mat-icon>menu</mat-icon>
         </button>
         <div class="chat-user-info">
-          <div class="header-avatar">{{ selectedConversation.participantName?.charAt(0)?.toUpperCase() || 'C' }}</div>
+          <div class="header-avatar">
+            <img *ngIf="selectedConversation.participantPhotoURL" [src]="selectedConversation.participantPhotoURL" [alt]="selectedConversation.participantName" />
+            <span *ngIf="!selectedConversation.participantPhotoURL">{{ selectedConversation.participantName?.charAt(0)?.toUpperCase() || 'C' }}</span>
+          </div>
           <div>
             <h3>{{ selectedConversation.participantName }}</h3>
             <span>{{ participantPresence === 'online' ? 'En línea' : 'Sin conexión' }}</span>
@@ -240,8 +246,11 @@
         Selecciona un usuario para iniciar una conversación
       </p>
       <div class="users-list">
-        <div class="user-card" *ngFor="let user of filteredUsers" (click)="selectedUserUid = user.uid"
-          [class.selected]="selectedUserUid === user.uid">
+        <div class="user-card" *ngFor="let user of filteredUsers"
+          [class.selected]="selectedUserUid === user.uid"
+          [class.disabled]="user.yaTieneChat"
+          [class.clickable]="!user.yaTieneChat"
+          (click)="!user.yaTieneChat && (selectedUserUid = user.uid)">
           <mat-icon>
             account_circle
           </mat-icon>
@@ -253,10 +262,10 @@
               {{ user.email }}
             </span>
           </div>
-          <mat-icon *ngIf="selectedUserUid === user.uid">
+          <mat-icon *ngIf="user.yaTieneChat" class="chat-exists-icon" matTooltip="Ya tienes conversación">chat_bubble</mat-icon>
+          <mat-icon *ngIf="!user.yaTieneChat && selectedUserUid === user.uid">
             check_circle
           </mat-icon>
-
         </div>
 
       </div>

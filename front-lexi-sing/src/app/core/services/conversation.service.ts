@@ -18,10 +18,33 @@ export class ConversationService {
     return collectionData(col, { idField: 'id' }) as Observable<Conversation[]>;
   }
 
-  createConversation(participants: string[]): Promise<any> {
+  async createConversation(participants: string[]): Promise<any> {
     const col = collection(this.firestore, 'conversaciones');
+
+    if (participants.length === 2) {
+      const [uidA, uidB] = participants;
+      const q = query(
+        col,
+        where('participants', 'array-contains', uidA)
+      );
+      const snapshot = await this._getSnapshot(q);
+      const exists = snapshot.docs.some((docSnap: any) => {
+        const data = docSnap.data();
+        const parts: string[] = (data as any)?.participants || [];
+        return parts.includes(uidB);
+      });
+      if (exists) {
+        throw new Error('Ya existe una conversación con este usuario.');
+      }
+    }
+
     const payload: Conversation = { participants, updatedAt: serverTimestamp(), lastMessage: '' } as any;
     return addDoc(col, payload);
+  }
+
+  private async _getSnapshot(q: any): Promise<any> {
+    const { getDocs } = await import('@angular/fire/firestore');
+    return getDocs(q);
   }
 
   getMessages(convId: string): Observable<Message[]> {

@@ -23,8 +23,10 @@
   .dashboard-layout {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     background: #f5f5f7;
+    overflow: hidden;
   }
 
   /* ===== Mobile-first (base 320–480px): sidebar como drawer off-canvas ===== */
@@ -197,6 +199,9 @@
     min-width: 0;
     padding: 12px;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   .topbar {
@@ -271,6 +276,10 @@
   @if $with-page-content {
     .page-content {
       flex: 1;
+      min-height: 0;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
     }
   }
 

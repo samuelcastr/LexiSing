@@ -197,10 +197,19 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   loadConversations(): void {
     this.convSub?.unsubscribe();
     this.convSub = this.convService.getConversationsForUser(this.uid).pipe(takeUntil(this.destroy$)).subscribe(list => {
+      this.chatUserUids = new Set<string>();
+      list.forEach(conv => {
+        const other = conv.participants?.find(p => p !== this.uid);
+        if (other) this.chatUserUids.add(other);
+      });
       this.conversations = list.map(conv => {
         const otherUid = conv.participants?.find(p => p !== this.uid);
         const otherUser = this.users.find(u => u.uid === otherUid);
-        return { ...conv, participantName: otherUser?.nombre || 'Conversación' };
+        return {
+          ...conv,
+          participantName: otherUser?.nombre || 'Conversación',
+          participantPhotoURL: otherUser?.photoURL || null
+        };
       }).sort((a, b) => {
         const timeA = a.updatedAt?.toDate?.() || new Date(0);
         const timeB = b.updatedAt?.toDate?.() || new Date(0);
@@ -208,6 +217,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
       });
 
       this.filterConversations();
+      this.buildUserList();
     });
   }
 
@@ -290,13 +300,26 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     this.usersSub = this.userApi.getUsers().pipe(takeUntil(this.destroy$)).subscribe({
       next: (users) => {
         this.users = users.filter(u => u.uid && u.uid !== this.uid);
-        this.filterUsers();
         this.loadConversations();
       },
       error: (error) => {
         this.errorService.mostrarError(error, 'Error al cargar los usuarios.');
       }
     });
+  }
+
+  private chatUserUids: Set<string> = new Set();
+
+  private buildUserList(): void {
+    this.users = this.users.map(u => ({
+      ...u,
+      yaTieneChat: this.chatUserUids.has(u.uid)
+    }));
+    this.filterUsers();
+  }
+
+  isUserAvailable(user: any): boolean {
+    return !user?.yaTieneChat;
   }
 
   createConversation(): void {
@@ -307,6 +330,12 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
     if (this.selectedUserUid === this.uid) {
       this.errorService.mostrarError(null, 'No puedes crear una conversación contigo mismo.');
+      return;
+    }
+
+    if (this.chatUserUids.has(this.selectedUserUid)) {
+      this.errorService.mostrarError(null, 'Ya tienes una conversación con este usuario.');
+      this.selectedUserUid = '';
       return;
     }
 
@@ -324,7 +353,13 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
       })
       .catch(error => {
-        this.errorService.mostrarError(error, 'Error al crear la conversación.');
+        const msg = error?.message || '';
+        if (msg.includes('Ya existe una conversación')) {
+          this.errorService.mostrarError(null, 'Ya tienes una conversación con este usuario.');
+          this.selectedUserUid = '';
+        } else {
+          this.errorService.mostrarError(error, 'Error al crear la conversación.');
+        }
       });
   }
 

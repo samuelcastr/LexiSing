@@ -32,6 +32,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   successMessage: string | null = null;
   passwordFocused = false;
   connecting$!: Observable<boolean>;
+  showPassword = false;
+  showConfirmPassword = false;
   private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private authService: AuthService) {
@@ -83,6 +85,14 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   onPasswordBlur(): void {
     this.passwordFocused = false;
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   submit() {

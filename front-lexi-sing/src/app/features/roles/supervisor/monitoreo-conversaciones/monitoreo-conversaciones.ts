@@ -6,20 +6,29 @@ import { UserApiService } from '../../../../core/services/user-api.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-monitoreo-conversaciones',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatTableModule],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatTableModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatOptionModule, FormsModule],
   templateUrl: './monitoreo-conversaciones.html',
   styleUrls: ['./monitoreo-conversaciones.scss']
 })
 export class MonitoreoConversaciones implements OnInit, OnDestroy {
   conversations: any[] = [];
+  filteredConversations: any[] = [];
   displayedColumns: string[] = ['participantes', 'ultimoMensaje', 'fecha'];
   users: any[] = [];
+  searchTerm: string = '';
+  selectedUserUid: string = '';
+  dateFilter: string = 'todos';
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -61,7 +70,44 @@ export class MonitoreoConversaciones implements OnInit, OnDestroy {
           };
         })
         .sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+      this.applyFilters();
     });
+  }
+
+  applyFilters(): void {
+    const term = this.searchTerm.trim().toLowerCase();
+    const now = new Date();
+
+    this.filteredConversations = this.conversations.filter(conv => {
+      if (this.selectedUserUid && !conv.participants?.includes(this.selectedUserUid)) {
+        return false;
+      }
+
+      if (term) {
+        const nameMatch = (conv.participantNames || '').toLowerCase().includes(term);
+        const lastMessageMatch = (conv.ultimoMensaje || '').toLowerCase().includes(term);
+        if (!nameMatch && !lastMessageMatch) {
+          return false;
+        }
+      }
+
+      if (this.dateFilter !== 'todos') {
+        const fecha = conv.fecha ? new Date(conv.fecha) : new Date();
+        const diffDays = Math.floor((now.getTime() - fecha.getTime()) / (1000 * 60 * 60 * 24));
+        if (this.dateFilter === 'hoy' && diffDays > 0) return false;
+        if (this.dateFilter === 'semana' && diffDays > 7) return false;
+        if (this.dateFilter === 'mes' && diffDays > 30) return false;
+      }
+
+      return true;
+    });
+  }
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.selectedUserUid = '';
+    this.dateFilter = 'todos';
+    this.applyFilters();
   }
 
   goBack(): void {
