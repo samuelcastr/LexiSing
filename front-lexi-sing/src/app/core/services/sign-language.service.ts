@@ -21,12 +21,24 @@ const WASM_PATH = '/mediapipe/wasm';
 const MODEL_PATH = '/mediapipe/models/hand_landmarker.task';
 
 const FRAMES_CONFIRMACION = 3;
+// Letras ambiguas del abecedario requieren más frames de retención para evitar falsos positivos.
+const FRAMES_CONFIRMACION_LETRA_AMBIGUA = 5;
 const MAX_GESTOS = 15;
 const HISTORY_SIZE = 15;
 const SMOOTH_FRAMES = 3;
 const GRACE_MS = 500;
 const HAND_LOST_MS = 600;
 const MAX_RETRY = 3;
+
+// Modo de reconocimiento: palabras (señas completas) o deletreo (abecedario).
+export enum SignMode {
+  PALABRAS = 'palabras',
+  DELETREAR = 'deletrear'
+}
+
+// Letras del dactilológico LSC que comparten configuraciones manuales muy
+// parecidas y necesitan retención adicional para distinguirse.
+const LETRAS_AMBIGUAS = new Set(['A', 'S', 'M', 'N', 'Ñ', 'J', 'E', 'O', 'R']);
 
 const CONEXIONES = [
   [0, 1], [1, 2], [2, 3], [3, 4],
@@ -68,6 +80,9 @@ export class SignLanguageService {
   readonly cargando$ = new BehaviorSubject<boolean>(false);
   readonly confirmado$ = new BehaviorSubject<string | null>(null);
   readonly manoPerdida$ = new BehaviorSubject<boolean>(false);
+  readonly modo$ = new BehaviorSubject<SignMode>(SignMode.PALABRAS);
+
+  private textoDeletreado = '';
 
   get detectando(): boolean {
     return this.detectando$.value;
@@ -75,6 +90,20 @@ export class SignLanguageService {
 
   get gestos(): GestoDetectado[] {
     return this.gestos$.value;
+  }
+
+  get modo(): SignMode {
+    return this.modo$.value;
+  }
+
+  setModo(modo: SignMode): void {
+    this.modo$.next(modo);
+    this.limpiar();
+    this.gestoActual = null;
+    this.framesConsecutivos = 0;
+    this.ultimoConfirmado = null;
+    this.textoDeletreado = '';
+    this.gestoEnCurso$.next(null);
   }
 
   async iniciar(video: HTMLVideoElement, canvas?: HTMLCanvasElement): Promise<void> {
@@ -156,6 +185,7 @@ export class SignLanguageService {
   }
 
   limpiar(): void {
+    this.textoDeletreado = '';
     this.gestos$.next([]);
   }
 
@@ -172,6 +202,11 @@ export class SignLanguageService {
   }
 
   traducirAhora(): string {
+    if (this.modo === SignMode.DELETREAR) {
+      if (!this.textoDeletreado) return '';
+      return this.textoDeletreado.charAt(0).toUpperCase() + this.textoDeletreado.slice(1);
+    }
+
     const palabras = this.gestos.map(g => g.etiqueta.replace(/[.,;:!?]/g, ''));
     if (palabras.length === 0) {
       return '';
@@ -180,6 +215,21 @@ export class SignLanguageService {
       .map((p, i) => (i === 0 ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : p.toLowerCase()))
       .join(' ')
       + '.';
+  }
+
+  // En modo deletreo, el gesto "por favor" se interpreta como espacio.
+  marcarEspacio(): void {
+    if (this.modo !== SignMode.DELETREAR) return;
+    this.textoDeletreado += ' ';
+    this.gestos$.next([{ id: 'espacio', etiqueta: this.textoDeletreado }]);
+  }
+
+  borrarUltimaLetra(): void {
+    if (this.modo !== SignMode.DELETREAR) return;
+    if (this.textoDeletreado.length > 0) {
+      this.textoDeletreado = this.textoDeletreado.slice(0, -1);
+    }
+    this.gestos$.next([{ id: 'borrar', etiqueta: this.textoDeletreado }]);
   }
 
   private bucle = (): void => {
@@ -265,7 +315,11 @@ export class SignLanguageService {
       this.framesConsecutivos = gesto ? 1 : 0;
     }
 
-    if (gesto && this.framesConsecutivos >= FRAMES_CONFIRMACION && gesto !== this.ultimoConfirmado) {
+    const esLetra = this.modo === SignMode.DELETREAR;
+    const letraAmbigua = esLetra && LETRAS_AMBIGUAS.has(gesto ?? '');
+    const framesRequeridos = letraAmbigua ? FRAMES_CONFIRMACION_LETRA_AMBIGUA : FRAMES_CONFIRMACION;
+
+    if (gesto && this.framesConsecutivos >= framesRequeridos && gesto !== this.ultimoConfirmado) {
       this.confirmarGesto(gesto);
     }
 
@@ -313,6 +367,12 @@ export class SignLanguageService {
   }
 
   private evaluarGestos(manos: ManoDetectada[]): string | null {
+    if (this.modo === SignMode.DELETREAR) {
+      // En deletreo usamos una sola mano (dactilología LSC).
+      const mano = manos[0];
+      return mano ? evaluarLetra(mano.landmarks) : null;
+    }
+
     const ahora = Date.now();
     const dentroDeGrace = (ahora - this.ultimaVezAmbasManos) < GRACE_MS;
 
@@ -391,8 +451,17 @@ export class SignLanguageService {
 
   private confirmarGesto(id: string): void {
     this.ultimoConfirmado = id;
-    const secuencia = [...this.gestos, { id, etiqueta: GESTO_PALABRA[id] ?? id }];
-    this.gestos$.next(secuencia.slice(-MAX_GESTOS));
+
+    if (this.modo === SignMode.DELETREAR) {
+      // En deletreo cada confirmación aporta UNA letra al texto corrido.
+      const letra = id.startsWith('LETRA_') ? id.slice('LETRA_'.length) : (GESTO_PALABRA[id] ?? id);
+      this.textoDeletreado += letra;
+      this.gestos$.next([{ id, etiqueta: this.textoDeletreado }]);
+    } else {
+      const secuencia = [...this.gestos, { id, etiqueta: GESTO_PALABRA[id] ?? id }];
+      this.gestos$.next(secuencia.slice(-MAX_GESTOS));
+    }
+
     this.confirmado$.next(id);
     setTimeout(() => this.confirmado$.next(null), 400);
   }
@@ -510,7 +579,16 @@ export const GESTO_PALABRA: Record<string, string> = {
   APLAUSO: 'Aplauso',
   PAZ: 'Paz',
   CORAZON: 'Amor',
-  PARAR: 'Parar'
+  PARAR: 'Parar',
+  // Léxico empresarial (LSC)
+  REUNION: 'Reunión',
+  INFORME: 'Informe',
+  CLIENTE: 'Cliente',
+  PAUSA: 'Pausa',
+  APROBAR: 'Aprobar',
+  ENVIAR: 'Enviar',
+  TRABAJAR: 'Trabajar',
+  PEDIR: 'Pedir'
 };
 
 function dist(a: Landmark, b: Landmark): number {
@@ -540,6 +618,153 @@ function angleBetween(a: Landmark, vertex: Landmark, b: Landmark): number {
   return Math.acos(Math.min(1, Math.max(-1, dot / (magA * magB))));
 }
 
+function fingerTipsTouching(a: number, b: number, lm: Landmark[], ratio = 0.28): boolean {
+  const handSize = dist(lm[0], lm[9]);
+  return dist(lm[a], lm[b]) < handSize * ratio;
+}
+
+// Punto medio de un dedo índice "doblado" (pulgar a lado).
+function fingerFoldedOverThumb(lm: Landmark[], tips: number[], pips: number[]): boolean {
+  // Los dedos se doblan sobre el pulgar: sus puntas caen por debajo (más cerca
+  // del centro de la mano) que sus articulaciones medias.
+  let folded = 0;
+  for (let i = 0; i < tips.length; i++) {
+    if (!fingerExtended(lm, tips[i], pips[i])) folded++;
+  }
+  return folded >= Math.floor(tips.length * 0.6);
+}
+
+// Clasificador del abecedario dactilológico de la Lengua de Señas Colombiana.
+// Prioriza configuraciones más específicas y requiere retención en letras
+// ambiguas (ver LETRAS_AMBIGUAS).
+export function evaluarLetra(lm: Landmark[]): string | null {
+  const idx = fingerExtended(lm, 8, 6);
+  const mid = fingerExtended(lm, 12, 10);
+  const ring = fingerExtended(lm, 16, 14);
+  const pink = fingerExtended(lm, 20, 18);
+  const thumb = thumbExtended(lm);
+  const floor = [idx, mid, ring, pink].filter(Boolean).length;
+  const handSize = dist(lm[0], lm[9]);
+
+  const tipsIndexRing = fingerTipsTouching(8, 16, lm, 0.35);
+  const tipsMidRing = fingerTipsTouching(12, 16, lm, 0.35);
+  const tipsMidPink = fingerTipsTouching(12, 20, lm, 0.35);
+
+  // --- Familia de puño (A, E, S, O, T) ---
+  if (floor === 0) {
+    // O: las cinco yemas se tocan formando un círculo abierto (la palma queda hueca).
+    if (thumb && allTipsClose(lm, handSize)) {
+      return 'LETRA_O';
+    }
+    // E: dedos doblados con las puntas apretadas hacia la base del pulgar.
+    if (!thumb && (tipsIndexRing && tipsMidPink)) {
+      return 'LETRA_E';
+    }
+    // S: puño cerrado con el pulgar doblado delante de los cuatro dedos.
+    if (thumb) {
+      return 'LETRA_S';
+    }
+    // T: índice doblado sobre el pulgar, resto cerrado (punta del índice cerca del pulgar).
+    if (dist(lm[8], lm[4]) < handSize * 0.3) {
+      return 'LETRA_T';
+    }
+    // A: puño cerrado, pulgar al costado/sobre el puño sin dedos extendidos.
+    return 'LETRA_A';
+  }
+
+  // --- I (solo meñique extendido) ---
+  if (!thumb && !idx && !mid && !ring && pink) {
+    return 'LETRA_I';
+  }
+
+  // --- Y (pulgar + meñique) ---
+  if (thumb && !idx && !mid && !ring && pink) {
+    return 'LETRA_Y';
+  }
+
+  // --- M (índice + medio + anular doblados sobre el pulgar, meñique en banco) ---
+  if (thumb && !idx && !mid && !ring && pink) {
+    return 'LETRA_M';
+  }
+
+  // --- N (índice y medio doblados sobre el pulgar, anular y meñique extendidos) ---
+  if (thumb && !idx && !mid && ring && pink) {
+    return 'LETRA_N';
+  }
+
+  // --- U (índice + medio extendidos juntos, anular y meñique doblados) ---
+  if (thumb && idx && mid && !ring && !pink && tipsMidRing) {
+    return 'LETRA_U';
+  }
+
+  // --- V (índice + medio extendidos separados) ---
+  if (thumb && idx && mid && !ring && !pink && !tipsMidRing) {
+    return 'LETRA_V';
+  }
+
+  // --- K (índice + medio extendidos con el pulgar entre ellos / al frente) ---
+  if (thumb && idx && mid && !ring && !pink && dist(lm[4], lm[0]) < handSize * 0.5) {
+    return 'LETRA_K';
+  }
+
+  // --- W (índice + medio + anular extendidos juntos) ---
+  if (thumb && idx && mid && ring && !pink && tipsIndexRing) {
+    return 'LETRA_W';
+  }
+
+  // --- D (índice extendido, otros doblados, pulgar apoyado en el medio) ---
+  if (idx && !mid && !ring && !pink && thumb) {
+    return 'LETRA_D';
+  }
+
+  // --- X (índice extendido y ligeramente doblado, medio/anular/meñique doblados) ---
+  if (idx && !mid && !ring && !pink && !thumb) {
+    // A diferencia de I, en X el índice está doblado (la yema cae cerca del PIP).
+    const anguloIndice = angleBetween(lm[5], lm[6], lm[8]);
+    return anguloIndice < 1.9 && anguloIndice > 0.5 ? 'LETRA_X' : 'LETRA_I';
+  }
+
+  // --- B (cuatro dedos extendidos juntos, pulgar doblado/pegado) ---
+  if (floor >= 4 && !thumb) {
+    return 'LETRA_B';
+  }
+
+  // --- F (pulgar + índice tocándose, tres dedos extendidos) ---
+  if (thumbIndexClose(lm) && idx && mid && ring && pink) {
+    return 'LETRA_F';
+  }
+
+  // --- G (índice y pulgar extendidos casi tocándose hacia adelante) ---
+  if (thumb && idx && !mid && !ring && !pink && fingerTipsTouching(4, 8, lm, 0.5)) {
+    return 'LETRA_G';
+  }
+
+  // --- L (índice + pulgar extendidos en L) ---
+  if (thumb && idx && !mid && !ring && !pink) {
+    const angulo = angleBetween(lm[4], lm[2], lm[8]);
+    if (angulo > 0.9) return 'LETRA_L';
+  }
+
+  // --- C (cuatro dedos curvados formando C, pulgar abierto) ---
+  if (thumb && floor >= 4 && !allTipsClose(lm, handSize)) {
+    return 'LETRA_C';
+  }
+
+  // --- P/Q/R fallback (letras con configuración de dedos extendidos hacia abajo)
+  // --- R (índice y medio entrecruzados) ---
+  if (idx && mid && !ring && !pink && fingerTipsTouching(8, 12, lm, 0.6)) {
+    return 'LETRA_R';
+  }
+
+  return null;
+}
+
+function allTipsClose(lm: Landmark[], handSize: number): boolean {
+  return dist(lm[4], lm[8]) < handSize * 0.3 &&
+         dist(lm[4], lm[12]) < handSize * 0.35 &&
+         dist(lm[4], lm[16]) < handSize * 0.4;
+}
+
 export function evaluarGesto(lm: Landmark[]): string | null {
   const idx = fingerExtended(lm, 8, 6);
   const mid = fingerExtended(lm, 12, 10);
@@ -549,9 +774,6 @@ export function evaluarGesto(lm: Landmark[]): string | null {
   const thumbIndexPinch = thumbIndexClose(lm);
 
   const handSize = dist(lm[0], lm[9]);
-  const allTipsClose = dist(lm[4], lm[8]) < handSize * 0.3 &&
-                       dist(lm[4], lm[12]) < handSize * 0.35 &&
-                       dist(lm[4], lm[16]) < handSize * 0.4;
 
   const extended = [idx, mid, ring, pink].filter(Boolean).length;
 
@@ -602,7 +824,7 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     }
   }
 
-  if (!idx && !mid && !ring && !pink && !thumb && allTipsClose) {
+  if (!idx && !mid && !ring && !pink && !thumb && allTipsClose(lm, handSize)) {
     return 'LETRA_O';
   }
 
@@ -683,6 +905,70 @@ function evaluarGestoBimanual(left: Landmark[], right: Landmark[]): string | nul
     if (thumbTouch < 0.08 && idxTouch < 0.08) {
       return 'CORAZON';
     }
+  }
+
+  // --- Léxico empresarial bimanual (LSC) ---
+  const lFlat = lExtended >= 4 && !lThumb;
+  const rFlat = rExtended >= 4 && !rThumb;
+
+  // APROBAR: ambos pulgares hacia arriba (distinto de PUÑO/PALMA unimanual).
+  const lThumbUp = lThumb && !lIdx && !lMid && !lRing && !lPink;
+  const rThumbUp = rThumb && !rIdx && !rMid && !rRing && !rPink;
+  if (lThumbUp && rThumbUp) {
+    return 'APROBAR';
+  }
+
+  // PAUSA: ambas manos extendidas apuntando una a la otra en vertical (forma "T").
+  const lIndexOver = lIdx && !lMid && !lRing && !lPink;
+  const rIndexOver = rIdx && !rMid && !rRing && !rPink;
+  if (lIndexOver && rIndexOver && !handsClose) {
+    const yGap = Math.abs(left[6].y - right[6].y);
+    const xGap = Math.abs(left[6].x - right[6].x);
+    if (yGap > 0.12 && xGap < 0.12) {
+      return 'PAUSA';
+    }
+  }
+
+  // TRABAJAR: ambos puños cerca (una contra la otra).
+  const lFist = !lIdx && !lMid && !lRing && !lPink && !lThumb;
+  const rFist = !rIdx && !rMid && !rRing && !rPink && !rThumb;
+  if (lFist && rFist && handsClose) {
+    return 'TRABAJAR';
+  }
+
+  // REUNION: ambas manos planas (B), una frente a la otra a distancia media y
+  // a la misma altura (grupo reunido). Distinto de ORACION (palmas abiertas) y
+  // de INFORME (una encima de la otra).
+  if (lFlat && rFlat && !handsClose) {
+    const palmY = Math.abs(left[9].y - right[9].y);
+    const palmX = Math.abs(left[9].x - right[9].x);
+    if (palmY < 0.08 && palmX > 0.12 && palmX < 0.35) {
+      return 'REUNION';
+    }
+  }
+
+  // INFORME: ambas manos planas (B), una encima de la otra a corta distancia
+  // (como sosteniendo un documento).
+  if (lFlat && rFlat) {
+    const yGap = Math.abs(left[9].y - right[9].y);
+    if (yGap > 0.08 && yGap < 0.3) {
+      return 'INFORME';
+    }
+  }
+
+  // ENVIAR: palmas abiertas, una claramente más arriba que la otra (empujar/envío).
+  if (lOpen && rOpen) {
+    const yGap = Math.abs(left[9].y - right[9].y);
+    if (yGap > 0.2) {
+      return 'ENVIAR';
+    }
+  }
+
+  // PEDIR: una mano abierta y la otra cerrada, ambas cerca (petición/palma arriba).
+  const lMuestra = lOpen && !rOpen;
+  const rMuestra = rOpen && !lOpen;
+  if ((lMuestra || rMuestra) && handsClose) {
+    return 'PEDIR';
   }
 
   return null;

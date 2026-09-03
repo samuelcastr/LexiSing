@@ -16,17 +16,19 @@
 
 ## Que es LexiSing
 
-LexiSing permite a personas sordomudas comunicarse en tiempo real mediante lengua de señas. La cámara detecta los gestos de la mano usando **MediaPipe HandLandmarker**, los traduce a palabras clave, y una IA (**Groq API**) las convierte en frases gramaticalmente correctas en español formal. Esas frases se envían como mensajes de chat entre usuarios.
+LexiSing permite a personas sordomudas comunicarse en tiempo real mediante **Lengua de Señas Colombiana (LSC)**. La cámara detecta los gestos de la mano usando **MediaPipe HandLandmarker**, los traduce a palabras clave o letras del abecedario, y una IA (**Groq API**) las convierte en frases gramaticalmente correctas en español formal. Esas frases se envían como mensajes de chat entre usuarios.
 
 ---
 
 ## Funcionalidades principales
 
-### Deteccion de señas en tiempo real
-- **24 gestos** reconocidos (14 unimanuales, 5 bimanuales, 3 de movimiento)
-- Suavizado de landmarks en 15 frames, confirmacion con 3 frames consecutivos
-- Acumulacion de hasta 15 gestos como "chips" que arman una frase
-- Modo practica con visualizacion de gestos detectados
+### Deteccion de señas en tiempo real (Lengua de Señas Colombiana)
+- **33 señas de palabras** reconocidas (incluye léxico empresarial) + **27 letras** del abecedario dactilológico LSC para deletreo
+- Dos modos de reconocimiento: **Palabras** (señas completas) y **Deletreo** (letra por letra)
+- Suavizado de landmarks (3 frames), historial de 15 frames y confirmación con 3 frames consecutivos (5 frames en letras ambiguas A/E/M/N/Ñ/O/R/S)
+- Acumulación de hasta 15 gestos como "chips" que arman una frase
+- Modo práctica con visualización de gestos detectados y retención estricta en letras ambiguas
+- Banner de "mano no detectada" cuando se pierde el rastreo por más de 600 ms
 
 ### Formalizacion con IA
 - El endpoint `POST /api/text/formalize/` convierte secuencias de glosas en texto formal empresarial usando **Groq API** (modelo `qwen/qwen3.8-27b`)
@@ -36,11 +38,18 @@ LexiSing permite a personas sordomudas comunicarse en tiempo real mediante lengu
 - Conversaciones 1-a-1 entre usuarios con mensajes en tiempo real
 - Edicion y eliminacion de mensajes
 - Indicador de presencia online/offline
+- Verificacion de conversaciones duplicadas antes de crear una nueva
+- Notificaciones sonoras cuando llega un mensaje en una conversación activa
 
 ### Autenticacion y usuarios
 - Login con email/password, Google y Microsoft via **Firebase Auth**
+- Sesión persistente (`browserLocalPersistence`) que conserva el rol del usuario al recargar
 - Perfiles de usuario con roles (admin, empleado, sordomudo, supervisor, usuario)
 - Guards de autenticacion y roles en rutas protegidas
+
+### Panel de supervisión (monitoreo)
+- Vista de monitoreo de conversaciones con filtros por participante/mensaje/fecha
+- Diseño violeta/índigo y tabla con truncado de mensajes largos
 
 ---
 
@@ -51,10 +60,12 @@ LexiSing permite a personas sordomudas comunicarse en tiempo real mediante lengu
 | Frontend | Angular + TypeScript | 20.3 |
 | UI | Angular Material | 20.2 |
 | Deteccion de señas | MediaPipe HandLandmarker | 1.0 |
+| Lengua de señas | LSC (abecedario dactilológico) | 27 letras |
 | Backend | Django + DRF | 6.0 + 3.17 |
 | Auth | Firebase Authentication | - |
 | Base de datos | Firestore (NoSQL) | - |
 | IA (formalizacion) | Groq API | - |
+| Camara | WebRTC `getUserMedia` | - |
 | HTTP Client | Requests (Python) / HttpClient (Angular) | - |
 
 ---
@@ -86,9 +97,15 @@ LexiSing/
 │   └── src/app/
 │       ├── core/
 │       │   ├── services/
-│       │   │   ├── sign-language.service.ts   # Deteccion de señas (MediaPipe)
+│       │   │   ├── sign-language.service.ts   # Deteccion de señas LSC (MediaPipe)
+│       │   │   ├── camera.service.ts          # Captura de cámara (getUserMedia)
 │       │   │   ├── text-formalizer.service.ts # Llamada a /api/text/formalize/
 │       │   │   ├── conversation.service.ts    # CRUD conversaciones (Firestore)
+│       │   │   ├── notification.service.ts    # Notificaciones sonoras de chat
+│       │   │   ├── presence.service.ts        # Presencia online/offline
+│       │   │   ├── activity.service.ts        # Registro de actividad
+│       │   │   ├── dashboard.service.ts       # Datos del panel de administracion
+│       │   │   ├── user-api.service.ts        # Cliente de las APIs de usuarios
 │       │   │   ├── auth.service.ts            # Firebase Auth
 │       │   │   └── error.service.ts           # Toast de errores
 │       │   ├── models/
@@ -98,8 +115,9 @@ LexiSing/
 │       └── features/
 │           ├── auth/                  # Login, registro, forgot-password
 │           ├── chat/
-│           │   └── conversation-list/ # Componente principal de chat + cámara
-│           └── dashboard/             # Panel de administracion
+│           │   └── conversation-list/ # Componente principal de chat + cámara + panel de traducción
+│           ├── dashboard/             # Panel de administracion
+│           └── roles/                 # Paneles por rol (supervisor, etc.)
 ```
 
 ---
@@ -183,28 +201,33 @@ Backend: `http://localhost:8000/`
 ## Como funciona la deteccion de señas
 
 ```
-Camara (WebRTC)
+Camara (WebRTC / getUserMedia)
     │
     ▼
 MediaPipe HandLandmarker (client-side)
     │
     ▼
-Extrae 21 landmarks por mano
+Extrae 21 landmarks por mano (hasta 2 manos)
     │
     ▼
 Suavizado (3 frames) + Historial (15 frames)
     │
     ▼
-Clasificacion de gestos:
-  ├─ Bimanuales primero (2 manos)
-  ├─ Estáticos (posición de dedos)
-  └─ Movimiento (ondeo, apuntar)
+Seleccion de modo:
+  ├─ Modo PALABRAS → Clasificacion de señas:
+  │     ├─ Bimanuales primero (2 manos)
+  │     ├─ Estáticas (posición de dedos)
+  │     └─ Movimiento (ondeo, apuntar)
+  │
+  └─ Modo DELETREAR → Abecedario LSC (27 letras)
+        clasificador evaluarLetra() (una mano)
     │
     ▼
-Confirmacion (3 frames consecutivos del mismo gesto)
+Confirmacion (3 frames consecutivos; 5 en letras ambiguas)
     │
     ▼
-Chip agregado al array de gestos
+Modo palabras: chip agregado al array de gestos
+Modo deletrear: letra concatenada al texto corrido (botones Espacio/Borrar)
     │
     ▼
 "Formalizar" → Groq API → Texto formal en español
@@ -215,35 +238,86 @@ Mensaje enviado en el chat
 
 ---
 
-## Gestos soportados
+## Señas soportadas
 
-| Gesto | Seña | Tipo |
-|-------|------|------|
-| HOLA | Palma abierta | Unimanual |
-| SI | Pulgar arriba | Unimanual |
-| NO | Pulgar abajo | Unimanual |
-| ADIOS | Indice + medio en V | Unimanual |
-| TE_QUIERO | Pulgar + indice + meñique | Unimanual |
-| ATENCION | Solo indice arriba | Unimanual |
-| GRACIAS | Puño cerrado | Unimanual |
-| POR_FAVOR | Indice + medio + anular | Unimanual |
-| NECESITO | 4 dedos arriba | Unimanual |
-| PERFECTO | Pulgar toca indice | Unimanual |
-| LLAMAR | Pulgar + meñique | Unimanual |
-| PROMESA | Solo meñique | Unimanual |
-| POCO | Pulgar + indice juntos | Unimanual |
-| LETRA_L | Pulgar + indice en L | Unimanual |
-| LETRA_O | Todas las puntas juntas | Unimanual |
-| TRES | Pulgar + indice + medio | Unimanual |
-| SEIS | Pulgar + meñique pinza | Unimanual |
-| ORACION | Ambas palmas juntas | Bimanual |
-| PARAR | Ambas palmas adelante | Bimanual |
-| PAZ | Ambas manos en V | Bimanual |
-| APLAUSO | Ambas abiertas juntas | Bimanual |
-| AMOR | Pulgares + indices juntos | Bimanual |
-| ONDEO | Mano de lado a lado | Movimiento |
-| MIRA_ARRIBA | Indice apunta arriba | Movimiento |
-| MIRA_ABAJO | Indice apunta abajo | Movimiento |
+### Modo Palabras — señas del vocabulario LSC y empresarial
+
+| Gesto | Significado | Tipo |
+|-------|-------------|------|
+| PALMA_ABIERTA | Hola | Unimanual |
+| PULGAR_ARRIBA | Sí | Unimanual |
+| PULGAR_ABAJO | No | Unimanual |
+| VICTORIA | Adiós | Unimanual |
+| TE_QUIERO | Te quiero | Unimanual |
+| INDICE_ARRIBA | Atención | Unimanual |
+| PUÑO_CERRADO | Gracias | Unimanual |
+| TRES_DEDOS | Por favor | Unimanual |
+| CUATRO_DEDOS | Necesito | Unimanual |
+| OK_SIGN | Perfecto | Unimanual |
+| PULGAR_MEÑIQUE | Llamar | Unimanual |
+| MEÑIQUE_ARRIBA | Promesa | Unimanual |
+| PINZA | Poco | Unimanual |
+| LETRA_L | Letra L | Unimanual |
+| LETRA_O | Letra O | Unimanual |
+| NUMERO_3 | Tres | Unimanual |
+| NUMERO_6 | Seis | Unimanual |
+| ONDEO | Adiós (ondeo) | Movimiento |
+| APUNTAR_ARRIBA | Mira arriba | Movimiento |
+| APUNTAR_ABAJO | Mira abajo | Movimiento |
+| ORACION | Oración | Bimanual |
+| PARAR | Parar | Bimanual |
+| PAZ | Paz | Bimanual |
+| APLAUSO | Aplauso | Bimanual |
+| CORAZON | Amor | Bimanual |
+
+### Léxico empresarial (LSC, bimanual)
+
+| Gesto | Significado | Tipo |
+|-------|-------------|------|
+| REUNION | Reunión | Bimanual |
+| INFORME | Informe | Bimanual |
+| PAUSA | Pausa | Bimanual |
+| APROBAR | Aprobar | Bimanual |
+| ENVIAR | Enviar | Bimanual |
+| TRABAJAR | Trabajar | Bimanual |
+| PEDIR | Pedir | Bimanual |
+| CLIENTE | Cliente | (mapeo reservado) |
+
+### Modo Deletreo — abecedario dactilológico LSC (27 letras)
+
+Las letras se detectan con el clasificador `evaluarLetra()` usando una sola mano, y cada confirmación concatena una letra al texto corrido.
+
+| Letra | Configuración manual |
+|-------|----------------------|
+| A | Puño cerrado, pulgar al costado |
+| B | 4 dedos extendidos juntos, pulgar doblado |
+| C | 4 dedos curvados formando C |
+| D | Índice extendido, otros doblados |
+| E | Dedos juntos doblados, pulgar al frente |
+| F | Pulgar + índice tocándose, otros arriba |
+| G | Índice + pulgar extendidos casi juntos |
+| H | Índice + medio extendidos horizontales |
+| I | Solo meñique extendido |
+| J | Meñique dibuja curva (movimiento) |
+| K | Índice + medio, pulgar al frente |
+| L | Índice + pulgar en L |
+| M | 3 dedos doblados sobre el pulgar |
+| N | 2 dedos doblados sobre el pulgar |
+| Ñ | N con pulgar en la mejilla |
+| O | Todas las yemas juntas (círculo) |
+| P | Índice + medio hacia abajo |
+| Q | Índice + medio hacia abajo, pulgar debajo |
+| R | Índice y medio entrecruzados |
+| S | Puño cerrado, pulgar doblado delante |
+| T | Índice doblado sobre el pulgar |
+| U | Índice + medio juntos |
+| V | Índice + medio en V |
+| W | Índice + medio + anular arriba |
+| X | Índice doblado (gancho) |
+| Y | Pulgar + meñique |
+| Z | Índice dibuja Z (movimiento) |
+
+> **Nota:** las letras A/E/M/N/Ñ/O/R/S son configuraciones muy similares entre sí; requieren 5 frames de retención para evitar falsos positivos y deben calibrarse con cámara real.
 
 ---
 

@@ -4,7 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { ConversationService } from '../../../core/services/conversation.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { CameraService } from '../../../core/services/camera.service';
-import { SignLanguageService, GestoDetectado } from '../../../core/services/sign-language.service';
+import { SignLanguageService, GestoDetectado, SignMode } from '../../../core/services/sign-language.service';
 import { TextFormalizerService } from '../../../core/services/text-formalizer.service';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
@@ -69,6 +69,36 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   formalizando = false;
   modoPractica = false;
   manoPerdida = false;
+  modoDeletrear = false;
+  abecedarioLSC = [
+    { nombre: 'A', como: 'Puño cerrado, pulgar al costado' },
+    { nombre: 'B', como: '4 dedos extendidos juntos, pulgar doblado' },
+    { nombre: 'C', como: '4 dedos curvados formando C' },
+    { nombre: 'D', como: 'Índice extendido, otros doblados' },
+    { nombre: 'E', como: 'Dedos juntos doblados, pulgar al frente' },
+    { nombre: 'F', como: 'Pulgar + índice tocándose, otros arriba' },
+    { nombre: 'G', como: 'Índice + pulgar extendidos casi juntos' },
+    { nombre: 'H', como: 'Índice + medio extendidos horizontales' },
+    { nombre: 'I', como: 'Solo meñique extendido' },
+    { nombre: 'J', como: 'Meñique dibuja curva (movimiento)' },
+    { nombre: 'K', como: 'Índice + medio, pulgar al frente' },
+    { nombre: 'L', como: 'Índice + pulgar en L' },
+    { nombre: 'M', como: '3 dedos doblados sobre el pulgar' },
+    { nombre: 'N', como: '2 dedos doblados sobre el pulgar' },
+    { nombre: 'Ñ', como: 'N con pulgar en la mejilla' },
+    { nombre: 'O', como: 'Todas las yemas juntas (círculo)' },
+    { nombre: 'P', como: 'Índice + medio hacia abajo, pulgar al frente' },
+    { nombre: 'Q', como: 'Índice + medio hacia abajo, pulgar debajo' },
+    { nombre: 'R', como: 'Índice y medio entrecruzados' },
+    { nombre: 'S', como: 'Puño cerrado, pulgar doblado delante' },
+    { nombre: 'T', como: 'Índice doblado sobre el pulgar' },
+    { nombre: 'U', como: 'Índice + medio juntos' },
+    { nombre: 'V', como: 'Índice + medio en V' },
+    { nombre: 'W', como: 'Índice + medio + anular arriba' },
+    { nombre: 'X', como: 'Índice doblado (gancho)' },
+    { nombre: 'Y', como: 'Pulgar + meñique' },
+    { nombre: 'Z', como: 'Índice dibuja Z (movimiento)' }
+  ];
   guiaSenas = [
     { nombre: 'Hola', como: 'Palma abierta' },
     { nombre: 'Sí', como: 'Pulgar arriba' },
@@ -94,7 +124,14 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     { nombre: 'Amor ✋✋', como: 'Pulgares + índices juntos' },
     { nombre: 'Ondeando ✋', como: 'Mano de lado a lado' },
     { nombre: 'Mira arriba ☝', como: 'Índice apunta arriba' },
-    { nombre: 'Mira abajo ☟', como: 'Índice apunta abajo' }
+    { nombre: 'Mira abajo ☟', como: 'Índice apunta abajo' },
+    { nombre: 'Reunión ✋✋', como: 'Palmas planas frente a frente' },
+    { nombre: 'Informe ✋✋', como: 'Palmas planas una encima de otra' },
+    { nombre: 'Pausa ✋✋', como: 'Índices cruzados en vertical (T)' },
+    { nombre: 'Aprobar 👌👌', como: 'Dos pulgares hacia arriba' },
+    { nombre: 'Enviar ✋✋', como: 'Palmas abiertas, una más arriba' },
+    { nombre: 'Trabajar ✊✊', como: 'Ambos puños juntos' },
+    { nombre: 'Pedir ✋✊', como: 'Una palma abierta + otra cerrada' }
   ];
   private sending = false;
   private destroy$ = new Subject<void>();
@@ -639,6 +676,22 @@ if (this.chatUserUids.has(this.selectedUserUid)) {
 
   togglePractica(): void {
     this.modoPractica = !this.modoPractica;
+  }
+
+  toggleModo(): void {
+    this.modoDeletrear = !this.modoDeletrear;
+    this.signLang.setModo(this.modoDeletrear ? SignMode.DELETREAR : SignMode.PALABRAS);
+    this.gestosActuales = [];
+    this.textoTraducido = '';
+  }
+
+  marcarEspacio(): void {
+    this.signLang.marcarEspacio();
+  }
+
+  borrarUltimaLetra(): void {
+    this.signLang.borrarUltimaLetra();
+    this.textoTraducido = this.signLang.traducirAhora();
   }
 
   cerrarPreview(): void {

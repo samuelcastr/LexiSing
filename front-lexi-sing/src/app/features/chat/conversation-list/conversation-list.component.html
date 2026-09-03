@@ -123,6 +123,11 @@
                 [class.active]="senasDetectando" (click)="abrirPreviewTraduccion()">
                 <mat-icon>translate</mat-icon>
               </button>
+              <button *ngIf="cameraActive" class="camera-toggle-btn camera-mode-btn"
+                [class.active]="modoDeletrear" (click)="toggleModo()"
+                [matTooltip]="modoDeletrear ? 'Deletreo activo: deletrea letra por letra' : 'Modo palabras: señas completas'">
+                <mat-icon>{{ modoDeletrear ? 'spellcheck' : 'translate' }}</mat-icon>
+              </button>
               <button *ngIf="cameraActive" class="camera-toggle-btn camera-practice-btn"
                 [class.active]="modoPractica" (click)="togglePractica()"
                 [matTooltip]="modoPractica ? 'Salir de práctica' : 'Modo práctica'">
@@ -136,6 +141,9 @@
             <div class="translation-preview-header">
               <mat-icon>translate</mat-icon>
               <span>Traducción de señas</span>
+              <span class="mode-badge" [class.mode-badge--deletrear]="modoDeletrear">
+                {{ modoDeletrear ? 'Deletreo' : 'Palabras' }}
+              </span>
               <button class="panel-close-btn" (click)="cerrarPreview()">
                 <mat-icon>close</mat-icon>
               </button>
@@ -157,6 +165,14 @@
               class="translation-textarea" [readonly]="textoLock || formalizando"></textarea>
             <div class="translation-actions">
               <button class="app-btn app-btn--outline app-btn--sm" (click)="limpiarGestos()">Limpiar</button>
+              <button *ngIf="modoDeletrear" class="app-btn app-btn--outline app-btn--sm"
+                (click)="marcarEspacio()" matTooltip="Insertar un espacio">
+                <mat-icon>space_bar</mat-icon> Espacio
+              </button>
+              <button *ngIf="modoDeletrear" class="app-btn app-btn--outline app-btn--sm"
+                (click)="borrarUltimaLetra()" matTooltip="Borrar última letra">
+                <mat-icon>backspace</mat-icon>
+              </button>
               <button class="app-btn app-btn--outline app-btn--sm" (click)="formalizarTexto()"
                 [disabled]="formalizando || gestosActuales.length === 0"
                 matTooltip="Formalizar texto con IA">
@@ -169,9 +185,11 @@
               </button>
             </div>
             <details class="sign-guide">
-              <summary class="sign-guide-title">Señas disponibles</summary>
+              <summary class="sign-guide-title">
+                {{ modoDeletrear ? 'Abecedario LSC (deletreo)' : 'Señas disponibles' }}
+              </summary>
               <div class="sign-guide-grid">
-                <div class="sign-guide-item" *ngFor="let s of guiaSenas">
+                <div class="sign-guide-item" *ngFor="let s of modoDeletrear ? abecedarioLSC : guiaSenas">
                   <span class="sign-guide-name">{{ s.nombre }}</span>
                   <span class="sign-guide-desc">{{ s.como }}</span>
                 </div>
