@@ -242,82 +242,89 @@ Mensaje enviado en el chat
 
 ### Modo Palabras — señas del vocabulario LSC y empresarial
 
-| Gesto | Significado | Tipo |
-|-------|-------------|------|
-| PALMA_ABIERTA | Hola | Unimanual |
-| PULGAR_ARRIBA | Sí | Unimanual |
-| PULGAR_ABAJO | No | Unimanual |
-| VICTORIA | Adiós | Unimanual |
-| TE_QUIERO | Te quiero | Unimanual |
-| INDICE_ARRIBA | Atención | Unimanual |
-| PUÑO_CERRADO | Gracias | Unimanual |
-| TRES_DEDOS | Por favor | Unimanual |
-| CUATRO_DEDOS | Necesito | Unimanual |
-| OK_SIGN | Perfecto | Unimanual |
-| PULGAR_MEÑIQUE | Llamar | Unimanual |
-| MEÑIQUE_ARRIBA | Promesa | Unimanual |
-| PINZA | Poco | Unimanual |
-| LETRA_L | Letra L | Unimanual |
-| LETRA_O | Letra O | Unimanual |
-| NUMERO_3 | Tres | Unimanual |
-| NUMERO_6 | Seis | Unimanual |
-| ONDEO | Adiós (ondeo) | Movimiento |
-| APUNTAR_ARRIBA | Mira arriba | Movimiento |
-| APUNTAR_ABAJO | Mira abajo | Movimiento |
-| ORACION | Oración | Bimanual |
-| PARAR | Parar | Bimanual |
-| PAZ | Paz | Bimanual |
-| APLAUSO | Aplauso | Bimanual |
-| CORAZON | Amor | Bimanual |
+Pon la mano frente a la cámara y mantén la posición unos segundos hasta que la seña se confirme. "Extendido" significa que el dedo queda recto; "doblado/cerrado" significa que se encoge hacia la palma.
 
-### Léxico empresarial (LSC, bimanual)
+| Significado | Cómo se hace la seña | Dedos usados | Tipo |
+|-------------|----------------------|--------------|------|
+| **Hola** | Mano abierta con todos los dedos extendidos y separados, palma mirando a la cámara | 4 dedos + pulgar abiertos | Unimanual |
+| **Sí** | Puño cerrado con el pulgar levantado hacia arriba | Nada + pulgar arriba | Unimanual |
+| **No** | Puño cerrado con el pulgar apuntando hacia abajo | Nada + pulgar abajo | Unimanual |
+| **Adiós** | Solo los dedos índice y medio extendidos formando una "V" | Índice + medio | Unimanual |
+| **Te quiero** | Coloca dedos en la mano del amor: índice y meñique extendidos con el pulgar abierto | Pulgar + índice + meñique | Unimanual |
+| **Atención** | Solo el índice extendido hacia arriba, el resto cerrado | Índice | Unimanual |
+| **Gracias** | Mano cerrada en puño (sin moverla) | Ninguno | Unimanual |
+| **Por favor** | Índice, medio y anular extendidos, meñique y pulgar cerrados | Índice + medio + anular | Unimanual |
+| **Necesito** | Los 4 dedos extendidos hacia arriba, pulgar cerrado | Índice + medio + anular + meñique | Unimanual |
+| **Perfecto** | Señal de "OK": pulgar y dedo índice se tocan formando un círculo, el resto levantado | Pulgar toca índice | Unimanual |
+| **Llamar** | Como la seña del celular: pulgar y meñique extendidos (en forma de teléfono) | Pulgar + meñique | Unimanual |
+| **Promesa** | Solo el meñique extendido hacia arriba, resto cerrado | Meñique | Unimanual |
+| **Poco** | Pulgar e índice se tocan por las puntas (pellizco pequeño) | Pulgar + índice juntos | Unimanual |
+| **Letra L** | Índice y pulgar extendidos formando una "L" (dedos en ángulo de 90°) | Pulgar + índice en L | Unimanual |
+| **Letra O** | Todas las puntas de los dedos se tocan formando un círculo | 5 puntas juntas | Unimanual |
+| **Tres** | Pulgar, índice y medio extendidos, resto cerrado | Pulgar + índice + medio | Unimanual |
+| **Seis** | Puño cerrado con pulgar y meñique extendidos haciendo pinza | Pulgar + meñique | Unimanual |
+| **Adiós (ondeo)** | Mano abierta moviéndose de lado a lado | Todos abiertos (con movimiento) | Movimiento |
+| **Mira arriba** | Índice extendido apuntando hacia arriba | Índice (con movimiento) | Movimiento |
+| **Mira abajo** | Índice extendido apuntando hacia abajo | Índice (con movimiento) | Movimiento |
 
-| Gesto | Significado | Tipo |
-|-------|-------------|------|
-| REUNION | Reunión | Bimanual |
-| INFORME | Informe | Bimanual |
-| PAUSA | Pausa | Bimanual |
-| APROBAR | Aprobar | Bimanual |
-| ENVIAR | Enviar | Bimanual |
-| TRABAJAR | Trabajar | Bimanual |
-| PEDIR | Pedir | Bimanual |
-| CLIENTE | Cliente | (mapeo reservado) |
+**Señas de palabras con las dos manos (bimanuales):**
+
+| Significado | Cómo se hace la seña | Tipo |
+|-------------|----------------------|------|
+| **Oración** | Las dos palmas abiertas se juntan frente a ti | Bimanual |
+| **Parar** | Las dos palmas abiertas hacia adelante, separadas (señal de alto) | Bimanual |
+| **Paz** | Las dos manos en forma de "V" (victoria) frente a ti | Bimanual |
+| **Aplauso** | Las dos palmas abiertas se chocan (como aplaudir) | Bimanual |
+| **Amor** | Pulgares e índices de ambas manos se tocan formando un corazón | Bimanual |
+
+### Léxico empresarial (señas de trabajo, con las dos manos)
+
+| Significado | Cómo se hace la seña | Tipo |
+|-------------|----------------------|------|
+| **Reunión** | Ambas manos planas (4 dedos juntos, pulgar pegado) frente a frente a la misma altura | Bimanual |
+| **Informe** | Ambas manos planas, una encima de la otra (como sosteniendo un documento) | Bimanual |
+| **Pausa** | Ambas manos en "T": índice y medio extendidos cruzados en vertical (señal de pausa) | Bimanual |
+| **Aprobar** | Los dos pulgares levantados hacia arriba a la vez | Bimanual |
+| **Enviar** | Ambas palmas abiertas, una claramente más arriba que la otra | Bimanual |
+| **Trabajar** | Ambos puños cerrados juntos, uno frente al otro | Bimanual |
+| **Pedir** | Una palma abierta y la otra cerrada, cerca una de la otra | Bimanual |
+| **Cliente** | *(mapeo reservado para futura seña)* | — |
 
 ### Modo Deletreo — abecedario dactilológico LSC (27 letras)
 
-Las letras se detectan con el clasificador `evaluarLetra()` usando una sola mano, y cada confirmación concatena una letra al texto corrido.
+Para **deletrear** una palabra: activa el modo Deletreo, forma cada letra con una mano y mantenla unos segundos; el texto se escribe letra por letra. Usa los botones **Espacio** y **Borrar** del panel para separar palabras o corregir.
 
-| Letra | Configuración manual |
-|-------|----------------------|
-| A | Puño cerrado, pulgar al costado |
-| B | 4 dedos extendidos juntos, pulgar doblado |
-| C | 4 dedos curvados formando C |
-| D | Índice extendido, otros doblados |
-| E | Dedos juntos doblados, pulgar al frente |
-| F | Pulgar + índice tocándose, otros arriba |
-| G | Índice + pulgar extendidos casi juntos |
-| H | Índice + medio extendidos horizontales |
-| I | Solo meñique extendido |
-| J | Meñique dibuja curva (movimiento) |
-| K | Índice + medio, pulgar al frente |
-| L | Índice + pulgar en L |
-| M | 3 dedos doblados sobre el pulgar |
-| N | 2 dedos doblados sobre el pulgar |
-| Ñ | N con pulgar en la mejilla |
-| O | Todas las yemas juntas (círculo) |
-| P | Índice + medio hacia abajo |
-| Q | Índice + medio hacia abajo, pulgar debajo |
-| R | Índice y medio entrecruzados |
-| S | Puño cerrado, pulgar doblado delante |
-| T | Índice doblado sobre el pulgar |
-| U | Índice + medio juntos |
-| V | Índice + medio en V |
-| W | Índice + medio + anular arriba |
-| X | Índice doblado (gancho) |
-| Y | Pulgar + meñique |
-| Z | Índice dibuja Z (movimiento) |
+| Letra | Cómo se hace la seña | Dedos usados |
+|-------|----------------------|--------------|
+| **A** | Puño cerrado con el pulgar descansando al costado | Ninguno |
+| **B** | Mano abierta con los 4 dedos juntos y rectos, pulgar doblado hacia la palma | 4 dedos juntos |
+| **C** | Dedos curvados hacia adelante formando una "C" con el pulgar abierto | 4 dedos curvados + pulgar |
+| **D** | Solo el índice extendido, los demás doblados y el pulgar apoyado en el medio | Índice |
+| **E** | Dedos doblados y juntos apuntando al pulgar (como un puño con los nudillos visibles) | 4 dedos juntos + pulgar |
+| **F** | Pulgar e índice se tocan en punta, los otros 3 dedos levantados | Pulgar + índice; otros arriba |
+| **G** | Índice y pulgar extendidos hacia adelante casi tocándose | Pulgar + índice |
+| **H** | Índice y medio extendidos tocándose, forma horizontal | Índice + medio |
+| **I** | Solo el meñique extendido, el resto cerrado | Meñique |
+| **J** | Como la I pero el meñique traza una curva (con movimiento) | Meñique (movimiento) |
+| **K** | Índice y medio extendidos con el pulgar apoyado al frente | Índice + medio + pulgar |
+| **L** | Índice y pulgar extendidos formando una "L" | Pulgar + índice en L |
+| **M** | Los tres primeros dedos doblados sobre el pulgar, meñique cerrado | 3 dedos doblados |
+| **N** | Los dos primeros dedos doblados sobre el pulgar | 2 dedos doblados |
+| **Ñ** | Igual que la N, con el pulgar tocando la mejilla | 2 dedos doblados + mejilla |
+| **O** | Las 5 puntas de los dedos se juntan formando un círculo | 5 puntas juntas |
+| **P** | Índice y medio extendidos hacia abajo, pulgar hacia adelante | Índice + medio |
+| **Q** | Índice y medio hacia abajo con el pulgar debajo | Índice + medio + pulgar |
+| **R** | Índice y medio extendidos y entrecruzados | Índice + medio cruzados |
+| **S** | Puño cerrado con el pulgar doblado por delante de los dedos | Ninguno |
+| **T** | Índice doblado sobre el pulgar, resto cerrado | Índice |
+| **U** | Índice y medio extendidos y juntos | Índice + medio |
+| **V** | Índice y medio extendidos separados formando la "V" | Índice + medio en V |
+| **W** | Índice, medio y anular extendidos | Índice + medio + anular |
+| **X** | Índice doblado como un gancho, resto cerrado | Índice |
+| **Y** | Pulgar y meñique extendidos (como el gesto de "llamada") | Pulgar + meñique |
+| **Z** | Índice extendido trazando la forma de una Z (con movimiento) | Índice (movimiento) |
 
-> **Nota:** las letras A/E/M/N/Ñ/O/R/S son configuraciones muy similares entre sí; requieren 5 frames de retención para evitar falsos positivos y deben calibrarse con cámara real.
+> **Nota:** las letras **A, E, S, M, N, Ñ, O, R** son configuraciones de mano muy parecidas entre sí. Por eso el sistema retiene la seña durante 5 frames consecutivos (en lugar de 3) antes de confirmarlas, para reducir errores. Para mejor precisión conviene probar y calibrar con la cámara real.
 
 ---
 
