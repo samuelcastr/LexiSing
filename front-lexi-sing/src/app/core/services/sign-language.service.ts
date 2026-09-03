@@ -20,12 +20,12 @@ interface ManoDetectada {
 const WASM_PATH = '/mediapipe/wasm';
 const MODEL_PATH = '/mediapipe/models/hand_landmarker.task';
 
-const FRAMES_CONFIRMACION = 3;
+const FRAMES_CONFIRMACION = 10;
 // Letras ambiguas del abecedario requieren más frames de retención para evitar falsos positivos.
-const FRAMES_CONFIRMACION_LETRA_AMBIGUA = 5;
+const FRAMES_CONFIRMACION_LETRA_AMBIGUA = 14;
 const MAX_GESTOS = 15;
 const HISTORY_SIZE = 15;
-const SMOOTH_FRAMES = 3;
+const SMOOTH_FRAMES = 10;
 const GRACE_MS = 500;
 const HAND_LOST_MS = 600;
 const MAX_RETRY = 3;

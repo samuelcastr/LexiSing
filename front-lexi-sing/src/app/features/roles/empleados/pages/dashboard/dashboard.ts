@@ -41,9 +41,9 @@ export class EmpleadosDashboardPageComponent implements OnInit, OnDestroy {
         this.mensajesPorHora = data;
         this.mensajes = data.reduce((acc, d) => acc + d.count, 0);
       });
-    });
 
-    this.dashboardService.getRecentActivity().pipe(takeUntil(this.destroy$)).subscribe(a => this.recentActivities = a.slice(0, 5));
+      this.dashboardService.getRecentActivityPorUsuario(user.uid).pipe(takeUntil(this.destroy$)).subscribe(a => this.recentActivities = a);
+    });
   }
 
   ngOnDestroy(): void {
