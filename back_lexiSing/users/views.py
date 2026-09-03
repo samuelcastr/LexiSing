@@ -78,7 +78,8 @@ class UsersListView(APIView):
                 users.append({
                     'uid': data.get('uid'),
                     'nombre': data.get('nombre'),
-                    'email': data.get('email')
+                    'email': data.get('email'),
+                    'photoURL': data.get('photoURL')
                 })
 
             return Response(
