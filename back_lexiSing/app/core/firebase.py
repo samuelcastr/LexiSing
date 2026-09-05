@@ -5,6 +5,8 @@ from firebase_admin import firestore
 
 from pathlib import Path
 
+# Always define db (None when Firebase is not configured) so imports never crash.
+db = None
 
 try:
 
@@ -41,3 +43,4 @@ except Exception as e:
 
     print("❌ Error conectando Firebase:")
     print(str(e))
+    print("⚠️  db quedará como None (Firebase no disponible).")
