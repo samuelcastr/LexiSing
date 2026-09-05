@@ -1,0 +1,102 @@
+<div class="config-layout">
+
+  <div class="config-header">
+    <div>
+      <h1>Configuración de perfil</h1>
+      <p>Administra la información de tu cuenta y mantén tus datos actualizados.</p>
+    </div>
+  </div>
+
+  <div class="config-grid">
+
+    <mat-card class="profile-card">
+      <div class="avatar-container">
+        <div class="profile-avatar">
+          <img *ngIf="photoURL" [src]="photoURL" alt="Imagen de perfil">
+          <mat-icon *ngIf="!photoURL">person</mat-icon>
+        </div>
+        <label class="photo-upload" for="profile-photo">
+          <mat-icon>photo_camera</mat-icon>
+          Cambiar imagen
+        </label>
+        <input id="profile-photo" type="file" accept="image/*" (change)="onPhotoSelected($event)">
+      </div>
+
+      <h2>{{ nombre || 'Usuario' }}</h2>
+
+      <span class="profile-role">{{ rolFormateado }}</span>
+
+      <p>
+        Gestiona tu información personal y protege tu cuenta actualizando los datos cuando sea necesario.
+      </p>
+
+      <div class="profile-info">
+        <div>
+          <small>Email</small>
+          <strong>{{ email || '—' }}</strong>
+        </div>
+        <div>
+          <small>Estado</small>
+          <strong>{{ user?.activo ? 'Activo' : 'Inactivo' }}</strong>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="profile-form-card">
+      <h3 class="section-title">Información personal</h3>
+
+      <div class="form-grid">
+        <div class="profile-field">
+          <label>Nombre</label>
+          <input type="text" placeholder="Tu nombre" [(ngModel)]="nombre" name="nombre">
+        </div>
+
+        <div class="profile-field full">
+          <label>Email</label>
+          <input type="email" placeholder="tu@email.com" [(ngModel)]="email" name="email">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 class="section-title">Seguridad</h3>
+
+      <div class="form-grid">
+        <div class="profile-field full">
+          <label>Contraseña actual</label>
+          <input type="password" placeholder="Ingresa tu contraseña actual solo si vas a cambiarla" [(ngModel)]="currentPassword" name="currentPassword">
+        </div>
+        <div class="profile-field">
+          <label>Nueva contraseña</label>
+          <input type="password" placeholder="Mínimo 8: mayúscula, minúscula, número y símbolo" [(ngModel)]="nuevoPassword" name="nuevoPassword" (focus)="onPasswordFocus()" (blur)="onPasswordBlur()">
+        </div>
+        <div class="profile-field">
+          <label>Confirmar contraseña</label>
+          <input type="password" placeholder="Repite la nueva contraseña" [(ngModel)]="confirmarPassword" name="confirmarPassword">
+        </div>
+      </div>
+
+      <ul class="password-checks" *ngIf="passwordFocused || nuevoPassword">
+        <li *ngFor="let check of passwordChecks" [class.valid]="check.ok">
+          <mat-icon>{{ check.ok ? 'check_circle' : 'cancel' }}</mat-icon>
+          <span>{{ check.label }}</span>
+        </li>
+      </ul>
+
+      <div class="status-message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'" *ngIf="message">
+        {{ message }}
+      </div>
+
+      <div class="buttons">
+        <button class="cancel-btn" type="button" (click)="cancel()">
+          Cancelar
+        </button>
+        <button class="save-info-btn" type="button" (click)="saveChanges()" [disabled]="saving">
+          <mat-icon>save</mat-icon>
+          {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </mat-card>
+
+  </div>
+</div>

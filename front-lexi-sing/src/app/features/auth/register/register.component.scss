@@ -1,0 +1,344 @@
+.auth-container{
+    width:100%;
+    min-height:100vh;
+    background:#f3f4f6;
+    display:flex;
+    flex-direction:column;
+}
+
+.top-section{
+    width:100%;
+    padding-top:70px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.title{
+    text-align:center;
+    color:#4b39ef;
+    font-size:50px;
+    font-weight:700;
+    margin-bottom:40px;
+}
+
+.tabs{
+    width:520px;
+    height:56px;
+    background:#e7e7ec;
+    border-radius:40px;
+    margin:auto;
+    padding:5px;
+    display:flex;
+}
+
+.tab{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:40px;
+    text-decoration:none;
+    color:#888;
+    font-size:14px;
+    font-weight:600;
+}
+
+.tab.active{
+    background:linear-gradient(90deg,#4018dd,#6d39ff);
+    color:white;
+}
+
+form{
+    width:350px;
+    margin:35px auto;
+    margin-bottom:60px;
+}
+
+.input-group{
+    height:40px;
+    background:white;
+    border:1.5px solid #8874ff;
+    border-radius:9px;
+    display:flex;
+    align-items:center;
+    padding:0 12px;
+    margin-bottom:16px;
+}
+
+.input-group input{
+    width:100%;
+    border:none;
+    outline:none;
+    background:none;
+    font-size:12px;
+}
+
+.icon{
+    margin-right:10px;
+}
+
+.toggle-password{
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    color:#888;
+    transition:color .2s ease;
+}
+
+.toggle-password:hover{
+    color:#4b39ef;
+}
+
+.toggle-password mat-icon{
+    font-size:20px;
+    width:20px;
+    height:20px;
+}
+
+.password-checks{
+    list-style:none;
+    margin:-4px 0 16px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.password-checks li{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:#9ca3af;
+    font-size:11px;
+    transition:color .2s ease;
+}
+
+.password-checks li mat-icon{
+    font-size:16px;
+    width:16px;
+    height:16px;
+    color:#9ca3af;
+    transition:color .2s ease;
+}
+
+.password-checks li.valid{
+    color:#16a34a;
+}
+
+.password-checks li.valid mat-icon{
+    color:#16a34a;
+}
+
+.forgot{
+    margin-top:10px;
+}
+
+.forgot a{
+    color:#8c8c8c;
+    font-size:11px;
+    text-decoration:none;
+}
+
+.bottom-section{
+    margin-top:auto;
+    background:#05101e;
+    border-top-left-radius:35px;
+    border-top-right-radius:35px;
+    padding:28px 80px 45px;
+}
+
+.main-btn{
+    width:100%;
+    max-width:600px;
+    display:block;
+    margin:auto;
+    height:40px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(90deg,#4018dd,#6d39ff);
+    color:white;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    margin-top:20px;
+}
+
+.main-btn:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(64, 24, 221, 0.4);
+}
+
+.main-btn:disabled{
+    opacity:0.7;
+    cursor:not-allowed;
+}
+
+.divider{
+    display:flex;
+    align-items:center;
+    margin-top:25px;
+    gap:20px;
+}
+
+.line{
+    flex:1;
+    height:1px;
+    background:#3d4755;
+}
+
+.divider span{
+    color:white;
+    font-size:10px;
+}
+
+.social-icons{
+    display:flex;
+    justify-content:center;
+    gap:25px;
+    margin-top:35px;
+}
+
+.social{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    border:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
+.social:hover{
+    transform:translateY(-5px);
+    box-shadow:0 8px 25px rgba(0,0,0,0.3);
+}
+
+.social svg{
+    width:32px;
+    height:32px;
+}
+
+.google{
+    background:white;
+}
+
+.microsoft{
+    background:rgb(0, 0, 0);
+    color:black;
+}
+
+.error-message{
+    color:#ef4444;
+    font-size:12px;
+    margin-top:12px;
+    text-align:center;
+    padding:8px;
+    background:#fee2e2;
+    border-radius:6px;
+    border:1px solid #fca5a5;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .title{
+        font-size:36px;
+        margin-bottom:30px;
+    }
+
+    .tabs{
+        width:90%;
+        max-width:450px;
+    }
+
+    form{
+        width:90%;
+        max-width:300px;
+        margin-bottom:50px;
+    }
+
+    .bottom-section{
+        margin-top:50px;
+        padding:20px 30px 35px;
+    }
+
+    .social-icons{
+        gap:20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .title{
+        font-size:28px;
+        margin-bottom:20px;
+    }
+
+    .tabs{
+        width:95%;
+        height:50px;
+        font-size:12px;
+    }
+
+    form{
+        width:95%;
+        margin:20px auto 50px;
+    }
+
+    .input-group{
+        height:36px;
+        font-size:11px;
+    }
+
+    .bottom-section{
+        margin-top:30px;
+        padding:15px 20px 25px;
+        border-top-left-radius:25px;
+        border-top-right-radius:25px;
+    }
+
+    .main-btn{
+        height:36px;
+        font-size:12px;
+    }
+
+    .divider{
+        gap:15px;
+        margin-top:15px;
+    }
+
+    .divider span{
+        font-size:9px;
+    }
+
+    .social-icons{
+        gap:15px;
+        margin-top:25px;
+    }
+
+    .social{
+        width:50px;
+        height:50px;
+    }
+
+    .social svg{
+        width:28px;
+        height:28px;
+    }
+}
+
+.success-message {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  text-align: center;
+  line-height: 1.4;
+  background: #e8f5e9;
+  color: #2e7d32;
+}

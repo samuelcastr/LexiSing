@@ -1,0 +1,92 @@
+<div class="dashboard-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen" [class.mobile-open]="mobileMenuOpen">
+
+    <div>
+
+      <div class="logo" [class.collapsed]="!sidebarOpen">
+        <img src="/logo.png" alt="LexiSing" class="logo-icon">
+        <span class="logo-name">LexiSing</span>
+      </div>
+
+      <nav (click)="closeMobileMenu()">
+
+        <a routerLink="/roles/admin/dashboard" routerLinkActive="active">
+          <mat-icon>dashboard</mat-icon>
+          <span *ngIf="sidebarOpen">Dashboard</span>
+        </a>
+
+        <a routerLink="/roles/admin/usuarios" routerLinkActive="active">
+          <mat-icon>groups</mat-icon>
+          <span *ngIf="sidebarOpen">Usuarios</span>
+        </a>
+
+        <a routerLink="/roles/admin/solicitudes" routerLinkActive="active">
+          <mat-icon>pending_actions</mat-icon>
+          <span *ngIf="sidebarOpen">Solicitudes</span>
+        </a>
+
+        <a routerLink="/roles/admin/conversations" routerLinkActive="active">
+          <mat-icon>chat</mat-icon>
+          <span *ngIf="sidebarOpen">Chat</span>
+        </a>
+
+        <a routerLink="/roles/admin/reportes" routerLinkActive="active">
+          <mat-icon>description</mat-icon>
+          <span *ngIf="sidebarOpen">Reportes</span>
+        </a>
+
+        <a routerLink="/roles/admin/configuracion" routerLinkActive="active">
+          <mat-icon>settings</mat-icon>
+          <span *ngIf="sidebarOpen">Configuración</span>
+        </a>
+
+      </nav>
+
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="sidebarOpen">Cerrar sesión</span>
+    </button>
+
+  </aside>
+
+  <!-- Contenido -->
+  <main class="content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+
+      <div class="topbar-left">
+
+        <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <div *ngIf="showGreeting">
+          <h1>¡Hola, {{ userName }}!</h1>
+          <p>Panel de Administración</p>
+        </div>
+
+      </div>
+
+      <div class="topbar-right">
+        <a class="profile" routerLink="/roles/admin/configuracion">
+          <img *ngIf="photoURL" [src]="photoURL" alt="Perfil">
+          <mat-icon *ngIf="!photoURL">account_circle</mat-icon>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Router outlet for sub-pages -->
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+
+  </main>
+
+  <div class="sidebar-backdrop" [class.visible]="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+</div>

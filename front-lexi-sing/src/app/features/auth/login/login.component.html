@@ -1,0 +1,79 @@
+<div class="auth-container">
+
+  <div class="top-section">
+
+    <h1 class="title">Inicia Sesión</h1>
+
+    <div class="tabs">
+      <a routerLink="/login" class="tab active">Iniciar Sesión</a>
+      <a routerLink="/register" class="tab">Registrarse</a>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <div class="input-group" [class.has-error]="email?.invalid && email?.touched">
+        <span class="icon"></span>
+        <input
+          type="email"
+          placeholder="Correo Electrónico"
+          formControlName="email"
+          [class.invalid-input]="email?.invalid && email?.touched">
+      </div>
+      <app-field-error [control]="email"></app-field-error>
+
+      <div class="input-group" [class.has-error]="password?.invalid && password?.touched">
+        <span class="icon"></span>
+        <input
+          type="password"
+          placeholder="Contraseña"
+          formControlName="password"
+          [class.invalid-input]="password?.invalid && password?.touched">
+      </div>
+      <app-field-error [control]="password"></app-field-error>
+
+      <div class="forgot">
+        <a routerLink="/forgot-password">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+
+      <button 
+        class="main-btn" 
+        type="submit"
+        [disabled]="loading">
+        {{ loading ? (connecting$ | async) ? 'Verificando conexión...' : 'Iniciando sesión...' : 'Iniciar Sesión' }}
+      </button>
+
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="bottom-section">
+
+    <div class="divider">
+      <div class="line"></div>
+      <span>O inicia sesión con</span>
+      <div class="line"></div>
+    </div>
+
+    <div class="social-icons">
+
+      <!-- Google -->
+      <button type="button" class="social google" title="Google" (click)="loginWithGoogle()" [disabled]="loading">
+        <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google" style="width: 32px; height: 32px;">
+      </button>
+
+      <!-- Microsoft -->
+      <button type="button" class="social microsoft" title="Microsoft" (click)="loginWithMicrosoft()" [disabled]="loading">
+        <img src="https://cdn-icons-png.flaticon.com/128/732/732221.png" alt="Microsoft" style="width: 32px; height: 32px;">
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

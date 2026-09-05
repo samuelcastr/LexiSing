@@ -1,0 +1,179 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: white;
+  padding: 16px;
+  border-radius: 18px;
+  box-shadow: 0 3px 15px rgba(0,0,0,.06);
+}
+
+.stat-card span {
+  color: #777;
+  font-size: 12px;
+}
+
+.stat-card h2 {
+  margin-top: 8px;
+  font-size: 24px;
+}
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+}
+
+.activity-card,
+.actions-card {
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 3px 15px rgba(0,0,0,.06);
+}
+
+.activity-card h2,
+.actions-card h2 {
+  font-size: 18px;
+  margin: 0 0 12px 0;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.activity-item:first-of-type {
+  margin-top: 0;
+}
+
+.activity-item mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: #777;
+}
+
+.activity-item h4 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.activity-item span {
+  color: #999;
+  font-size: 13px;
+}
+
+.empty-state {
+  color: #6b7280;
+  font-size: 13px;
+  padding: 8px 0 4px;
+}
+
+.actions-card {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.actions-card button {
+  height: 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.actions-card button:hover {
+  background: #f3f4f6;
+}
+
+.charts-section {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.chart-card {
+  min-width: 0;
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 3px 15px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+
+@media (max-width: 1100px) {
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-card h2 {
+    font-size: 20px;
+  }
+
+  .bottom-grid {
+    gap: 12px;
+  }
+
+  .activity-card,
+  .actions-card,
+  .chart-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .activity-item {
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .activity-item mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .actions-card button {
+    height: 48px;
+    min-height: 44px;
+  }
+}

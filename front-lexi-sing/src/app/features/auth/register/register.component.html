@@ -1,0 +1,109 @@
+<div class="auth-container">
+
+  <div class="top-section">
+
+    <h1 class="title">Regístrate</h1>
+
+    <div class="tabs">
+      <a routerLink="/login" class="tab">
+        Iniciar Sesión
+      </a>
+
+      <a routerLink="/register" class="tab active">
+        Registrarse
+      </a>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <div class="input-group" [class.has-error]="nombre?.invalid && nombre?.touched">
+        <span class="icon"></span>
+        <input type="text" placeholder="Nombre" formControlName="nombre"
+          [class.invalid-input]="nombre?.invalid && nombre?.touched">
+      </div>
+      <app-field-error [control]="nombre"></app-field-error>
+
+      <div class="input-group" [class.has-error]="email?.invalid && email?.touched">
+        <span class="icon"></span>
+        <input type="email" placeholder="Correo Electrónico" formControlName="email"
+          [class.invalid-input]="email?.invalid && email?.touched">
+      </div>
+      <app-field-error [control]="email"
+        [customMessages]="{ emailExiste: 'Este correo ya está registrado. Intenta iniciar sesión.' }"></app-field-error>
+
+      <div class="input-group" [class.has-error]="password?.invalid && password?.touched">
+        <span class="icon"></span>
+        <input [type]="showPassword ? 'text' : 'password'" placeholder="Contraseña" formControlName="password" (focus)="onPasswordFocus()"
+          (blur)="onPasswordBlur()" [class.invalid-input]="password?.invalid && password?.touched">
+        <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+          <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </div>
+      <app-field-error [control]="password"
+        [customMessages]="{ pattern: 'Debe incluir al menos una mayúscula, una minúscula, un número y un símbolo.' }"></app-field-error>
+
+      <ul class="password-checks" *ngIf="passwordFocused || password?.touched">
+        <li *ngFor="let check of passwordChecks" [class.valid]="check.ok">
+          <mat-icon>{{ check.ok ? 'check_circle' : 'cancel' }}</mat-icon>
+          <span>{{ check.label }}</span>
+        </li>
+      </ul>
+
+      <div class="input-group" [class.has-error]="confirmPassword?.invalid && confirmPassword?.touched">
+        <span class="icon"></span>
+        <input [type]="showConfirmPassword ? 'text' : 'password'" placeholder="Confirmar Contraseña" formControlName="confirmPassword"
+          [class.invalid-input]="confirmPassword?.invalid && confirmPassword?.touched">
+        <button type="button" class="toggle-password" (click)="toggleConfirmPasswordVisibility()">
+          <mat-icon>{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </div>
+      <app-field-error [control]="confirmPassword"
+        [customMessages]="{ passwordsMismatch: 'Las contraseñas no coinciden.' }"></app-field-error>
+
+      <button class="main-btn" type="submit" [disabled]="loading">
+        {{ loading ? (connecting$ | async) ? 'Verificando conexión...' : 'Registrando...' : 'Registrarse' }}
+      </button>
+
+      @if (error) {
+      <div class="error-message">
+        {{ error }}
+      </div>
+      }
+
+      @if (successMessage) {
+      <div class="success-message" role="status">
+        {{ successMessage }}
+      </div>
+      }
+
+    </form>
+
+  </div>
+
+  <div class="bottom-section">
+
+    <div class="divider">
+      <div class="line"></div>
+      <span>O inicia sesión con</span>
+      <div class="line"></div>
+    </div>
+
+    <div class="social-icons">
+
+      <!-- Google -->
+      <button type="button" class="social google" title="Google" >
+        <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google"
+          style="width: 32px; height: 32px;">
+      </button>
+
+      <!-- Microsoft -->
+      <button type="button" class="social microsoft" title="Microsoft">
+        <img src="https://cdn-icons-png.flaticon.com/128/732/732221.png" alt="Microsoft"
+          style="width: 32px; height: 32px;">
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

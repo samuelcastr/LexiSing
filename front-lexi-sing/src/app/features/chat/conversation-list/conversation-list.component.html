@@ -1,0 +1,308 @@
+<div class="conversation-container">
+  <!-- Sidebar izquierdo - Conversaciones + Cámara -->
+  <aside class="sidebar-left" [class.mobile-open]="mobileSidebarOpen">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <div class="title-icon">
+          <mat-icon>forum</mat-icon>
+        </div>
+        <div>
+          <h2>Chats</h2>
+        </div>
+      </div>
+      <button mat-icon-button class="app-icon-btn app-icon-btn--primary" matTooltip="Nueva conversación" aria-label="Nueva conversación"
+        (click)="toggleNewConvForm()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="text" placeholder="Buscar conversación..." [(ngModel)]="searchTerm" (input)="filterConversations()" />
+    </div>
+
+    <div class="conversations-list">
+      <div *ngIf="conversations.length === 0" class="empty-state-sidebar">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>No tienes conversaciones</p>
+      </div>
+
+      <div *ngIf="conversations.length > 0 && filteredConversations.length === 0" class="empty-state-sidebar">
+        <mat-icon>search_off</mat-icon>
+        <p>No se encontraron conversaciones</p>
+      </div>
+
+      <div *ngFor="let c of filteredConversations" class="conversation-item" (click)="selectConversation(c)"
+        [class.active]="selectedConversation?.id === c.id">
+        <div class="conversation-avatar">
+          <img *ngIf="c.participantPhotoURL" [src]="c.participantPhotoURL" [alt]="c.participantName" />
+          <span *ngIf="!c.participantPhotoURL">{{ (c.participantName || 'C').charAt(0).toUpperCase() }}</span>
+        </div>
+        <div class="conversation-item-content">
+          <h4>{{ c.participantName || 'Conversación' }}</h4>
+          <p class="last-message">{{ c.lastMessage || 'Inicia una conversación...' }}</p>
+          <small class="time" *ngIf="c.updatedAt">{{ c.updatedAt?.toDate ? (c.updatedAt.toDate() | date:'d MMM yyyy, HH:mm') :
+            'Ahora' }}</small>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Backdrop para el drawer en móvil/tablet -->
+  <div class="mobile-backdrop" [class.visible]="mobileSidebarOpen" (click)="toggleMobileSidebar()"></div>
+
+  <!-- Centro/Derecha - Chat -->
+  <div class="chat-panel">
+    <div *ngIf="selectedConversation" class="chat-container">
+      <!-- Header del chat -->
+      <div class="chat-header">
+        <button mat-icon-button class="app-icon-btn mobile-back-btn" (click)="goBack()" aria-label="Volver al inicio">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <button mat-icon-button class="app-icon-btn mobile-menu-btn" (click)="toggleMobileSidebar()"
+          aria-label="Ver conversaciones">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <div class="chat-user-info">
+          <div class="header-avatar">
+            <img *ngIf="selectedConversation.participantPhotoURL" [src]="selectedConversation.participantPhotoURL" [alt]="selectedConversation.participantName" />
+            <span *ngIf="!selectedConversation.participantPhotoURL">{{ selectedConversation.participantName?.charAt(0)?.toUpperCase() || 'C' }}</span>
+          </div>
+          <div>
+            <h3>{{ selectedConversation.participantName }}</h3>
+            <span>{{ participantPresence === 'online' ? 'En línea' : 'Sin conexión' }}</span>
+          </div>
+        </div>
+        <button mat-icon-button class="app-icon-btn" (click)="toggleCamera()"
+          [matTooltip]="cameraActive ? 'Apagar cámara' : 'Encender cámara'"
+          [attr.aria-label]="cameraActive ? 'Apagar cámara' : 'Encender cámara'">
+          <mat-icon>{{ cameraActive ? 'videocam_off' : 'videocam' }}</mat-icon>
+        </button>
+      </div>
+
+      <!-- Mensajes con Cámara a la izquierda -->
+      <div class="messages-wrapper">
+        <!-- Columna de cámara + traducción -->
+        <div class="camera-column" [class.active]="cameraActive">
+          <!-- Cámara -->
+          <div class="camera-box" [class.active]="cameraActive" [class.paused]="cameraPaused">
+            <video #videoElement autoplay playsinline muted></video>
+            <canvas #landmarksCanvas class="landmarks-canvas"></canvas>
+
+            <div class="camera-paused-overlay" *ngIf="cameraPaused">
+              <mat-icon>videocam_off</mat-icon>
+            </div>
+
+            <div class="model-loading" *ngIf="modeloCargando">
+              <div class="spinner"></div>
+              <span>Cargando modelo…</span>
+            </div>
+
+            <div class="hand-lost-banner" *ngIf="manoPerdida && !cameraPaused">
+              <mat-icon>pan_tool</mat-icon>
+              <span>Mano no detectada — muestra la mano a la cámara</span>
+            </div>
+
+            <div class="practice-overlay" *ngIf="modoPractica && cameraActive && !cameraPaused">
+              <div class="practice-gesture-name" *ngIf="gestoEnCurso">
+                {{ gestoEnCurso | titlecase }}
+              </div>
+              <div class="practice-id" *ngIf="gestoEnCurso">{{ gestoEnCurso }}</div>
+              <div class="practice-hint" *ngIf="!gestoEnCurso">Muestra una seña…</div>
+            </div>
+
+            <div class="camera-controls">
+              <button *ngIf="cameraActive" class="camera-toggle-btn camera-close-btn" (click)="toggleCamera()">
+                <mat-icon>videocam_off</mat-icon>
+              </button>
+              <button *ngIf="cameraActive" class="camera-toggle-btn" [class.paused]="cameraPaused"
+                (click)="toggleCameraPause()">
+                <mat-icon>{{ cameraPaused ? 'play_arrow' : 'pause' }}</mat-icon>
+              </button>
+              <button *ngIf="cameraActive && !mostrarPreview" class="camera-toggle-btn camera-translate-btn"
+                [class.active]="senasDetectando" (click)="abrirPreviewTraduccion()">
+                <mat-icon>translate</mat-icon>
+              </button>
+              <button *ngIf="cameraActive" class="camera-toggle-btn camera-mode-btn"
+                [class.active]="modoDeletrear" (click)="toggleModo()"
+                [matTooltip]="modoDeletrear ? 'Deletreo activo: deletrea letra por letra' : 'Modo palabras: señas completas'">
+                <mat-icon>{{ modoDeletrear ? 'spellcheck' : 'translate' }}</mat-icon>
+              </button>
+              <button *ngIf="cameraActive" class="camera-toggle-btn camera-practice-btn"
+                [class.active]="modoPractica" (click)="togglePractica()"
+                [matTooltip]="modoPractica ? 'Salir de práctica' : 'Modo práctica'">
+                <mat-icon>school</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Panel de traducción (fuera de la cámara) -->
+          <div class="translation-panel" *ngIf="mostrarPreview">
+            <div class="translation-preview-header">
+              <mat-icon>translate</mat-icon>
+              <span>Traducción de señas</span>
+              <span class="mode-badge" [class.mode-badge--deletrear]="modoDeletrear">
+                {{ modoDeletrear ? 'Deletreo' : 'Palabras' }}
+              </span>
+              <button class="panel-close-btn" (click)="cerrarPreview()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="glosa-row" *ngIf="gestosActuales.length > 0 || gestoEnCurso">
+              <span *ngIf="gestoEnCurso" class="glosa-chip glosa-chip--detectando">{{ gestoEnCurso }}…</span>
+              <span *ngFor="let g of gestosActuales; let i = index" class="glosa-chip"
+                [class.glosa-chip--flash]="gestoConfirmadoFlash === g.id"
+                (click)="eliminarGesto(i)">
+                {{ g.etiqueta }}
+                <mat-icon class="glosa-chip-remove">close</mat-icon>
+              </span>
+            </div>
+            <p *ngIf="gestosActuales.length === 0 && !gestoEnCurso" class="translation-hint">
+              Haz una seña frente a la cámara…
+            </p>
+            <textarea [(ngModel)]="textoTraducido" rows="2"
+              [placeholder]="formalizando ? 'Formalizando texto...' : 'Texto detectado...'"
+              class="translation-textarea" [readonly]="textoLock || formalizando"></textarea>
+            <div class="translation-actions">
+              <button class="app-btn app-btn--outline app-btn--sm" (click)="limpiarGestos()">Limpiar</button>
+              <button *ngIf="modoDeletrear" class="app-btn app-btn--outline app-btn--sm"
+                (click)="marcarEspacio()" matTooltip="Insertar un espacio">
+                <mat-icon>space_bar</mat-icon> Espacio
+              </button>
+              <button *ngIf="modoDeletrear" class="app-btn app-btn--outline app-btn--sm"
+                (click)="borrarUltimaLetra()" matTooltip="Borrar última letra">
+                <mat-icon>backspace</mat-icon>
+              </button>
+              <button class="app-btn app-btn--outline app-btn--sm" (click)="formalizarTexto()"
+                [disabled]="formalizando || gestosActuales.length === 0"
+                matTooltip="Formalizar texto con IA">
+                <mat-icon>{{ formalizando ? 'hourglass_empty' : 'auto_fix_high' }}</mat-icon>
+                {{ formalizando ? 'Formalizando...' : 'Formalizar' }}
+              </button>
+              <button class="app-btn app-btn--primary app-btn--sm" (click)="enviarTraduccion()"
+                [disabled]="!textoTraducido.trim() || formalizando">
+                <mat-icon>send</mat-icon> Enviar
+              </button>
+            </div>
+            <details class="sign-guide">
+              <summary class="sign-guide-title">
+                {{ modoDeletrear ? 'Abecedario LSC (deletreo)' : 'Señas disponibles' }}
+              </summary>
+              <div class="sign-guide-grid">
+                <div class="sign-guide-item" *ngFor="let s of modoDeletrear ? abecedarioLSC : guiaSenas">
+                  <span class="sign-guide-name">{{ s.nombre }}</span>
+                  <span class="sign-guide-desc">{{ s.como }}</span>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div class="messages-container" #messagesContainer>
+          <div *ngFor="let msg of messages" class="message" [class.received]="msg.senderUid !== uid"
+            [class.sent]="msg.senderUid === uid">
+            <div *ngIf="editingMessageId !== msg.id; else editMode">
+              <p (contextmenu)="msg.senderUid === uid ? onMessageContextMenu($event, msg) : null">{{ msg.content }} <span *ngIf="msg.edited" class="edited-badge">(editado)</span></p>
+              <small>{{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'d MMM yyyy, HH:mm') : 'Ahora' }}</small>
+              <div class="message-actions" *ngIf="msg.senderUid === uid && activeMessageMenuId === msg.id">
+                <button class="app-btn app-btn--outline app-btn--sm" (click)="startEditMessage(msg)">Editar</button>
+                <button class="app-btn app-btn--danger app-btn--sm" (click)="deleteMessage(msg)">Eliminar</button>
+              </div>
+            </div>
+            <ng-template #editMode>
+              <div class="edit-message-box">
+                <input type="text" [(ngModel)]="editingText" />
+                <div class="edit-actions">
+                  <button class="app-icon-btn" (click)="saveEditMessage(msg)">
+                    <mat-icon>check</mat-icon>
+                  </button>
+                  <button class="app-icon-btn" (click)="cancelEditMessage()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input de mensaje -->
+      <div class="chat-input-area">
+        <input type="text" placeholder="Escribe un mensaje..." class="chat-input" [(ngModel)]="messageText"
+          (keyup.enter)="sendMessage()" />
+        <button class="app-icon-btn app-icon-btn--primary" (click)="sendMessage()">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!selectedConversation" class="chat-empty" (click)="onEmptyStateClick()" role="button"
+      tabindex="0" (keydown.enter)="onEmptyStateClick()"
+      (keydown.space)="onEmptyStateClick(); $event.preventDefault()" [attr.aria-label]="emptyStateHint">
+      <div class="empty-orb">
+        <mat-icon>{{ conversations.length === 0 ? 'add_comment' : 'chat_bubble_outline' }}</mat-icon>
+      </div>
+      <p class="empty-title">{{ conversations.length === 0 ? 'Aún no tienes conversaciones' : 'Tus chats están aquí' }}</p>
+      <span class="empty-hint">
+        <mat-icon>{{ conversations.length === 0 ? 'add' : 'format_list_bulleted' }}</mat-icon>
+        {{ emptyStateHint }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Modal de nueva conversación -->
+  <div *ngIf="showNewConvForm" class="modal-overlay" (click)="toggleNewConvForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Nueva conversación</h3>
+      <div class="modal-search-box">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar usuario por nombre..." [(ngModel)]="newConvSearchTerm"
+          (input)="filterUsers()" />
+      </div>
+      <p class="modal-subtitle">
+        Selecciona un usuario para iniciar una conversación
+      </p>
+      <div class="users-list">
+        <div class="user-card" *ngFor="let user of filteredUsers"
+          [class.selected]="selectedUserUid === user.uid"
+          [class.disabled]="user.yaTieneChat"
+          [class.clickable]="!user.yaTieneChat"
+          (click)="!user.yaTieneChat && (selectedUserUid = user.uid)">
+          <mat-icon>
+            account_circle
+          </mat-icon>
+          <div class="user-info">
+            <h4>
+              {{ user.nombre }}
+            </h4>
+            <span>
+              {{ user.email }}
+            </span>
+          </div>
+          <mat-icon *ngIf="user.yaTieneChat" class="chat-exists-icon" matTooltip="Ya tienes conversación">chat_bubble</mat-icon>
+          <mat-icon *ngIf="!user.yaTieneChat && selectedUserUid === user.uid">
+            check_circle
+          </mat-icon>
+        </div>
+
+      </div>
+      <div *ngIf="users.length === 0" class="no-users-message">
+        <p>No hay usuarios disponibles</p>
+      </div>
+      <div *ngIf="users.length > 0 && filteredUsers.length === 0" class="no-users-message">
+        <p>No se encontraron usuarios</p>
+      </div>
+      <div class="modal-actions">
+        <button class="app-btn app-btn--primary" (click)="createConversation()">
+          <mat-icon>check</mat-icon>
+          Crear
+        </button>
+        <button class="app-btn app-btn--outline" (click)="toggleNewConvForm()">
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

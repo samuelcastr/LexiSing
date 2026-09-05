@@ -1,9 +1,13 @@
+import os
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+from dotenv import load_dotenv
 
-SECRET_KEY = 'django-insecure-change-me'
-DEBUG = True
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
+
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-me')
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -14,10 +18,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'users',
+    'text',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,3 +84,25 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4200',
+    'http://localhost:3000',
+    'http://127.0.0.1:4200',
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# Django REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'app.core.authentication.FirebaseAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# Groq API (formalización de texto)
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+
