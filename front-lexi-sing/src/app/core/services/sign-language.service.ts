@@ -23,12 +23,17 @@ const MODEL_PATH = '/mediapipe/models/hand_landmarker.task';
 const FRAMES_CONFIRMACION = 10;
 // Letras ambiguas del abecedario requieren más frames de retención para evitar falsos positivos.
 const FRAMES_CONFIRMACION_LETRA_AMBIGUA = 14;
+// Las letras con movimiento (J, Z) se confirman con menos frames porque su
+// trazo completo dura menos de medio segundo.
+const FRAMES_CONFIRMACION_MOVIMIENTO = 6;
 const MAX_GESTOS = 15;
 const HISTORY_SIZE = 15;
 const SMOOTH_FRAMES = 10;
 const GRACE_MS = 500;
 const HAND_LOST_MS = 600;
 const MAX_RETRY = 3;
+// Frames usados para analizar la trayectoria de las letras con movimiento (J, Z).
+const TRAYECTORIA_FRAMES = 12;
 
 // Modo de reconocimiento: palabras (señas completas) o deletreo (abecedario).
 export enum SignMode {
@@ -39,6 +44,10 @@ export enum SignMode {
 // Letras del dactilológico LSC que comparten configuraciones manuales muy
 // parecidas y necesitan retención adicional para distinguirse.
 const LETRAS_AMBIGUAS = new Set(['A', 'S', 'M', 'N', 'Ñ', 'J', 'E', 'O', 'R']);
+
+// Letras que se reconocen por su trazo (movimiento de la yema) en lugar de una
+// pose estática; se confirman con pocos frames porque el trazo dura poco.
+const LETRAS_MOVIMIENTO = new Set(['LETRA_J', 'LETRA_Z']);
 
 const CONEXIONES = [
   [0, 1], [1, 2], [2, 3], [3, 4],
@@ -317,7 +326,12 @@ export class SignLanguageService {
 
     const esLetra = this.modo === SignMode.DELETREAR;
     const letraAmbigua = esLetra && LETRAS_AMBIGUAS.has(gesto ?? '');
-    const framesRequeridos = letraAmbigua ? FRAMES_CONFIRMACION_LETRA_AMBIGUA : FRAMES_CONFIRMACION;
+    const esMovimiento = esLetra && LETRAS_MOVIMIENTO.has(gesto ?? '');
+    const framesRequeridos = esMovimiento
+      ? FRAMES_CONFIRMACION_MOVIMIENTO
+      : letraAmbigua
+        ? FRAMES_CONFIRMACION_LETRA_AMBIGUA
+        : FRAMES_CONFIRMACION;
 
     if (gesto && this.framesConsecutivos >= framesRequeridos && gesto !== this.ultimoConfirmado) {
       this.confirmarGesto(gesto);
@@ -370,7 +384,15 @@ export class SignLanguageService {
     if (this.modo === SignMode.DELETREAR) {
       // En deletreo usamos una sola mano (dactilología LSC).
       const mano = manos[0];
-      return mano ? evaluarLetra(mano.landmarks) : null;
+      if (!mano) {
+        return null;
+      }
+      // Las letras con movimiento (J, Z) se leen del trazo de la yema.
+      const trazo = this.evaluarTrazoLetra(mano);
+      if (trazo) {
+        return trazo;
+      }
+      return evaluarLetra(mano.landmarks);
     }
 
     const ahora = Date.now();
@@ -444,6 +466,66 @@ export class SignLanguageService {
           return 'APUNTAR_ABAJO';
         }
       }
+    }
+
+    return null;
+  }
+
+  // Lee las letras dactilológicas que se dibujan en el aire (J, Z) a partir de
+  // la trayectoria de la yema dentro del buffer histórico.
+  private evaluarTrazoLetra(mano: ManoDetectada): string | null {
+    const historias = this.landmarkHistory
+      .slice(-TRAYECTORIA_FRAMES)
+      .map(frame => frame.find(m => m.handedness === mano.handedness))
+      .filter((m): m is ManoDetectada => !!m);
+
+    if (historias.length < 8) {
+      return null;
+    }
+
+    const actual = historias[historias.length - 1].landmarks;
+    const handSize = dist(actual[0], actual[9]);
+    const idx = fingerExtended(actual, 8, 6);
+    const mid = fingerExtended(actual, 12, 10);
+    const ring = fingerExtended(actual, 16, 14);
+    const pink = fingerExtended(actual, 20, 18);
+    const thumb = thumbExtended(actual);
+
+    // J: solo meñique estirado (pose de I) trazando un gancho hacia abajo y
+    // de regreso arriba.
+    if (!thumb && !idx && !mid && !ring && pink) {
+      const ys = historias.map(h => h.landmarks[20].y);
+      const maxY = Math.max(...ys);
+      const minY = Math.min(...ys);
+      const range = maxY - minY;
+      const descendio = maxY - ys[0] > range * 0.4;
+      const subio = maxY - ys[ys.length - 1] > range * 0.3;
+      if (range > handSize * 0.8 && descendio && subio) {
+        return 'LETRA_J';
+      }
+      return null;
+    }
+
+    // Z: solo índice estirado (pose de X/I) trazando un zigzag lateral con dos
+    // giros de dirección.
+    if (!thumb && idx && !mid && !ring && !pink) {
+      const pts = historias.map(h => h.landmarks[8]);
+      const dxs = pts.slice(1).map((p, i) => p.x - pts[i].x);
+      const noise = handSize * 0.15;
+      let giros = 0;
+      for (let i = 1; i < dxs.length; i++) {
+        const a = dxs[i - 1];
+        const b = dxs[i];
+        if (Math.abs(a) > noise && Math.abs(b) > noise && Math.sign(a) !== Math.sign(b)) {
+          giros++;
+        }
+      }
+      const xs = pts.map(p => p.x);
+      const xRange = Math.max(...xs) - Math.min(...xs);
+      if (giros >= 2 && xRange > handSize * 1.5) {
+        return 'LETRA_Z';
+      }
+      return null;
     }
 
     return null;
@@ -623,6 +705,15 @@ function fingerTipsTouching(a: number, b: number, lm: Landmark[], ratio = 0.28):
   return dist(lm[a], lm[b]) < handSize * ratio;
 }
 
+// En Y el pulgar apunta hacia arriba, bien separado de la base del índice; en M
+// el pulgar queda doblado sobre los dedos (yema cerca del índice y más baja que
+// la yema del meñique).
+function pulgarEnPosicionY(lm: Landmark[], handSize: number): boolean {
+  const pulgarSeparado = dist(lm[4], lm[6]) > handSize * 0.45;
+  const pulgarAlto = lm[4].y < lm[20].y;
+  return pulgarSeparado && pulgarAlto;
+}
+
 // Punto medio de un dedo índice "doblado" (pulgar a lado).
 function fingerFoldedOverThumb(lm: Landmark[], tips: number[], pips: number[]): boolean {
   // Los dedos se doblan sobre el pulgar: sus puntas caen por debajo (más cerca
@@ -677,34 +768,33 @@ export function evaluarLetra(lm: Landmark[]): string | null {
     return 'LETRA_I';
   }
 
-  // --- Y (pulgar + meñique) ---
+  // --- Y / M (pulgar + meñique; Y estira el pulgar hacia arriba y separado,
+  // M lo dobla sobre el índice/medio/anular dejando el meñique de apoyo) ---
   if (thumb && !idx && !mid && !ring && pink) {
-    return 'LETRA_Y';
+    return pulgarEnPosicionY(lm, handSize) ? 'LETRA_Y' : 'LETRA_M';
   }
 
-  // --- M (índice + medio + anular doblados sobre el pulgar, meñique en banco) ---
-  if (thumb && !idx && !mid && !ring && pink) {
-    return 'LETRA_M';
-  }
-
-  // --- N (índice y medio doblados sobre el pulgar, anular y meñique extendidos) ---
+  // --- N / Ñ (índice y medio doblados sobre el pulgar, anular y meñique
+  // extendidos; Ñ se marca cuando la mano sube hasta la mejilla) ---
   if (thumb && !idx && !mid && ring && pink) {
-    return 'LETRA_N';
+    const centroManoY = (lm[0].y + lm[9].y) * 0.5;
+    return centroManoY < 0.32 ? 'LETRA_Ñ' : 'LETRA_N';
   }
 
-  // --- U (índice + medio extendidos juntos, anular y meñique doblados) ---
-  if (thumb && idx && mid && !ring && !pink && tipsMidRing) {
-    return 'LETRA_U';
-  }
-
-  // --- V (índice + medio extendidos separados) ---
-  if (thumb && idx && mid && !ring && !pink && !tipsMidRing) {
-    return 'LETRA_V';
-  }
-
-  // --- K (índice + medio extendidos con el pulgar entre ellos / al frente) ---
-  if (thumb && idx && mid && !ring && !pink && dist(lm[4], lm[0]) < handSize * 0.5) {
-    return 'LETRA_K';
+  // --- U / V / K / H (índice + medio extendidos; la orientación y la apertura
+  // discriminan: H es horizontal, K tiene el pulgar pegado a la muñeca,
+  // U junta las yemas y V las separa) ---
+  if (thumb && idx && mid && !ring && !pink) {
+    const dirIdx = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    const horizontal = Math.abs(dirIdx.dx) > Math.abs(dirIdx.dy) * 1.3;
+    const kPegado = dist(lm[4], lm[0]) < handSize * 0.5;
+    if (horizontal) {
+      return 'LETRA_H';
+    }
+    if (kPegado) {
+      return 'LETRA_K';
+    }
+    return tipsMidRing ? 'LETRA_U' : 'LETRA_V';
   }
 
   // --- W (índice + medio + anular extendidos juntos) ---
@@ -743,6 +833,18 @@ export function evaluarLetra(lm: Landmark[]): string | null {
   if (thumb && idx && !mid && !ring && !pink) {
     const angulo = angleBetween(lm[4], lm[2], lm[8]);
     if (angulo > 0.9) return 'LETRA_L';
+  }
+
+  // --- P / Q (cuatro dedos juntos apuntando hacia abajo; P vertical y Q en
+  // diagonal, ambas con el pulgar abierto) ---
+  if (thumb && idx && mid && ring && pink) {
+    const dirIdxDown = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    if (dirIdxDown.dy > 0 && Math.abs(dirIdxDown.dy) > Math.abs(dirIdxDown.dx) * 1.3) {
+      return 'LETRA_P';
+    }
+    if (dirIdxDown.dy > 0 && Math.abs(dirIdxDown.dy) > Math.abs(dirIdxDown.dx) * 0.4) {
+      return 'LETRA_Q';
+    }
   }
 
   // --- C (cuatro dedos curvados formando C, pulgar abierto) ---
