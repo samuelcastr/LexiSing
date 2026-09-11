@@ -1,0 +1,39 @@
+Árbol real del repositorio del proyecto LexiSing
+(excluyendo node_modules, .git, dist y cachés)
+
+front-lexi-sing/
+├── public/
+│   ├── assets/sounds/
+│   ├── mediapipe/
+│   │   ├── models/            # hand_landmarker.task
+│   │   └── wasm/              # binarios MediaPipe Tasks Vision
+│   └── logo.png
+├── src/
+│   ├── app/
+│   │   ├── core/services/      # auth, sign-language, text-formalizer, camera, etc.
+│   │   ├── features/           # auth, chat, roles (admin/supervisor/empleados/usuario/sordomudo), dashboard
+│   │   ├── shared/             # componentes compartidos (configuracion-perfil, layout)
+│   │   ├── app.routes.ts
+│   │   ├── app.scss
+│   │   └── app.ts
+│   ├── environments/
+│   │   ├── environment.ts
+│   │   └── environment.prod.ts
+│   ├── styles/
+│   └── index.html
+├── firebase.json
+├── firestore.rules
+├── package.json
+└── angular.json
+
+back_lexiSing/
+├── app/                        # DRF: api, core (authentication, firebase), crud, db, models, schemas
+├── lexising/                   # settings, urls, wsgi/asgi
+├── text/                       # app de formalización de texto (services.py = GroqService)
+├── users/                      # app de usuarios (models, views, urls)
+├── .env.example
+├── requirements.txt
+└── manage.py
+
+.github/
+└── workflows/ci.yml            # pipeline de CI/CD

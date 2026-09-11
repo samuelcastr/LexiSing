@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function esAdminOSupervisor() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol in ['admin', 'supervisor'];
+    }
+
+    function esParticipante(convId) {
+      return request.auth.uid in get(/databases/$(database)/documents/conversaciones/$(convId)).data.participants;
+    }
+
+    // Un usuario solo puede editar campos de perfil inofensivos en su propio doc,
+    // nunca su rol (impide auto-asignarse admin/supervisor).
+    function camposPermitidosParaMiPerfil() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['nombre', 'email', 'activo', 'fotoPerfil']);
+    }
+
+    // Usuarios: lectura para cualquier usuario autenticado (búsqueda en chat),
+    // creación solo del propio perfil con rol inicial 'usuario',
+    // actualización restringida (self sin rol) o admin/supervisor.
+    match /usuarios/{uid} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.rol == 'usuario';
+      allow update: if signedIn() && (
+                      (request.auth.uid == uid && camposPermitidosParaMiPerfil()) ||
+                      esAdminOSupervisor()
+                    );
+      allow delete: if signedIn() && esAdminOSupervisor();
+    }
+
+    // Conversaciones: un usuario solo puede leer conversaciones donde participa.
+    // Admin/supervisor mantienen acceso global para reportes y monitoreo.
+    // La creación exige al menos 2 participantes e incluirse a sí mismo.
+    match /conversaciones/{convId} {
+      allow read: if signedIn() && (esAdminOSupervisor() || esParticipante(convId));
+      allow create: if signedIn()
+                    && request.resource.data.participants is list
+                    && request.resource.data.participants.size() >= 2
+                    && request.auth.uid in request.resource.data.participants;
+      allow update, delete: if signedIn() && (esAdminOSupervisor() || esParticipante(convId));
+
+      // Mensajes: lectura restringida a participantes (o admin/supervisor),
+      // escritura solo de mensajes propios.
+      match /mensajes/{msgId} {
+        allow read: if signedIn() && (esAdminOSupervisor() || esParticipante(convId));
+        allow create: if signedIn() && (esAdminOSupervisor() || esParticipante(convId))
+                        && request.resource.data.senderUid == request.auth.uid;
+        allow update, delete: if signedIn() && (esAdminOSupervisor() || esParticipante(convId))
+                                && resource.data.senderUid == request.auth.uid;
+      }
+    }
+
+    // Actividad global: lectura para autenticados; escritura solo de registros
+    // propios con forma controlada (no spam con campos arbitrarios).
+    match /activities/{activityId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.timestamp is timestamp
+                    && request.resource.data.diff({}).affectedKeys()
+                         .hasOnly(['userName', 'action', 'timestamp', 'uid']);
+      allow update, delete: if signedIn() && esAdminOSupervisor();
+    }
+  }
+}

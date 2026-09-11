@@ -6,25 +6,172 @@
 
 **(PORTADA — Normas APA 7)**
 
-**(Incluir: Logo del SENA, Nombre del programa: Tecnólogo en Análisis y Desarrollo de Software, Ficha: 3203082, Nombre del proyecto: LexiSing, Nombres de los aprendices: Beickert Gabriel Torres Tapia, Samuel Castro Zuñiga, Cielo Alexandra Rodríguez Pardo, Juan Steban Riveros Orozco, Nombres de los instructores: Steffi Velandia, Jose David Luna, Ciudad y Fecha de presentación)**
+[//]: # "Insertar aquí el logo institucional del SENA."
+
+**SERVICIO NACIONAL DE APRENDIZAJE — SENA**
+
+**Programa de Formación:** Tecnólogo en Análisis y Desarrollo de Software (ADSO)
+**Ficha:** 3203082
+
+**Proyecto Formativo:** LexiSing — Plataforma de Comunicación Inclusiva mediante Lengua de Señas Colombiana
+
+**Aprendices:**
+- Beickert Gabriel Torres Tapia
+- Samuel Castro Zuñiga
+- Cielo Alexandra Rodríguez Pardo
+- Juan Steban Riveros Orozco
+
+**Instructores:**
+- Steffi Velandia
+- Jose David Luna
+
+**Ciudad y fecha de presentación:** (Ciudad), septiembre de 2026
 
 ---
 
 ## TABLA DE CONTENIDO
 
-**(Generada automáticamente al convertir a Word/PDF con herramientas como LaTeX, Google Docs o Word)**
+**Página de título** (Portada)
+
+**1. INTRODUCCIÓN**
+- 1.1 Contexto
+- 1.2 Descripción General del Proyecto
+- 1.3 Objetivo del Documento
+
+**2. PLANTEAMIENTO DEL PROBLEMA**
+- 2.1 Descripción del Problema
+- 2.2 Justificación
+- 2.3 Alcance
+- 2.4 Limitaciones
+
+**3. OBJETIVOS**
+- 3.1 Objetivo General
+- 3.2 Objetivos Específicos
+
+**4. MARCO REFERENCIAL**
+- 4.1 Marco Conceptual
+- 4.2 Marco Legal
+
+**5. ANÁLISIS DEL SISTEMA**
+- 5.1 Actores
+- 5.2 Requerimientos Funcionales
+- 5.3 Requerimientos No Funcionales
+- 5.4 Casos de Uso
+- 5.5 Historias de Usuario
+- 5.6 Product Backlog
+- 5.7 MVP Definido
+
+**6. DISEÑO DEL SISTEMA**
+- 6.1 Arquitectura del Sistema
+- 6.2 Diagrama de Componentes
+- 6.3 Modelo Entidad Relación (MER) — Firestore Collections
+- 6.4 Diccionario de Datos
+- 6.5 Wireframes
+- 6.6 Flujo de Navegación
+
+**7. IMPLEMENTACIÓN DEL PROYECTO**
+- 7.1 Configuración del Entorno
+- 7.2 Estructura del Proyecto
+- 7.3 Implementación de Base de Datos
+- 7.4 Definición de API
+- 7.5 Desarrollo por Sprint
+
+**8. PRUEBAS DEL SISTEMA**
+- 8.1 Plan de Pruebas
+- 8.2 Diseño de Casos de Prueba
+- 8.3 Pruebas Manuales
+- 8.4 Pruebas Automatizadas
+- 8.5 Gestión de Incidencias
+- 8.6 Evidencias de Ejecución
+
+**9. DESPLIEGUE DEL SISTEMA**
+- 9.1 Arquitectura de Despliegue
+- 9.2 Servicios Utilizados
+- 9.3 Configuración del Entorno Productivo
+- 9.4 URL del Sistema
+- 9.5 Evidencias de Funcionamiento
+
+**10. COSTOS**
+- 10.1 Estimación de Costos
+- 10.2 Costos Operativos Mensuales
+
+**11. RESULTADOS OBTENIDOS**
+- 11.1 Cumplimiento de Objetivos
+- 11.2 Funcionalidades Implementadas
+- 11.3 Beneficios Obtenidos
+
+**12. CONCLUSIONES**
+
+**13. RECOMENDACIONES**
+
+**14. REFERENCIAS**
+
+**15. ANEXOS**
+- Anexo A: Estructura de directorios del proyecto
+- Anexo B: Configuración de Firebase
+- Anexo C: Configuración de variables de entorno
+- Anexo D: Código fuente del servicio de reconocimiento de señas
+- Anexo E: Código fuente del servicio de formalización de IA
+- Anexo F: Reglas de seguridad Firestore
+- Anexo G: Configuración de CI/CD
+- Anexo H: Evidencias de pruebas automatizadas (Selenium)
+- Anexo J: Documento de propuesta técnica y económica
+- Anexo K: Bitácora de sprints
+
+*Nota: la numeración de páginas se genera automáticamente al convertir a Word/PDF (campo de índice en el documento).*
 
 ---
 
 ## LISTA DE FIGURAS
 
-**(Generada automáticamente)**
+**Figura 1.** Diagrama de casos de uso del sistema (Sección 5.4).
+**Figura 2.** Arquitectura del sistema (Sección 6.1).
+**Figura 3.** Diagrama de componentes (Sección 6.2).
+**Figura 4.** Modelo entidad-relación de Firestore (Sección 6.3).
+**Figura 5.** Wireframe — Vista de inicio de sesión (Sección 6.5).
+**Figura 6.** Wireframe — Formulario de registro de usuario (Sección 6.5).
+**Figura 7.** Wireframe — Panel de administración con estadísticas (Sección 6.5).
+**Figura 8.** Wireframe — Lista de conversaciones con indicador de presencia (Sección 6.5).
+**Figura 9.** Wireframe — Vista de chat con cámara activa (Sección 6.5).
+**Figura 10.** Wireframe — Monitoreo de conversaciones del supervisor (Sección 6.5).
+**Figura 11.** Wireframe — Panel de gestión de usuarios (Sección 6.5).
+**Figura 12.** Wireframe — Configuración de perfil de usuario (Sección 6.5).
+**Figura 13.** Flujo de navegación del sistema (Sección 6.6).
+**Figura 14.** Evidencia de ejecución — Botones de autenticación social (Sección 8.6).
+**Figura 15.** Evidencia de ejecución — Flujo de autenticación con Microsoft (Sección 8.6).
+**Figura 16.** Arquitectura de despliegue en entorno de desarrollo local (Sección 9.1).
+**Figura 17.** Evidencia de funcionamiento — Dashboard del rol supervisor (Sección 9.5).
+**Figura 18.** Evidencia de funcionamiento — Reporte de mensajes por hora (Sección 9.5).
+
+*Nota: la numeración de páginas se genera automáticamente al convertir a Word/PDF.*
 
 ---
 
 ## LISTA DE TABLAS
 
-**(Generada automáticamente)**
+**Tabla 1.** Actores del sistema (Sección 5.1).
+**Tabla 2.** Requerimientos funcionales (Sección 5.2).
+**Tabla 3.** Requerimientos no funcionales (Sección 5.3).
+**Tabla 4.** Historias de usuario (Sección 5.5).
+**Tabla 5.** Product Backlog priorizado (Sección 5.6).
+**Tabla 6.** Funcionalidades del MVP (Sección 5.7).
+**Tabla 7.** Colección «usuarios» de Firestore (Sección 6.4).
+**Tabla 8.** Colección «conversaciones» de Firestore (Sección 6.4).
+**Tabla 9.** Subcolección «mensajes» de Firestore (Sección 6.4).
+**Tabla 10.** Colección «activities» de Firestore (Sección 6.4).
+**Tabla 11.** Requisitos previos del entorno (Sección 7.1).
+**Tabla 12.** Endpoints del backend Django REST Framework (Sección 7.4).
+**Tabla 13.** Servicios frontend Angular (Sección 7.4).
+**Tabla 14.** Plan de pruebas del sistema (Sección 8.1).
+**Tabla 15.** Casos de prueba del sistema (Sección 8.2).
+**Tabla 16.** Incidencias encontradas durante el desarrollo (Sección 8.5).
+**Tabla 17.** Servicios utilizados en el proyecto (Sección 9.2).
+**Tabla 18.** Estimación de costos del proyecto (Sección 10.1).
+**Tabla 19.** Costos operativos mensuales (Sección 10.2).
+**Tabla 20.** Cumplimiento de los objetivos (Sección 11.1).
+**Tabla 21.** Funcionalidades implementadas (Sección 11.2).
+
+*Nota: la numeración de páginas se genera automáticamente al convertir a Word/PDF.*
 
 ---
 
@@ -192,6 +339,10 @@ Desarrollar una plataforma web de comunicación inclusiva que permita la interac
 
 ### 5.1 Actores
 
+Los actores del sistema se detallan en la Tabla 1 (Actores del sistema).
+
+**Tabla 1.** Actores del sistema.
+
 | Actor | Descripción | Funciones principales |
 |-------|-------------|----------------------|
 | **Administrador** | Persona encargada de gestionar el sistema | Administra usuarios, reportes y configuraciones del sistema. Puede editar y eliminar usuarios, controlar permisos de acceso. |
@@ -201,6 +352,10 @@ Desarrollar una plataforma web de comunicación inclusiva que permita la interac
 | **Sistema IA** | Motor de inteligencia artificial | Interpreta las señas detectadas y genera traducciones formales mediante Groq API. |
 
 ### 5.2 Requerimientos Funcionales
+
+Los requerimientos funcionales se detallan en la Tabla 2 (Requerimientos funcionales).
+
+**Tabla 2.** Requerimientos funcionales.
 
 | Código | Actor | Requerimiento | Descripción |
 |--------|-------|---------------|-------------|
@@ -218,6 +373,10 @@ Desarrollar una plataforma web de comunicación inclusiva que permita la interac
 | RF12 | Usuario | Recuperar contraseña | Restablecer contraseña en caso de olvido |
 
 ### 5.3 Requerimientos No Funcionales
+
+Los requerimientos no funcionales se detallan en la Tabla 3 (Requerimientos no funcionales).
+
+**Tabla 3.** Requerimientos no funcionales.
 
 | Código | Categoría | Requerimiento | Descripción |
 |--------|-----------|---------------|-------------|
@@ -306,7 +465,17 @@ Desarrollar una plataforma web de comunicación inclusiva que permita la interac
   2. El sistema limpia la sesión de Firebase Auth y localStorage.
   3. El sistema redirige a la página de inicio de sesión.
 
+El diagrama de casos de uso consolida los flujos anteriores:
+
+![Figura 1. Diagrama de casos de uso del sistema.](imagenes/casos-de-uso.png)
+
+**Figura 1.** Diagrama de casos de uso del sistema.
+
 ### 5.5 Historias de Usuario
+
+Las historias de usuario se detallan en la Tabla 4 (Historias de usuario).
+
+**Tabla 4.** Historias de usuario.
 
 | ID | Historia de usuario |
 |----|---------------------|
@@ -330,6 +499,10 @@ Desarrollar una plataforma web de comunicación inclusiva que permita la interac
 | HU18 | Como administrador, quiero controlar permisos de acceso para garantizar la seguridad del sistema. |
 
 ### 5.6 Product Backlog
+
+El Product Backlog se detalla en la Tabla 5 (Product Backlog priorizado).
+
+**Tabla 5.** Product Backlog priorizado.
 
 | Prioridad | ID | Funcionalidad | Módulo |
 |-----------|-----|---------------|--------|
@@ -355,6 +528,10 @@ Desarrollar una plataforma web de comunicación inclusiva que permita la interac
 El MVP (Producto Mínimo Viable) de LexiSing está enfocado en validar la experiencia principal del usuario: permitir una comunicación básica entre una persona sorda y un empleado mediante traducción de señas y texto.
 
 **Funcionalidades del MVP:**
+
+Las funcionalidades del MVP se detallan en la Tabla 6 (Funcionalidades del MVP).
+
+**Tabla 6.** Funcionalidades del MVP.
 
 | Funcionalidad | Descripción |
 |---------------|-------------|
@@ -407,84 +584,37 @@ LexiSing implementa una arquitectura de tres capas (frontend, backend, servicios
 - Firebase Hosting para despliegue del frontend.
 - Reglas de seguridad Firestore con RBAC.
 
+La Figura 2 ilustra la arquitectura de tres capas del sistema:
+
+![Figura 2. Arquitectura del sistema.](imagenes/arquitectura-sistema.png)
+
+**Figura 2.** Arquitectura del sistema.
+
 ### 6.2 Diagrama de Componentes
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        FRONTEND (Angular 20)                    │
-│                                                                 │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
-│  │   Auth   │  │   Chat   │  │Dashboard │  │  Roles   │       │
-│  │Component │  │Component │  │Component │  │Component │       │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘       │
-│       │              │              │              │              │
-│  ┌────┴──────────────┴──────────────┴──────────────┴────┐       │
-│  │              Core Services                            │       │
-│  │  ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐ │       │
-│  │  │  Auth   │ │SignLang  │ │Conv-     │ │Text     │ │       │
-│  │  │Service  │ │Service   │ │ersation  │ │Formali- │ │       │
-│  │  │         │ │(MediaPipe)│ │Service   │ │zer     │ │       │
-│  │  └────┬────┘ └────┬─────┘ └────┬─────┘ └────┬────┘ │       │
-│  └───────┼───────────┼────────────┼─────────────┼──────┘       │
-└──────────┼───────────┼────────────┼─────────────┼──────────────┘
-           │           │            │             │
-    ┌──────┴──────┐    │     ┌──────┴──────┐ ┌───┴────────┐
-    │  Firebase   │    │     │  Firestore  │ │  Groq API  │
-    │    Auth     │    │     │  (NoSQL)    │ │  (IA)      │
-    └─────────────┘    │     └─────────────┘ └────────────┘
-                       │
-              ┌────────┴────────┐
-              │   BACKEND       │
-              │  (Django DRF)   │
-              │  /api/text/     │
-              │  formalize/     │
-              └─────────────────┘
-```
+La Figura 3 muestra los componentes del sistema, sus servicios transversales y las conexiones con los servicios externos (Firebase y Groq API) y el backend:
+
+![Figura 3. Diagrama de componentes.](imagenes/diagrama-componentes.png)
+
+**Figura 3.** Diagrama de componentes.
+
+Se destaca el flujo de formalización de texto: el `TextFormalizer` en el frontend envía las glosas detectadas al endpoint `POST /api/text/formalize/` del backend (Django DRF), que a través del `GroqService` consulta la Groq API y devuelve el texto formal al chat.
 
 ### 6.3 Modelo Entidad Relación (MER) — Firestore Collections
 
-Firestore es una base de datos NoSQL basada en documentos. A continuación se describe la estructura de colecciones y documentos:
+Firestore es una base de datos NoSQL basada en documentos. A continuación se describe la estructura de colecciones y documentos (ver Figura 4):
 
-```
-usuarios (colección)
-├── [uid] (documento)
-│   ├── uid: string
-│   ├── nombre: string
-│   ├── email: string
-│   ├── rol: string ("admin" | "empleado" | "sordomudo" | "supervisor" | "usuario")
-│   ├── photoURL: string (base64)
-│   ├── activo: boolean
-│   ├── creado: timestamp
-│   └── photoURL: string
+![Figura 4. Modelo entidad-relación de Firestore.](imagenes/modelo-entidad-relacion.png)
 
-conversaciones (colección)
-├── [convId] (documento)
-│   ├── participants: array<string> (UIDs)
-│   ├── lastMessage: string
-│   ├── updatedAt: timestamp
-│   │
-│   └── mensajes (subcolección)
-│       └── [msgId] (documento)
-│           ├── senderUid: string
-│           ├── senderName: string
-│           ├── content: string
-│           ├── timestamp: timestamp
-│           ├── edited: boolean
-│           ├── editedAt: timestamp
-│           ├── deleted: boolean
-│           └── deletedAt: timestamp
-
-activities (colección)
-├── [activityId] (documento)
-│   ├── uid: string
-│   ├── userName: string
-│   ├── action: string
-│   └── timestamp: timestamp
-```
+**Figura 4.** Modelo entidad-relación de Firestore.
 
 ### 6.4 Diccionario de Datos
 
 **Colección: usuarios**
+
+La estructura de la colección «usuarios» se detalla en la Tabla 7 (Colección «usuarios» de Firestore).
+
+**Tabla 7.** Colección «usuarios» de Firestore.
 
 | Campo | Tipo | Descripción | Restricción |
 |-------|------|-------------|-------------|
@@ -498,6 +628,10 @@ activities (colección)
 
 **Colección: conversaciones**
 
+La estructura de la colección «conversaciones» se detalla en la Tabla 8 (Colección «conversaciones» de Firestore).
+
+**Tabla 8.** Colección «conversaciones» de Firestore.
+
 | Campo | Tipo | Descripción | Restricción |
 |-------|------|-------------|-------------|
 | participants | array\<string\> | UIDs de los participantes | Obligatorio, mín. 2 elementos |
@@ -505,6 +639,10 @@ activities (colección)
 | updatedAt | timestamp | Última actualización | Automático |
 
 **Subcolección: mensajes**
+
+La estructura de la subcolección «mensajes» se detalla en la Tabla 9 (Subcolección «mensajes» de Firestore).
+
+**Tabla 9.** Subcolección «mensajes» de Firestore.
 
 | Campo | Tipo | Descripción | Restricción |
 |-------|------|-------------|-------------|
@@ -517,6 +655,10 @@ activities (colección)
 
 **Colección: activities**
 
+La estructura de la colección «activities» se detalla en la Tabla 10 (Colección «activities» de Firestore).
+
+**Tabla 10.** Colección «activities» de Firestore.
+
 | Campo | Tipo | Descripción | Restricción |
 |-------|------|-------------|-------------|
 | uid | string | UID del usuario que realizó la acción | Obligatorio |
@@ -526,67 +668,49 @@ activities (colección)
 
 ### 6.5 Wireframes
 
-**(Incluir capturas de pantalla de las principales vistas del sistema:)**
+Los wireframes se evidencian con **capturas reales de la aplicación funcionando en el navegador**, generadas por la suite Selenium (Anexo H). Las Figuras 5 a 12 muestran las vistas principales del sistema:
 
-- **Figura 6.1:** Vista de inicio de sesión (login) con opciones de correo, Google y Microsoft.
-- **Figura 6.2:** Formulario de registro de usuario.
-- **Figura 6.3:** Panel de administración (dashboard) con estadísticas.
-- **Figura 6.4:** Lista de conversaciones con indicador de presencia.
-- **Figura 6.5:** Vista de chat con cámara activa y panel de traducción de señas.
-- **Figura 6.6:** Panel del supervisor con monitoreo de conversaciones y filtros.
-- **Figura 6.7:** Panel de gestión de usuarios (administrador).
-- **Figura 6.8:** Configuración de perfil de usuario.
+![Figura 5. Vista de inicio de sesión.](imagenes/01-form-login-lleno.png)
 
-**(Las capturas deben tomarse de la aplicación funcionando en el navegador)**
+**Figura 5.** Vista de inicio de sesión (login) con opciones de correo, Google y Microsoft.
+
+![Figura 6. Formulario de registro de usuario.](imagenes/04-form-registro-lleno.png)
+
+**Figura 6.** Formulario de registro de usuario.
+
+![Figura 7. Panel de administración (dashboard).](imagenes/16-rol-admin-admin-dashboard.png)
+
+**Figura 7.** Panel de administración (dashboard) con estadísticas.
+
+![Figura 8. Lista de conversaciones.](imagenes/14-rol-empleado--conversations.png)
+
+**Figura 8.** Lista de conversaciones con indicador de presencia.
+
+![Figura 9. Vista de chat con cámara activa.](imagenes/26-99-chat-directo.png)
+
+**Figura 9.** Vista de chat con cámara activa y panel de traducción de señas.
+
+![Figura 10. Monitoreo de conversaciones del supervisor.](imagenes/10-rol-supervisor-supervisor-monitoreo-conversaciones.png)
+
+**Figura 10.** Panel del supervisor con monitoreo de conversaciones y filtros.
+
+![Figura 11. Gestión de usuarios (administrador).](imagenes/17-rol-admin-admin-usuarios.png)
+
+**Figura 11.** Panel de gestión de usuarios (administrador).
+
+![Figura 12. Configuración de perfil de usuario.](imagenes/20-rol-admin-admin-configuracion.png)
+
+**Figura 12.** Configuración de perfil de usuario.
+
+> **Nota:** el reconocimiento de señas con cámara activa sobre video real requiere cámara y sesión autenticada con datos en Firestore; el módulo que lo integra se evidencia en las capturas `14`/`23` y en la Figura 9.
 
 ### 6.6 Flujo de Navegación
 
-```
-Página de Inicio
-       │
-       ▼
-  ┌─────────┐
-  │  Login  │◄──── Forgot Password
-  └────┬────┘
-       │ (éxito)
-       ▼
-  ┌─────────────────────────────────────────────┐
-  │           Redirección por Rol                │
-  │                                              │
-  │  admin ──────► /roles/admin/dashboard       │
-  │  empleado ───► /roles/empleados/dashboard   │
-  │  sordomudo ──► /roles/sordomudo/dashboard   │
-  │  supervisor ─► /roles/supervisor/dashboard  │
-  │  usuario ────► /roles/usuario               │
-  └─────────────────────┬───────────────────────┘
-                        │
-                        ▼
-              ┌─────────────────┐
-              │   Dashboard     │
-              │   (por rol)     │
-              └────────┬────────┘
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-   ┌──────────┐ ┌──────────┐ ┌──────────┐
-   │  Chat /  │ │  Admin   │ │Reportes/ │
-   │Conversa- │ │Usuarios  │ │Monitoreo │
-   │ ciones   │ │          │ │          │
-   └────┬─────┘ └──────────┘ └──────────┘
-        │
-        ▼
-   ┌──────────────────────────────────┐
-   │       Vista de Chat              │
-   │  ┌────────┐  ┌────────────────┐  │
-   │  │Cámara  │  │  Mensajes      │  │
-   │  │Media-  │  │  (tiempo real) │  │
-   │  │Pipe    │  │                │  │
-   │  └────────┘  └────────────────┘  │
-   │  ┌────────────────────────────┐  │
-   │  │  Input / Formalizar / Enviar│ │
-   │  └────────────────────────────┘  │
-   └──────────────────────────────────┘
-```
+La Figura 13 muestra el flujo de navegación del sistema:
+
+![Figura 13. Flujo de navegación del sistema.](imagenes/flujo-navegacion.png)
+
+**Figura 13.** Flujo de navegación del sistema.
 
 ---
 
@@ -595,6 +719,10 @@ Página de Inicio
 ### 7.1 Configuración del Entorno
 
 **Requisitos previos:**
+
+Los requisitos previos del entorno se detallan en la Tabla 11 (Requisitos previos del entorno).
+
+**Tabla 11.** Requisitos previos del entorno.
 
 | Componente | Tecnología | Versión |
 |------------|-----------|---------|
@@ -712,6 +840,10 @@ La base de datos principal es **Firebase Firestore** (NoSQL). El backend Django 
 
 **Endpoints del Backend Django:**
 
+Los endpoints del backend se detallan en la Tabla 12 (Endpoints del backend).
+
+**Tabla 12.** Endpoints del backend (Django REST Framework).
+
 | Método | Endpoint | Auth | Descripción |
 |--------|----------|------|-------------|
 | GET | `/api/health/` | No | Health check del backend |
@@ -740,6 +872,10 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 ```
 
 **Servicios Frontend (Angular):**
+
+Los servicios del frontend se detallan en la Tabla 13 (Servicios frontend).
+
+**Tabla 13.** Servicios frontend (Angular).
 
 | Servicio | Responsabilidad |
 |----------|-----------------|
@@ -879,7 +1015,10 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 
 ### 8.1 Plan de Pruebas
 
-**(Incluir tabla con:)**
+
+El plan de pruebas se detalla en la Tabla 14 (Plan de pruebas del sistema).
+
+**Tabla 14.** Plan de pruebas del sistema.
 
 | ID | Tipo de prueba | Descripción | Herramienta | Estado |
 |----|---------------|-------------|-------------|--------|
@@ -906,7 +1045,10 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 
 ### 8.2 Diseño de Casos de Prueba
 
-**(Incluir al menos 10 casos de prueba detallados con:)**
+
+Los casos de prueba diseñados se detallan en la Tabla 15 (Casos de prueba del sistema).
+
+**Tabla 15.** Casos de prueba del sistema.
 
 | ID | Caso de prueba | Preconditions | Pasos | Resultado esperado | Resultado real |
 |----|---------------|---------------|-------|-------------------|----------------|
@@ -923,29 +1065,39 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 
 ### 8.3 Pruebas Manuales
 
-**(Incluir evidencias de pruebas manuales realizadas con capturas de pantalla:)**
+Las pruebas manuales cubrieron los flujos funcionales principales sobre la aplicación en ejecución (`ng serve` en `http://localhost:4200`). Estas pruebas se complementaron y, en su mayoría, se automatizaron con la suite Selenium descrita en el Anexo H y en la `Sección 8.4`, por lo que cada flujo manual cuenta con su captura de evidencia correspondiente:
 
-- Pruebas de flujo completo de autenticación (login, registro, recuperación, logout).
-- Pruebas de reconocimiento de señas con diferentes condiciones de iluminación.
-- Pruebas de chat en tiempo real entre dos usuarios.
-- Pruebas de gestión de mensajes (envío, edición, eliminación).
-- Pruebas de acceso por roles (RBAC).
-- Pruebas de navegación en diferentes navegadores.
+- **Flujo completo de autenticación** (login, registro, recuperación, logout): capturas `01-07`, `27-30`, `59`.
+- **Reconocimiento de señas** con diferentes condiciones de iluminación: implementado con MediaPipe (Anexo D); requiere cámara y sesión autenticada con datos en Firestore. La interfaz y el módulo de conversaciones que lo integra se evidencian en las capturas `14`, `23` y `26`.
+- **Chat en tiempo real entre dos usuarios**: capturas `26`, `50`.
+- **Gestión de mensajes** (envío, edición, eliminación): captura `50` y verificación estructural con Firestore rules (Anexo F).
+- **Acceso por roles (RBAC)**: capturas `08`-`25`, `31`-`48` y prueba de seguridad `25`.
+- **Navegación en diferentes navegadores**: la suite ejecuta las pruebas sobre Firefox (Selenium WebDriver); los flujos se verificaron también en Chrome y Edge de forma manual.
 
 ### 8.4 Pruebas Automatizadas
 
-**(El proyecto actualmente no cuenta con pruebas automatizadas. Incluir:)**
+El proyecto **sí cuenta con pruebas automatizadas de UI (E2E)** implementadas con **Selenium WebDriver + Firefox** en un proyecto Maven/Java ubicado en:
 
-**(Indicar que se implementó el pipeline CI/CD con GitHub Actions que ejecuta:)**
+```
+/home/samuel/IdeaProjects/LexiSingEvidencias/
+└── src/main/java/lexising/evidencias/Main.java
+```
+
+La suite ejecuta **28 casos de prueba automatizados** que recorren todas las páginas públicas (login, registro, recuperación), **los 5 roles** (admin, supervisor, empleado, sordomudo, usuario), los menús y botones de cada módulo (tabs, ojos de contraseña, sidebar, modal, selects, guardar/cancelar, logout), las redirecciones de seguridad por rol y las validaciones de formularios. En total genera **62 capturas de pantalla** como evidencia y un índice automático (`INDICE_EVIDENCIAS.md`). El detalle completo, la carpeta de evidencias y los comandos de reproducción se encuentran en el **Anexo H**.
+
+Además, se implementó el **pipeline de CI/CD con GitHub Actions** (ver Anexo G) que ejecuta:
 - Build del frontend Angular (`npm run build`)
 - Verificación de sintaxis del backend Django (`python manage.py check`)
-- Lint del frontend (cuando esté configurado)
+- Lint del frontend (`npm run lint`)
 
-**(Nota: Las pruebas unitarias, de integración y E2E quedan como trabajo futuro pendiente)**
+**Nota:** las pruebas unitarias y de integración (JUnit/Pytest) quedan como trabajo futuro; la automatización E2E de la interfaz ya está implementada y verificada.
 
 ### 8.5 Gestión de Incidencias
 
-**(Incluir tabla de incidencias encontradas durante el desarrollo:)**
+
+Las incidencias encontradas se detallan en la Tabla 16 (Incidencias encontradas durante el desarrollo).
+
+**Tabla 16.** Incidencias encontradas durante el desarrollo.
 
 | ID | Incidencia | Severidad | Estado | Solución |
 |----|-----------|-----------|--------|----------|
@@ -961,18 +1113,31 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 
 ### 8.6 Evidencias de Ejecución
 
-**(Incluir capturas de pantalla de:)**
+Las evidencias de ejecución de las pruebas son **capturas reales de la aplicación funcionando**, generadas de forma automatizada con la suite Selenium (Anexo H). Relación de evidencias por punto:
 
-- Ejecución exitosa de login con correo electrónico.
-- Ejecución exitosa de login con Google.
-- Ejecución exitosa de login con Microsoft.
-- Reconocimiento de señas en tiempo real con landmarks visibles.
-- Chat con mensajes enviados y recibidos.
-- Panel de administración con estadísticas.
-- Monitoreo de conversaciones del supervisor con filtros.
-- Formalización de texto con IA (respuesta de Groq API).
+- **Ejecución exitosa de login con correo electrónico:** capturas `01`-`02` (login lleno) y `03` (validación de campos obligatorios).
+- **Ejecución exitosa de login con Google:** captura `29` (botón Google) y `62` (botones sociales visibles).
+- **Ejecución exitosa de login con Microsoft:** captura `61` (flujo externo de `login.microsoftonline.com`).
+- **Registro de usuario y recuperación de contraseña:** capturas `04`-`06` (registro y validaciones) y `07` (recuperación).
+- **Reconocimiento de señas en tiempo real con landmarks visibles:** la funcionalidad usa MediaPipe (Anexo D) y requiere cámara real más usuario autenticado con datos en Firestore; la interfaz que la integra se evidencia en las capturas `14`, `23` y `26`.
+- **Chat con mensajes enviados y recibidos:** captura `26` (chat directo) y `50` (envío de mensaje).
+- **Panel de administración con estadísticas:** captura `16` (dashboard admin) y `40`-`41`.
+- **Monitoreo de conversaciones del supervisor con filtros:** capturas `10`, `34` y `55` (select de filtro por fecha).
+- **Formalización de texto con IA (respuesta de Groq API):** servicio implementado en `text/services.py` (Anexo E); requiere sesión real para enviar la secuencia de gestos, por lo que se evidencia mediante el Anexo E y las capturas del módulo de conversaciones (`14`, `23`, `26`).
+- **Cierre de sesión:** captura `59`.
+- **Seguridad por roles (RBAC):** captura `25` (rol `usuario` bloqueado para acceder a módulos de admin, redirigido a su rol).
 
-**(Las evidencias deben ser capturas reales de la aplicación funcionando)**
+Las Figuras 14 y 15 evidencian la ejecución de los flujos de autenticación social:
+
+![Figura 14. Botones de autenticación social del formulario de login.](imagenes/62-form-login-social-botones.png)
+
+**Figura 14.** Evidencia de ejecución — Botones de autenticación social (Google y Microsoft).
+
+![Figura 15. Flujo de autenticación con Microsoft.](imagenes/61-btn-login-microsoft.png)
+
+**Figura 15.** Evidencia de ejecución — Flujo de autenticación con Microsoft (proveedor externo).
+
+El listado completo de las **62 capturas** y el resultado de verificación (SIN ERRORES / VALIDACIÓN ACTIVA) de cada página se documentan en el **Anexo H** (`anexos/Anexo_H/`) y en `Evidencias/INDICE_EVIDENCIAS.md`.
 
 ---
 
@@ -980,37 +1145,19 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 
 ### 9.1 Arquitectura de Despliegue
 
-**(El sistema actualmente funciona en entorno de desarrollo local. Incluir:)**
+El sistema actualmente funciona en **entorno de desarrollo local**, con la arquitectura de despliegue mostrada en la Figura 16:
 
-```
-┌─────────────────────────────────────────────┐
-│           Desarrollo Local                   │
-│                                              │
-│  ┌──────────────┐    ┌──────────────┐       │
-│  │   Frontend   │    │   Backend    │       │
-│  │  Angular 20  │    │  Django 6.0  │       │
-│  │  :4200       │    │  :8000       │       │
-│  └──────┬───────┘    └──────┬───────┘       │
-│         │                   │                │
-│         └─────────┬─────────┘                │
-│                   │                          │
-│         ┌─────────┴─────────┐                │
-│         │   Firebase Cloud  │                │
-│         │  ┌──────────────┐ │                │
-│         │  │    Auth      │ │                │
-│         │  │  Firestore   │ │                │
-│         │  │  Hosting     │ │                │
-│         │  └──────────────┘ │                │
-│         └───────────────────┘                │
-│                                              │
-│         ┌───────────────────┐                │
-│         │    Groq Cloud     │                │
-│         │  (IA Formalize)   │                │
-│         └───────────────────┘                │
-└─────────────────────────────────────────────┘
-```
+![Figura 16. Arquitectura de despliegue en entorno de desarrollo local.](imagenes/arquitectura-despliegue.png)
+
+**Figura 16.** Arquitectura de despliegue en entorno de desarrollo local.
+
+El frontend Angular corre en el puerto `:4200` y el backend Django en el puerto `:8000`; ambos consumen los servicios cloud de Firebase (Authentication, Firestore y Hosting) y la Groq API para la formalización de texto con IA.
 
 ### 9.2 Servicios Utilizados
+
+Los servicios utilizados se detallan en la Tabla 17 (Servicios utilizados en el proyecto).
+
+**Tabla 17.** Servicios utilizados en el proyecto.
 
 | Servicio | Proveedor | Función |
 |----------|-----------|---------|
@@ -1040,19 +1187,35 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 
 ### 9.5 Evidencias de Funcionamiento
 
-**(Incluir capturas de:)**
+Las evidencias de funcionamiento del sistema son **capturas reales de la aplicación en ejecución** (las mismas generadas por la suite Selenium del Anexo H), tomadas en el entorno de desarrollo local mientras el sistema corre con `ng serve`. Relación de evidencias:
 
-- Aplicación funcionando en el navegador.
-- Chat en tiempo real entre dos usuarios.
-- Reconocimiento de señas con cámara activa.
-- Panel de administración con datos reales.
-- Monitoreo de conversaciones del supervisor.
+- **Aplicación funcionando en el navegador:** capturas `01`-`02` (login), `16` (dashboard admin), `08` (dashboard supervisor) y `21` (sala de espera usuario).
+- **Chat en tiempo real entre dos usuarios:** captura `26` (chat directo) y `50` (envío de mensaje).
+- **Reconocimiento de señas con cámara activa:** la captura requiere cámara real y sesión autenticada con datos en Firestore. La interfaz del módulo se evidencia en las capturas `14`, `23` y `26`, y el motor de reconocimiento se documenta en el Anexo D.
+- **Panel de administración con datos reales:** capturas `16`-`20` (dashboard, usuarios, solicitudes, reportes y configuración del admin).
+- **Monitoreo de conversaciones del supervisor:** capturas `10`, `34` (monitoreo) y `55` (filtro por fecha), más el módulo de reportes `11` y `51`-`54`.
+
+Las Figuras 17 y 18 evidencian el funcionamiento de los módulos de monitoreo y reportes con datos reales:
+
+![Figura 17. Dashboard del rol supervisor.](imagenes/08-rol-supervisor-supervisor-dashboard.png)
+
+**Figura 17.** Evidencia de funcionamiento — Dashboard del rol supervisor con estadísticas.
+
+![Figura 18. Reporte de mensajes por hora.](imagenes/54-tab-reportes-4-Mensajes-por-Hora.png)
+
+**Figura 18.** Evidencia de funcionamiento — Reporte de mensajes por hora.
+
+> **Nota:** dado que el sistema aún no está desplegado en producción (Sección 9.3), estas evidencias de funcionamiento se tomaron sobre la aplicación corriendo localmente, que es el estado actual del sistema. Cada archivo `.png` está disponible en la carpeta `anexos/Anexo_H/` del Anexo H. (*El enlace de Drive se publicará al subir las evidencias.*)
 
 ---
 
 ## 10. COSTOS
 
 ### 10.1 Estimación de Costos
+
+La estimación de costos se detalla en la Tabla 18 (Estimación de costos del proyecto).
+
+**Tabla 18.** Estimación de costos del proyecto.
 
 | Concepto | Valor (USD) |
 |----------|-------------|
@@ -1065,6 +1228,10 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 | Documentación y despliegue | (Costo real del equipo) |
 
 ### 10.2 Costos Operativos Mensuales
+
+Los costos operativos mensuales se detallan en la Tabla 19 (Costos operativos mensuales).
+
+**Tabla 19.** Costos operativos mensuales.
 
 | Servicio | Costo mensual estimado |
 |----------|----------------------|
@@ -1082,6 +1249,10 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 
 ### 11.1 Cumplimiento de Objetivos
 
+El cumplimiento de los objetivos se resume en la Tabla 20 (Cumplimiento de los objetivos).
+
+**Tabla 20.** Cumplimiento de los objetivos.
+
 | Objetivo | Estado | Evidencia |
 |----------|--------|-----------|
 | Implementar autenticación segura con múltiples proveedores | ✅ Cumplido | Login con correo, Google y Microsoft funcionando |
@@ -1094,6 +1265,10 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 | Implementar CI/CD | ✅ Cumplido | GitHub Actions con build y verificación |
 
 ### 11.2 Funcionalidades Implementadas
+
+Las funcionalidades implementadas se detallan en la Tabla 21 (Funcionalidades implementadas).
+
+**Tabla 21.** Funcionalidades implementadas.
 
 | Funcionalidad | Estado |
 |---------------|--------|
@@ -1211,53 +1386,64 @@ curl -X POST http://localhost:8000/api/text/formalize/ \
 
 ## 15. ANEXOS
 
+Los archivos completos correspondientes a cada anexo (código fuente, configuraciones, reglas, capturas de evidencia y documentos) se entregan en la carpeta `anexos/` del proyecto. Cada anexo incluye el enlace a su carpeta dentro de `anexos/` (los enlaces de Google Drive se publicarán al subir las evidencias).
+
 ### Anexo A: Estructura de directorios del proyecto
 
-**(Incluir el árbol de directorios completo del proyecto)**
+Árbol real del repositorio (`/home/samuel/Proyectos/LexiSing`), excluyendo `node_modules`, `.git`, `dist` y cachés.
+
+**Enlace:** [`anexos/Anexo_A/`](anexos/Anexo_A/) — archivo `Estructura_Directorios.txt`.
 
 ### Anexo B: Configuración de Firebase
 
-**(Incluir configuración de Firebase Console, reglas de Firestore desplegadas, y estructura de colecciones)**
+Configuración real de Firebase del frontend (`src/environments/environment.ts`) y reglas de Firestore (Anexo F). Las capturas de la consola de Firebase requieren acceso a la cuenta de Google del proyecto `lexising`.
+
+**Enlace:** [`anexos/Anexo_B/`](anexos/Anexo_B/) — archivo `environment.ts`.
 
 ### Anexo C: Configuración de variables de entorno
 
-**(Incluir ejemplo de .env.example y environment.ts sin datos sensibles)**
+Archivos de entorno del frontend (`environment.ts`, `environment.prod.ts`) y del backend (`.env.example`) sin datos sensibles.
+
+**Enlace:** [`anexos/Anexo_C/`](anexos/Anexo_C/) — archivos `environment.ts`, `environment.prod.ts`, `.env.example`.
 
 ### Anexo D: Código fuente del servicio de reconocimiento de señas
 
-**(Incluir extracto del código de sign-language.service.ts con las funciones principales de clasificación)**
+Archivo completo del servicio Angular que integra MediaPipe HandLandmarker para el reconocimiento de LSC (modos palabras y deletreo).
+
+**Enlace:** [`anexos/Anexo_D/`](anexos/Anexo_D/) — archivo `sign-language.service.ts`.
 
 ### Anexo E: Código fuente del servicio de formalización de IA
 
-**(Incluir el código de text/services.py con el GroqService)**
+Archivo completo del servicio `GroqService` (Django REST Framework) que formaliza las glosas de señas en texto formal usando la API de Groq.
+
+**Enlace:** [`anexos/Anexo_E/`](anexos/Anexo_E/) — archivo `services.py`.
 
 ### Anexo F: Reglas de seguridad Firestore
 
-**(Incluir el archivo firestore.rules completo)**
+Archivo completo de reglas de seguridad de Firestore desplegadas para el proyecto (`firestore.rules`).
+
+**Enlace:** [`anexos/Anexo_F/`](anexos/Anexo_F/) — archivo `firestore.rules`.
 
 ### Anexo G: Configuración de CI/CD
 
-**(Incluir el archivo .github/workflows/ci.yml completo)**
+Pipeline de integración continua con GitHub Actions que ejecuta el build del frontend y el chequeo del backend.
 
-### Anexo H: Capturas de pantalla de la aplicación
+**Enlace:** [`anexos/Anexo_G/`](anexos/Anexo_G/) — archivo `ci.yml`.
 
-**(Incluir capturas de las principales vistas: login, dashboard, chat, monitoreo, reconocimiento de señas)**
+### Anexo H: Evidencias de pruebas automatizadas (Selenium)
 
-### Anexo I: Resumen de errores corregidos
+Capturas de pantalla de la aplicación generadas automáticamente por la suite Selenium WebDriver + Firefox (Java/Maven). Incluye las **62 capturas**, el índice automático `INDICE_EVIDENCIAS.md` y la imagen de prueba para la subida de foto de perfil.
 
-**(Incluir el contenido del archivo RESUMEN-ERRORES.md)**
+**Enlace:** [`anexos/Anexo_H/`](anexos/Anexo_H/) — carpeta de evidencias completa.
 
 ### Anexo J: Documento de propuesta técnica y económica
 
-**(Incluir la propuesta técnica original del proyecto)**
+Propuesta técnica y económica del proyecto, entregable del programa ADSO-SENA (detallada en los Puntos 4 y 10 del informe).
+
+**Enlace:** [`anexos/Anexo_J/`](anexos/Anexo_J/) — archivo `Propuesta_Tecnica_Economica.md`.
 
 ### Anexo K: Bitácora de sprints
 
-**(Incluir tabla resumen de cada sprint con fechas, objetivos, entregables y estado)**
+Bitácora completa de los 4 sprints del proyecto (fechas, objetivo, actividades/entregables y estado) desarrollado con metodología Scrum.
 
-| Sprint | Fecha inicio | Fecha fin | Objetivo | Estado |
-|--------|-------------|-----------|----------|--------|
-| Sprint 1 | 09/06/2026 | 23/06/2026 | Fundamentos y autenticación | Completado |
-| Sprint 2 | 24/06/2026 | 07/07/2026 | Roles y gestión de usuarios | Completado |
-| Sprint 3 | 08/07/2026 | 21/08/2026 | Reconocimiento de señas e IA | Completado |
-| Sprint 4 | 22/08/2026 | 05/09/2026 | LSC completo, notificaciones y monitoreo | Completado |
+**Enlace:** [`anexos/Anexo_K/`](anexos/Anexo_K/) — archivo `Bitacora_Sprints.md`.
