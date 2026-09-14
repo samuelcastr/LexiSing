@@ -1,3 +1,6 @@
+import json
+import os
+
 import firebase_admin
 
 from firebase_admin import credentials
@@ -5,30 +8,33 @@ from firebase_admin import firestore
 
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# Ruta raíz del proyecto
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Cargar variables del .env
+load_dotenv(BASE_DIR / ".env")
+
 # Always define db (None when Firebase is not configured) so imports never crash.
 db = None
 
 try:
 
-    # Ruta raíz del proyecto
-    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    # Credenciales del service account en formato JSON (una sola línea) en .env
+    firebase_credentials = os.getenv("FIREBASE_CREDENTIALS", "").strip()
 
-    # Ruta al archivo firebase-key.json
-    firebase_key_path = BASE_DIR / "firebase-key.json"
-
-    # Verificar si existe
-    if not firebase_key_path.exists():
+    if not firebase_credentials:
         raise Exception(
             "Firebase no está configurado. "
-            "Por favor, coloca 'firebase-key.json' "
-            "en el directorio raíz del proyecto."
+            "Define la variable 'FIREBASE_CREDENTIALS' en el archivo .env "
+            "con el contenido del JSON del service account."
         )
+
+    cred = credentials.Certificate(json.loads(firebase_credentials))
 
     # Inicializar Firebase una sola vez
     if not firebase_admin._apps:
-
-        cred = credentials.Certificate(str(firebase_key_path))
-
         firebase_admin.initialize_app(cred)
 
     # Cliente Firestore
@@ -37,10 +43,10 @@ try:
     # Probar conexión
     test = db.collections()
 
-    print("🔥 Firebase conectado correctamente")
+    print("Firebase conectado correctamente")
 
 except Exception as e:
 
-    print("❌ Error conectando Firebase:")
+    print("Error conectando Firebase:")
     print(str(e))
-    print("⚠️  db quedará como None (Firebase no disponible).")
+    print("db quedara como None (Firebase no disponible).", flush=True)

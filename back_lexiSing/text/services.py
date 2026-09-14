@@ -5,10 +5,6 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
-GROQ_MODEL = 'qwen/qwen3.8-27b'
-GROQ_TIMEOUT = 10
-
 SYSTEM_PROMPT = (
     'Eres un asistente que convierte secuencias de señas (glosas) '
     'en texto formal empresarial en español. '
@@ -29,7 +25,9 @@ class GroqService:
 
     def __init__(self):
         self.api_key = getattr(settings, 'GROQ_API_KEY', '')
-        self.timeout = GROQ_TIMEOUT
+        self.api_url = getattr(settings, 'GROQ_API_URL', 'https://api.groq.com/openai/v1/chat/completions')
+        self.model = getattr(settings, 'GROQ_MODEL', 'qwen/qwen3.8-27b')
+        self.timeout = int(getattr(settings, 'GROQ_TIMEOUT', 10))
 
     def formalizar(self, gestos: list[str], contexto: str) -> dict:
         if not self.api_key:
@@ -38,7 +36,7 @@ class GroqService:
 
         gestos_str = ', '.join(gestos)
         payload = {
-            'model': GROQ_MODEL,
+            'model': self.model,
             'messages': [
                 {'role': 'system', 'content': SYSTEM_PROMPT.format(contexto=contexto)},
                 {'role': 'user', 'content': USER_PROMPT.format(gestos=gestos_str)},
@@ -53,7 +51,7 @@ class GroqService:
 
         try:
             response = requests.post(
-                GROQ_API_URL,
+                self.api_url,
                 json=payload,
                 headers=headers,
                 timeout=self.timeout,

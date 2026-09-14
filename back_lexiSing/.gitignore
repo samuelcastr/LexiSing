@@ -4,5 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 *.db
+*.sqlite3
 .env
 firebase-key.json
+staticfiles/

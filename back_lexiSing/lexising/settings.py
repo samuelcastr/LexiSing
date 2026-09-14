@@ -83,6 +83,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS Configuration
@@ -90,6 +91,9 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
     'http://localhost:3000',
     'http://127.0.0.1:4200',
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https://.*\.vercel\.app$',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -105,4 +109,7 @@ REST_FRAMEWORK = {
 
 # Groq API (formalización de texto)
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+GROQ_API_URL = os.getenv('GROQ_API_URL', 'https://api.groq.com/openai/v1/chat/completions')
+GROQ_MODEL = os.getenv('GROQ_MODEL', 'qwen/qwen3.8-27b')
+GROQ_TIMEOUT = int(os.getenv('GROQ_TIMEOUT', '10'))
 
