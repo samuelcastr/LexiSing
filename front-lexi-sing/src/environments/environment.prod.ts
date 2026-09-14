@@ -11,5 +11,5 @@ export const environment = {
     measurementId: 'G-3ZVGJ16TWJ'
   },
 
-  apiUrl: 'https://api.lexising.com/api'
+  apiUrl: 'https://lexising.vercel.app/api'
 };

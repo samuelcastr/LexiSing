@@ -94,6 +94,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r'^https://.*\.vercel\.app$',
+    r'^https://.*\.web\.app$',
+    r'^https://.*\.firebaseapp\.com$',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
