@@ -48,7 +48,7 @@ export class AdminReportesPageComponent implements OnInit, OnDestroy, AfterViewI
   ngAfterViewInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       import('plotly.js-dist').then(plotly => {
-        this.Plotly = plotly;
+        this.Plotly = (plotly as any).default ?? plotly;
         this.renderChartForActiveTab();
       });
     }

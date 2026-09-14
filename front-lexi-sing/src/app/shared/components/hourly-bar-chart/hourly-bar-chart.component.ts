@@ -28,7 +28,7 @@ export class HourlyBarChartComponent implements OnChanges, AfterViewInit, OnDest
     if (isPlatformBrowser(this.platformId)) {
       this.observarCambioTamanio();
       import('plotly.js-dist').then(plotly => {
-        this.Plotly = plotly;
+        this.Plotly = (plotly as any).default ?? plotly;
         if (this.datosPendientes) {
           this.datosPendientes = false;
           this.render();
