@@ -5,9 +5,11 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:deploy": "ng build && node ./deploy-scripts/prepare-hosting.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:front-lexi-sing": "node dist/front-lexi-sing/server/server.mjs"
+    "serve:ssr:front-lexi-sing": "node dist/front-lexi-sing/server/server.mjs",
+    "deploy": "npm run build:deploy && firebase deploy --only hosting"
   },
   "prettier": {
     "printWidth": 100,

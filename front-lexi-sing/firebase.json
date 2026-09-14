@@ -12,18 +12,8 @@
     "rewrites": [
       {
         "source": "**",
-        "function": "ssr"
+        "destination": "/index.html"
       }
-    ]
-  },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs22",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log"
     ]
   }
 }

@@ -46,6 +46,5 @@ Thumbs.db
 firebase-key.json
 firebase-key*.json
 
-# Copias SSR para Cloud Functions
-/functions/server
-/functions/browser
+# Cache de deploy Firebase
+/.firebase
