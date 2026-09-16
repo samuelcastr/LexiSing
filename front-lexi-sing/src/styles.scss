@@ -1,6 +1,5 @@
 @use './app/features/roles/admin/variables' as *;
 @use './styles/buttons';
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 html, body {
 	height: 100%;
@@ -9,6 +8,7 @@ html, body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	overflow-x: hidden;
+	scroll-behavior: smooth;
 }
 
 a { color: #5b21b6; text-decoration: none }

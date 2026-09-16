@@ -73,6 +73,6 @@ export const APP_ROUTES: Routes = [
   { path: 'conversations', loadComponent: () => import('./features/chat/conversation-list/conversation-list.component').then(m => m.ConversationListComponent), canActivate: [authGuard] },
 
   { path: 'chat/:id', loadComponent: () => import('./features/chat/chat/chat.component').then(m => m.ChatComponent), canActivate: [authGuard] },
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent) },
   { path: '**', redirectTo: '/dashboard' }
 ];
