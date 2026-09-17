@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -36,7 +36,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   showConfirmPassword = false;
   private destroy$ = new Subject<void>();
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.connecting$ = this.authService.connecting$;
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
@@ -124,5 +124,45 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.error = err?.message || 'Error de red';
       }
     });
+  }
+
+  loginWithGoogle(): void {
+    this.startSocialLogin(this.authService.loginWithGoogle());
+  }
+
+  loginWithMicrosoft(): void {
+    this.startSocialLogin(this.authService.loginWithMicrosoft());
+  }
+
+  private startSocialLogin(request: Observable<any>): void {
+    this.error = null;
+    this.successMessage = null;
+    this.loading = true;
+
+    request.pipe(takeUntil(this.destroy$)).subscribe({
+      next: res => {
+        this.loading = false;
+        if (res.user) {
+          this.navigateToRoleHome(res.user.rol);
+        } else if (res.message && res.code !== 'auth/popup-closed-by-user') {
+          this.error = res.message;
+        }
+      },
+      error: err => {
+        this.loading = false;
+        this.error = err?.message || 'Error al registrarse';
+      }
+    });
+  }
+
+  private navigateToRoleHome(rol: string): void {
+    const roleRoutes: Record<string, string> = {
+      admin: '/roles/admin',
+      supervisor: '/roles/supervisor',
+      empleado: '/roles/empleados',
+      usuario: '/roles/usuario',
+      sordomudo: '/roles/sordomudo',
+    };
+    this.router.navigate([roleRoutes[rol] || '/login']);
   }
 }
