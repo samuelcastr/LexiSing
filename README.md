@@ -5,7 +5,7 @@
   </p>
   <p align="center">
     <img src="https://img.shields.io/badge/Angular-20-E34F26?style=for-the-badge&logo=angular&logoColor=white" alt="Angular"/>
-    <img src="https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django&logoColor=white" alt="Django"/>
+    <img src="https://img.shields.io/badge/Django-5.2-092E20?style=for-the-badge&logo=django&logoColor=white" alt="Django"/>
     <img src="https://img.shields.io/badge/Firebase-DD2C00?style=for-the-badge&logo=firebase&logoColor=white" alt="Firebase"/>
     <img src="https://img.shields.io/badge/Groq-IA-blueviolet?style=for-the-badge" alt="Groq"/>
     <img src="https://img.shields.io/badge/MediaPipe-green?style=for-the-badge" alt="MediaPipe"/>
@@ -61,7 +61,7 @@ LexiSing permite a personas sordomudas comunicarse en tiempo real mediante **Len
 | UI | Angular Material | 20.2 |
 | Deteccion de señas | MediaPipe HandLandmarker | 1.0 |
 | Lengua de señas | LSC (abecedario dactilológico) | 27 letras |
-| Backend | Django + DRF | 6.0 + 3.17 |
+| Backend | Django + DRF | 5.2 + 3.17 |
 | Auth | Firebase Authentication | - |
 | Base de datos | Firestore (NoSQL) | - |
 | IA (formalizacion) | Groq API | - |
