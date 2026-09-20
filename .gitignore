@@ -1,0 +1,12 @@
+.env
+.env.*
+*.secret
+firebase-key.json
+db.sqlite3
+node_modules/
+dist/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo

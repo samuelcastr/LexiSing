@@ -1,0 +1,1 @@
+{"projects":{"front-lexi-sing":{"architect":{"build":{"options":{"outputPath":"dist/front-lexi-sing","index":"src/index.html","main":"src/main.ts","polyfills":["zone.js"],"tsConfig":"tsconfig.app.json"},"configurations":{"production":{"budgets":[{"type":"initial","maximumWarning":"500kB","maximumError":"1MB"}]}}}},"serve":{"options":{"buildTarget":"front-lexi-sing:build"}}}}

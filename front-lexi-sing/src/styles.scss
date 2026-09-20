@@ -1,0 +1,13 @@
+// LexiSing - Estilos globales para Angular Material
+@use '@angular/material' as mat;
+@include mat.core();
+
+:root {
+  --primary: #6200ee;
+  --secondary: #00c49a;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
