@@ -1,0 +1,145 @@
+// =============================================================================
+// _buttons.scss
+// Sistema base compartido de botones (icono circular y píldora de acción).
+// Se aplica sobre <button> y sobre botones de Angular Material para unificar
+// colores, tamaños, bordes e iconografía en todo el proyecto.
+//
+// Uso:
+//   <button mat-icon-button class="app-icon-btn app-icon-btn--primary">...</button>
+//   <button class="app-btn app-btn--primary">...</button>
+//   <button class="app-btn app-btn--outline app-btn--sm">...</button>
+//
+// Se usa !important en las propiedades de apariencia para garantizar que el
+// diseño base gane sobre los estilos por defecto de Angular Material.
+// =============================================================================
+
+/* ===== Botones de icono (circulares) ===== */
+.app-icon-btn {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  flex: 0 0 auto;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: #f5f3ff !important;
+  color: #6d28d9 !important;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25) !important;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none !important;
+  }
+}
+
+.app-icon-btn--primary {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+  color: white !important;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.24) !important;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.34) !important;
+  }
+}
+
+/* ===== Botones de acción (píldora) ===== */
+.app-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px !important;
+  border: 1.5px solid transparent !important;
+  border-radius: 999px !important;
+  background: white !important;
+  color: #4b5563 !important;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease !important;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}
+
+.app-btn--primary {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+  color: white !important;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.24) !important;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.34) !important;
+  }
+}
+
+.app-btn--outline {
+  background: white !important;
+  border-color: #dfd9ff !important;
+  color: #4b5563 !important;
+
+  &:hover:not(:disabled) {
+    background: #f7f5ff !important;
+    border-color: #8b5cf6 !important;
+    color: #6d28d9 !important;
+  }
+}
+
+.app-btn--danger {
+  background: white !important;
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+
+  &:hover:not(:disabled) {
+    background: #fef2f2 !important;
+    border-color: #ef4444 !important;
+    color: #dc2626 !important;
+  }
+}
+
+/* Variante compacta (acciones inline sobre mensajes) */
+.app-btn--sm {
+  min-height: 36px;
+  padding: 4px 12px !important;
+  font-size: 12px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}

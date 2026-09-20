@@ -1,0 +1,73 @@
+<div class="dashboard-layout">
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen" [class.mobile-open]="mobileMenuOpen">
+    <div>
+      <div class="logo" [class.collapsed]="!sidebarOpen">
+        <img src="/logo.png" alt="LexiSing" class="logo-icon">
+        <span class="logo-name">LexiSing</span>
+      </div>
+
+      <nav (click)="closeMobileMenu()">
+        <a routerLink="/roles/supervisor/dashboard" routerLinkActive="active">
+          <mat-icon>dashboard</mat-icon>
+          <span *ngIf="sidebarOpen">Monitoreo</span>
+        </a>
+
+        <a routerLink="/roles/supervisor/conversations" routerLinkActive="active">
+          <mat-icon>message</mat-icon>
+          <span *ngIf="sidebarOpen">Chat</span>
+        </a>
+
+        <a routerLink="/roles/supervisor/usuarios" routerLinkActive="active">
+          <mat-icon>groups</mat-icon>
+          <span *ngIf="sidebarOpen">Usuarios</span>
+        </a>
+
+        <a routerLink="/roles/supervisor/monitoreo-conversaciones" routerLinkActive="active">
+          <mat-icon>chat</mat-icon>
+          <span *ngIf="sidebarOpen">Conversaciones</span>
+        </a>
+
+        <a routerLink="/roles/supervisor/reportes" routerLinkActive="active">
+          <mat-icon>description</mat-icon>
+          <span *ngIf="sidebarOpen">Reportes</span>
+        </a>
+
+        <a routerLink="/roles/supervisor/configuracion" routerLinkActive="active">
+          <mat-icon>settings</mat-icon>
+          <span *ngIf="sidebarOpen">Configuración</span>
+        </a>
+      </nav>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="sidebarOpen">Cerrar sesión</span>
+    </button>
+  </aside>
+
+  <main class="content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <div *ngIf="showGreeting">
+          <h1>¡Hola, {{ userName }}!</h1>
+          <p>Supervisor Dashboard</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a class="profile" routerLink="/roles/supervisor/configuracion">
+          <img *ngIf="photoURL" [src]="photoURL" alt="Perfil">
+          <mat-icon *ngIf="!photoURL">account_circle</mat-icon>
+        </a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <div class="sidebar-backdrop" [class.visible]="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+</div>

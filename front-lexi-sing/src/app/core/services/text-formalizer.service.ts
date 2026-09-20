@@ -1,22 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { FormalizeResponse } from '../models/formalize-response.model';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class TextFormalizerService {
-  private apiUrl = 'http://localhost:8000/api/text/formalize/';
 
-  constructor(private http: HttpClient) {}
+  private api = environment.apiUrl;
 
-  formalizar(gestos: string[], contexto: string): Observable<any> {
-    return this.http.post<any>(this.apiUrl, { gestos, contexto }, {
-      headers: { 'Authorization': 'Bearer TOKEN', 'Content-Type': 'application/json' }
-    }).pipe(
-      catchError(error => {
-        const fallback = { texto_formal: gestos.join(' ').replace(/^\w/, c => c.toUpperCase()) + '.', gestos_originales: gestos, fuente: 'fallback' };
-        return of(fallback);
-      })
-    );
+  constructor(private http: HttpClient) { }
+
+  formalize(gestos: string[], contexto?: string): Observable<FormalizeResponse> {
+    const body: Record<string, unknown> = { gestos };
+    if (contexto) {
+      body['contexto'] = contexto;
+    }
+    return this.http.post<FormalizeResponse>(`${this.api}/text/formalize/`, body);
   }
 }

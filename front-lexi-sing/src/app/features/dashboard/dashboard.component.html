@@ -1,0 +1,187 @@
+<div class="dashboard-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen" [class.mobile-open]="mobileMenuOpen">
+
+    <div>
+
+      <div class="logo" [class.collapsed]="!sidebarOpen">
+        <mat-icon>pan_tool</mat-icon>
+      </div>
+
+      <nav (click)="closeMobileMenu()">
+
+        <a class="active">
+          <mat-icon>home</mat-icon>
+          <span *ngIf="sidebarOpen">Inicio</span>
+        </a>
+
+        <a routerLink="/conversations">
+          <mat-icon>chat</mat-icon>
+          <span *ngIf="sidebarOpen">Chat</span>
+        </a>
+
+        <a>
+          <mat-icon>forum</mat-icon>
+          <span *ngIf="sidebarOpen">Comunicación en vivo</span>
+        </a>
+
+        <a>
+          <mat-icon>groups</mat-icon>
+          <span *ngIf="sidebarOpen">Empleados</span>
+        </a>
+
+        <a>
+          <mat-icon>description</mat-icon>
+          <span *ngIf="sidebarOpen">Reportes</span>
+        </a>
+
+        <a>
+          <mat-icon>settings</mat-icon>
+          <span *ngIf="sidebarOpen">Configuración</span>
+        </a>
+
+      </nav>
+
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="sidebarOpen">Cerrar sesión</span>
+    </button>
+
+  </aside>
+
+  <div class="sidebar-backdrop" [class.visible]="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+
+  <!-- Contenido -->
+  <main class="content">
+    <div class="topbar">
+
+      <div class="topbar-left">
+
+        <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+
+          <mat-icon>menu</mat-icon>
+
+        </button>
+
+        <div>
+          <h1>¡Hola, {{ userName }}! </h1>
+          <p>Bienvenido a LexiSing</p>
+        </div>
+
+      </div>
+
+      <div class="topbar-right">
+
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+
+        <button class="notification">
+          <mat-icon>notifications_none</mat-icon>
+        </button>
+
+        <div class="profile">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Tarjetas -->
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <span>Empleados activos</span>
+        <h2>{{ empleadosActivos }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Conversaciones hoy</span>
+        <h2>{{ conversacionesHoy }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Mensajes enviados</span>
+        <h2>{{ mensajesEnviados }}</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>Usuarios en línea</span>
+        <h2>{{ onlineUsers }}</h2>
+      </div>
+
+    </div>
+
+    <!-- Sección inferior -->
+    <div class="bottom-grid">
+
+      <!-- Actividad -->
+      <div class="activity-card">
+
+        <h2>Actividad reciente</h2>
+
+        <div class="activity-item" *ngFor="let activity of recentActivities">
+
+          <mat-icon>
+            account_circle
+          </mat-icon>
+
+          <div>
+
+            <h4>
+              {{ activity.userName }}
+              {{ activity.action }}
+            </h4>
+
+            <span>
+
+              {{
+              activity.timestamp?.toDate()
+              | date:'short'
+              }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Acciones -->
+      <div class="actions-card">
+
+        <h2>Acciones rápidas</h2>
+
+        <button>
+          <mat-icon>chat_bubble_outline</mat-icon>
+          Nueva conversación
+        </button>
+
+        <button>
+          <mat-icon>forum</mat-icon>
+          Comunicación en vivo
+        </button>
+
+        <button>
+          <mat-icon>groups</mat-icon>
+          Ver empleados
+        </button>
+
+        <button>
+          <mat-icon>description</mat-icon>
+          Generar reporte
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>

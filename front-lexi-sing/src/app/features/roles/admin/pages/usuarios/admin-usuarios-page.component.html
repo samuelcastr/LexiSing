@@ -1,0 +1,27 @@
+<div class="section-header">
+  <div>
+    <h2>Usuarios registrados</h2>
+    <p>Administra los roles del sistema.</p>
+  </div>
+</div>
+
+<div class="search-bar">
+  <mat-icon>search</mat-icon>
+  <input
+    type="text"
+    placeholder="Buscar por nombre, correo o rol..."
+    [(ngModel)]="searchTerm"
+    (input)="filterUsers()"
+  />
+</div>
+
+<div class="no-results" *ngIf="allUsers.length > 0 && filteredUsers.length === 0">
+  No se encontraron usuarios que coincidan con la búsqueda.
+</div>
+
+<app-user-table
+  [users]="filteredUsers"
+  [showPendingBadge]="false"
+  actionButtonLabel="Guardar"
+  (roleChanged)="handleRoleChange($event)">
+</app-user-table>

@@ -1,0 +1,116 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../../core/services/auth.service';
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil, debounceTime } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, RouterModule, FieldErrorComponent],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
+})
+export class LoginComponent implements OnInit, OnDestroy {
+  form!: FormGroup;
+
+  loading = false;
+  error: string | null = null;
+  connecting$!: Observable<boolean>;
+  private destroy$ = new Subject<void>();
+
+  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+    this.connecting$ = this.authService.connecting$;
+    this.form = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]]
+    });
+  }
+
+  ngOnInit(): void {
+    this.authService.ensureAuthServerReachable();
+    this.form.valueChanges.pipe(
+      debounceTime(400),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.authService.ensureAuthServerReachable());
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  get email() { return this.form.get('email'); }
+  get password() { return this.form.get('password'); }
+
+  submit() {
+    this.error = null;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.loading = true;
+    const { email, password } = this.form.value;
+    this.authService.login(email!, password!).pipe(takeUntil(this.destroy$)).subscribe({
+      next: res => {
+        this.loading = false;
+        if (res.user) {
+          this.navigateToRoleHome(res.user.rol);
+        } else {
+          this.error = res.message || 'Error al iniciar sesión';
+        }
+      },
+      error: err => {
+        this.loading = false;
+        this.error = err?.message || 'Error de red';
+      }
+    });
+  }
+
+  loginWithGoogle(): void {
+    this.startSocialLogin(this.authService.loginWithGoogle());
+  }
+
+  loginWithMicrosoft(): void {
+    this.startSocialLogin(this.authService.loginWithMicrosoft());
+  }
+
+  private startSocialLogin(request: Observable<any>): void {
+    this.error = null;
+    this.loading = true;
+
+    request.pipe(takeUntil(this.destroy$)).subscribe({
+      next: res => {
+        this.loading = false;
+        if (res.user) {
+          this.navigateToRoleHome(res.user.rol);
+        } else if (res.message && res.code !== 'auth/popup-closed-by-user') {
+          this.error = res.message;
+        }
+      },
+      error: err => {
+        this.loading = false;
+        this.error = err?.message || 'Error al iniciar sesión';
+      }
+    });
+  }
+
+  private navigateToRoleHome(rol: string): void {
+    const roleRoutes: Record<string, string> = {
+      admin: '/roles/admin',
+      supervisor: '/roles/supervisor',
+      empleado: '/roles/empleados',
+      usuario: '/roles/usuario',
+      sordomudo: '/roles/sordomudo',
+    };
+    this.router.navigate([roleRoutes[rol] || '/login']);
+  }
+  
+}

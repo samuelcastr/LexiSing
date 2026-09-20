@@ -1,1 +1,9 @@
-{"builds":[{"src":"back_lexiSing/requirements.txt","use":"@vercel/python"}],"routes":[{"src":"/api/(.*)","dest":"back_lexiSing/manage.py"}]}
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python manage.py migrate --noinput",
+  "functions": {
+    "lexising/asgi.py": {
+      "maxDuration": 60
+    }
+  }
+}

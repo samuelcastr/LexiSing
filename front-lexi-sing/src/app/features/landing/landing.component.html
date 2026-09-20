@@ -1,0 +1,245 @@
+<header class="navbar">
+  <div class="nav-inner">
+    <a routerLink="/" class="brand">
+      <img src="/logo.png" alt="LexiSing" class="brand-logo">
+      <span class="brand-name">LexiSing</span>
+    </a>
+
+    <nav class="nav-links">
+      <a (click)="scrollTo('inicio')">Inicio</a>
+      <a (click)="scrollTo('nosotros')">Nosotros</a>
+      <a (click)="scrollTo('caracteristicas')">Características</a>
+      <a (click)="scrollTo('objetivos')">Objetivos</a>
+      <a (click)="scrollTo('como-funciona')">Cómo funciona</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a routerLink="/login" class="btn btn-outline">Iniciar Sesión</a>
+      <a routerLink="/register" class="btn btn-primary">Registrarse</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="inicio">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <span class="badge">Plataforma de comunicación inclusiva</span>
+      <h1>Conecta sin barreras, <span class="gradient-text">comunícate con señas.</span></h1>
+      <p>
+        LexiSing facilita la comunicación entre personas sordomudas y el resto del mundo,
+        traduciendo lenguaje de señas en tiempo real mediante inteligencia artificial.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/register" class="btn btn-primary btn-lg">Empezar ahora</a>
+        <a routerLink="/login" class="btn btn-outline btn-lg">Ya tengo cuenta</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img src="/lexising-banner-rounded.png" alt="LexiSing Banner" class="hero-img">
+    </div>
+  </section>
+
+  <section class="stats" >
+    <div class="stat">
+      <h3>+500</h3>
+      <p>Conversaciones semanales</p>
+    </div>
+    <div class="stat">
+      <h3>100%</h3>
+      <p>Comunicación accesible</p>
+    </div>
+    <div class="stat">
+      <h3>24/7</h3>
+      <p>Disponibilidad continua</p>
+    </div>
+    <div class="stat">
+      <h3>IA</h3>
+      <p>Traducción en tiempo real</p>
+    </div>
+  </section>
+
+  <section class="about" id="nosotros">
+    <div class="section-head">
+      <span class="section-tag">Sobre el proyecto</span>
+      <h2>Misión y Visión</h2>
+    </div>
+
+    <div class="mv-grid">
+      <div class="mv-card">
+        <div class="mv-icon"><mat-icon>flag</mat-icon></div>
+        <h3>Misión</h3>
+        <p>
+          Facilitar la comunicación inclusiva entre personas sordas, mudas y oyentes en
+          entornos empresariales, educativos y de atención al público en Colombia, mediante
+          tecnología innovadora que traduzca el lenguaje de señas en tiempo real y promueva
+          una cultura organizacional más empática y accesible.
+        </p>
+      </div>
+      <div class="mv-card">
+        <div class="mv-icon"><mat-icon>visibility</mat-icon></div>
+        <h3>Visión</h3>
+        <p>
+          Ser la plataforma líder en inclusión comunicacional en Colombia para el año 2030,
+          convirtiéndose en la herramienta preferida por empresas e instituciones para
+          garantizar el derecho a la comunicación y la participación activa de las personas
+          con discapacidad auditiva en el ámbito laboral y social.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="proyecto">
+    <div class="proyecto-inner">
+      <div class="slogan">
+        <span class="slogan-quote">“La comunicación inclusiva es también una oportunidad de crecimiento empresarial”</span>
+        <p class="slogan-author">— Eslogan LexiSing</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-icon"><mat-icon>groups</mat-icon></div>
+          <h3>Equipo de desarrollo</h3>
+          <ul>
+            <li>Beickert Gabriel Torres Tapia</li>
+            <li>Samuel Castro Zuñiga</li>
+            <li>Cielo Alexandra Rodriguez Pardo</li>
+            <li>Juan Steban Riveros Orozco</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon"><mat-icon>people</mat-icon></div>
+          <h3>Usuarios beneficiados</h3>
+          <ul>
+            <li>Personas sordas o mudas</li>
+            <li>Personal administrativo y de atención al cliente</li>
+            <li>Empresas, entidades públicas y centros de formación</li>
+            <li>Entre 50 y 200 usuarios en fase piloto</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="caracteristicas">
+    <div class="section-head">
+      <span class="section-tag">Características</span>
+      <h2>Todo lo que necesitas para comunicarte</h2>
+      <p>Una plataforma diseñada para derribar las barreras del lenguaje de señas.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon purple-1"><mat-icon>record_voice_over</mat-icon></div>
+        <h3>Reconocimiento de señas</h3>
+        <p>Detecta y traduce el lenguaje de señas a texto mediante visión computarizada.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple-2"><mat-icon>chat</mat-icon></div>
+        <h3>Chat en tiempo real</h3>
+        <p>Conversaciones fluidas entre usuarios, con soporte de traducción automática.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple-3"><mat-icon>support_agent</mat-icon></div>
+        <h3>Agentes y supervisión</h3>
+        <p>Herramientas para el personal, supervisores y administradores de la plataforma.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple-4"><mat-icon>insights</mat-icon></div>
+        <h3>Reportes y analíticas</h3>
+        <p>Estadísticas claras sobre la actividad y el rendimiento del servicio.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="objetivos" id="objetivos">
+    <div class="section-head">
+      <span class="section-tag">Objetivos</span>
+      <h2>Nuestra meta</h2>
+    </div>
+
+    <div class="obj-general">
+      <div class="obj-gen-icon"><mat-icon>track_changes</mat-icon></div>
+      <p>
+        Desarrollar una aplicación web y móvil enfocada en el contexto empresarial que permita la
+        traducción del lenguaje de señas colombiano en tiempo real a texto o voz y viceversa,
+        facilitando la comunicación inclusiva y el aprendizaje entre personas sordas y oyentes.
+      </p>
+    </div>
+
+    <div class="obj-list">
+      <div class="obj-item">
+        <mat-icon>check_circle</mat-icon>
+        <span>Analizar los requerimientos funcionales y no funcionales del sistema.</span>
+      </div>
+      <div class="obj-item">
+        <mat-icon>check_circle</mat-icon>
+        <span>Diseñar una interfaz accesible orientada a entornos empresariales.</span>
+      </div>
+      <div class="obj-item">
+        <mat-icon>check_circle</mat-icon>
+        <span>Desarrollar un módulo de traducción de señas enfocado en comunicación básica empresarial.</span>
+      </div>
+      <div class="obj-item">
+        <mat-icon>check_circle</mat-icon>
+        <span>Implementar un sistema de chat para facilitar la comunicación entre usuarios.</span>
+      </div>
+      <div class="obj-item">
+        <mat-icon>check_circle</mat-icon>
+        <span>Integrar funcionalidades de aprendizaje del lenguaje de señas en la aplicación móvil.</span>
+      </div>
+      <div class="obj-item">
+        <mat-icon>check_circle</mat-icon>
+        <span>Realizar pruebas piloto en entornos como el SENA y documentar el sistema.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="como-funciona">
+    <div class="section-head">
+      <span class="section-tag">Cómo funciona</span>
+      <h2>Tres pasos para empezar</h2>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Crea tu cuenta</h3>
+        <p>Regístrate como usuario, personal, supervisor o administrador.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Configura tu perfil</h3>
+        <p>Completa tus datos y elige tu rol dentro de la plataforma.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Comunícate</h3>
+        <p>Inicia conversaciones y usa la traducción de lenguaje de señas.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta-box">
+      <h2>¿Listo para comunicarte sin límites?</h2>
+      <p>Únete a LexiSing hoy mismo y forma parte de una comunidad inclusiva.</p>
+      <div class="cta-actions">
+        <a routerLink="/register" class="btn btn-light btn-lg">Crear cuenta gratis</a>
+        <a routerLink="/login" class="btn btn-outline-light btn-lg">Iniciar sesión</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <img src="/logo.png" alt="LexiSing" class="foot-logo">
+      <span>LexiSing</span>
+    </div>
+    <p class="foot-text">Comunicación inclusiva para todos.</p>
+    <p class="foot-copy">© 2026 LexiSing. Todos los derechos reservados.</p>
+  </div>
+</footer>

@@ -1,0 +1,12 @@
+<div class="toast-container">
+  <div *ngFor="let error of errores" class="toast error-toast" role="alert">
+    <mat-icon class="toast-icon">error_outline</mat-icon>
+    <div class="toast-content">
+      <span class="toast-title">Error</span>
+      <p class="toast-message">{{ error.message }}</p>
+    </div>
+    <button type="button" class="toast-close" (click)="cerrar(error.id)" aria-label="Cerrar notificación">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>

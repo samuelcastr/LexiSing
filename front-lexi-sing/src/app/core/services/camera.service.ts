@@ -1,14 +1,32 @@
 import { Injectable } from '@angular/core';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class CameraService {
   private stream: MediaStream | null = null;
 
-  async obtenerCamara(): Promise<MediaStream> {
-    this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
-    return this.stream;
+  async startCamera(videoElement: HTMLVideoElement): Promise<void> {
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user' },
+        audio: false
+      });
+      videoElement.srcObject = this.stream;
+      await videoElement.play();
+    } catch (error) {
+      console.error('Error al acceder a la cámara:', error);
+      throw error;
+    }
   }
 
-  detener(): void { if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; } }
-  getStream(): MediaStream | null { return this.stream; }
+  stopCamera(videoElement?: HTMLVideoElement): void {
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+      this.stream = null;
+    }
+    if (videoElement) {
+      videoElement.srcObject = null;
+    }
+  }
 }

@@ -1,14 +1,36 @@
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { AuthService } from './auth.service';
+import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import { Observable, from } from 'rxjs';
+import { Auth, authState } from '@angular/fire/auth';
+import { inject } from '@angular/core';
+import { switchMap, take } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
-@Injectable()
-export class FirebaseTokenInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService) {}
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.authService.getToken();
-    if (token) { const cloned = req.clone({ headers: req.headers.set('Authorization', `Bearer ${token}`) }); return next.handle(cloned); }
-    return next.handle(req);
+export function firebaseTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
+  const apiUrl = environment.apiUrl;
+
+  if (!req.url.startsWith(apiUrl)) {
+    return next(req);
   }
+
+  const auth = inject(Auth);
+
+  return authState(auth).pipe(
+    take(1),
+    switchMap(user => {
+      if (!user) {
+        return next(req);
+      }
+
+      return from(user.getIdToken()).pipe(
+        switchMap(token => {
+          const cloned = req.clone({
+            setHeaders: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          return next(cloned);
+        })
+      );
+    })
+  );
 }

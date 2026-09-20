@@ -1,0 +1,39 @@
+<div class="usuarios-list-layout">
+  <div class="page-header compact">
+    <button mat-icon-button class="back-btn" routerLink="/roles/supervisor">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-text">
+      <h1>Usuarios</h1>
+      <p>Administra y busca usuarios rápido.</p>
+    </div>
+  </div>
+
+  <mat-card class="usuarios-card">
+    <div class="search-bar">
+      <mat-icon>search</mat-icon>
+      <input
+        type="text"
+        placeholder="Buscar por nombre, correo o rol..."
+        [(ngModel)]="searchTerm"
+        (input)="filterUsuarios()"
+      />
+    </div>
+
+    <div class="usuarios-table">
+      <div class="usuarios-row header">
+        <span>Nombre</span>
+        <span>Correo</span>
+        <span>Rol</span>
+      </div>
+      <div class="usuarios-row" *ngFor="let user of filteredUsuarios">
+        <span>{{ user.nombre }}</span>
+        <span>{{ user.email }}</span>
+        <span>{{ user.rol }}</span>
+      </div>
+      <div class="no-usuarios" *ngIf="filteredUsuarios.length === 0">
+        No hay usuarios que coincidan con la búsqueda.
+      </div>
+    </div>
+  </mat-card>
+</div>

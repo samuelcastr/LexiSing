@@ -1,0 +1,188 @@
+.waiting-room-page {
+  min-height: 100vh;
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  padding: 26px 16px 40px;
+  background: #f7f7ff;
+}
+
+.waiting-card {
+  width: min(100%, 1020px);
+  background: #ffffff;
+  border-radius: 26px;
+  padding: 32px 26px;
+  box-shadow: 0 20px 64px rgba(15, 23, 42, 0.08);
+  display: grid;
+  gap: 26px;
+}
+
+.illustration-wrapper {
+  display: grid;
+  place-items: center;
+  padding: 18px 0 0;
+}
+
+.illustration-wrapper img {
+  width: min(100%, 520px);
+  height: auto;
+}
+
+.waiting-content {
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.waiting-content h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.2vw, 2.4rem);
+  color: #111827;
+}
+
+.waiting-content p {
+  margin: 10px auto 0;
+  color: #6b7280;
+  line-height: 1.65;
+  max-width: 500px;
+  font-size: 0.96rem;
+}
+
+.secondary-text {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.info-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.info-box {
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 20px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.info-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  background: rgba(79, 70, 229, 0.12);
+  color: #4338ca;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+}
+
+.info-label {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  margin: 3px 0 0;
+  color: #111827;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.help-card {
+  background: rgba(99, 102, 241, 0.12);
+  border-radius: 20px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #4b5563;
+}
+
+.help-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(79, 70, 229, 0.16);
+  color: #4338ca;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.help-card a {
+  margin-left: auto;
+  color: #4338ca;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.disabled-link {
+  margin-left: auto;
+  color: #8b5cf6;
+  opacity: 0.65;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  justify-self: center;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+@media (max-width: 900px) {
+  .waiting-card {
+    padding: 24px 18px;
+  }
+
+  .illustration-wrapper img {
+    width: min(100%, 420px);
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .waiting-room-page {
+    padding: 16px 12px 32px;
+  }
+
+  .waiting-card {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .waiting-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .info-box {
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+
+  .help-card {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}

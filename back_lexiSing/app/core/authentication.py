@@ -1,14 +1,26 @@
-from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed
 import firebase_admin
 from firebase_admin import auth as firebase_auth
-from app.core.firebase import db, firebase_admin_app
-class FirebaseAuthentication(BaseAuthentication):
-    def authenticate(self, request):
-        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-        if not auth_header.startswith('Bearer '): return None
-        token = auth_header.split('Bearer ')[1]
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+
+
+class FirebaseAuthentication(TokenAuthentication):
+    """
+    Autenticación basada en Firebase ID tokens.
+    Valida el token enviado en el header 'Authorization: Bearer <ID_TOKEN>'
+    """
+    keyword = 'Bearer'
+
+    def authenticate_credentials(self, key):
         try:
-            decoded_token = firebase_auth.verify_id_token(token)
-            return (decoded_token['uid'], decoded_token)
-        except Exception: raise AuthenticationFailed('Token Firebase inválido')
+            decoded_token = firebase_auth.verify_id_token(key)
+            uid = decoded_token.get('uid')
+            if not uid:
+                raise AuthenticationFailed('Token inválido: no contiene uid')
+            return (uid, decoded_token)  # retorna (uid, decoded_token)
+        except firebase_auth.InvalidIdTokenError:
+            raise AuthenticationFailed('Token Firebase inválido')
+        except firebase_auth.ExpiredIdTokenError:
+            raise AuthenticationFailed('Token Firebase expirado')
+        except Exception as e:
+            raise AuthenticationFailed(f'Error validando token: {str(e)}')

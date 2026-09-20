@@ -1,0 +1,58 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="back-button">
+      <a routerLink="/conversations">
+        <mat-icon>arrow_back</mat-icon>
+        Conversaciones
+      </a>
+    </div>
+    <h2>Chat</h2>
+    <div class="spacer"></div> <!-- Spacer para centrar título -->
+  </div>
+
+  <div class="messages" #messagesContainer>
+    <div *ngFor="let m of messages" class="message-row" [ngClass]="{'sent': isMyMessage(m.senderUid), 'received': !isMyMessage(m.senderUid)}">
+      <div class="bubble-wrapper">
+        <div class="bubble" [ngClass]="{'sent': isMyMessage(m.senderUid), 'received': !isMyMessage(m.senderUid)}">
+          <div class="content">{{ m.content }}</div>
+          <div class="timestamp">
+            <span *ngIf="m.edited" class="edited-badge">(editado)</span>
+            {{ getMessageTime(m.timestamp) }}
+          </div>
+        </div>
+        <button *ngIf="isMyMessage(m.senderUid)" mat-icon-button [matMenuTriggerFor]="menu" class="delete-btn">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="editMessage(m)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="deleteMessage(m.id)">
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <div class="composer" [class.editing]="editingMessage">
+    <div class="edit-indicator" *ngIf="editingMessage">
+      <span>Editando mensaje</span>
+      <button mat-icon-button (click)="cancelEdit()" class="cancel-edit-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <input 
+      matInput 
+      [placeholder]="editingMessage ? 'Editar mensaje...' : 'Escribe un mensaje...'" 
+      [(ngModel)]="text" 
+      (keyup.enter)="send()"
+      class="input-field"
+    />
+    <button mat-icon-button color="primary" (click)="send()" [disabled]="!text.trim()">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

@@ -9,6 +9,10 @@
 
 ### Total: ~400+ señas integradas en `GESTO_PALABRA`
 
+> **📌 Estado real (Fase 1-3):** el diccionario actual contiene **46 señas funcionales** (33 base + 5 de Fase 1: `NUMERO_7`, `HORA`, `AHORA`, `HOY`, `SUPERVISAR` + 4 de Fase 2: `PELIGRO`, `EMERGENCIA_GESTO`, `MAÑANA`, `AYER` + 4 de Fase 3: `TECLADO_GESTO`, `RECHAZAR_GESTO`, `RECIBIR_GESTO`, `FELICIDAD`). Los IDs pendientes de las categorías 2-16 están documentados abajo como catálogo para implementar progresivamente.
+>
+> **⚠️ Restricción de configuración manual (CM):** los números 1, 2, 5, 8 y 9 usan las mismas CMs que señas ya existentes — 1 = `INDICE_ARRIBA` (Atención), 2 = `VICTORIA` (Adiós), 5 = `PALMA_ABIERTA` (Hola), 8 ≈ `LETRA_D`, 9 ≈ `LETRA_X`. No se han añadido como señas independientes porque generarían ambigüedad sin discriminadores de orientación/ubicación (requieren calibración con cámara).
+
 ### CATEGORÍAS:
 
 #### 1. SALUDOS Y PRESENTACIONES (15 señas)
@@ -37,8 +41,14 @@ NUMERO_0 a NUMERO_100, incluyendo:
 - Cien
 - Mayor que / Menor que / Igual que
 
+**✅ Implementadas (Fase 1):** `NUMERO_3` (Tres), `NUMERO_6` (Seis), `NUMERO_7` (Siete · pinza triple pulgar+índice+medio).
+**⏳ Pendientes de calibración:** 1, 2, 5 (colisionan con Atención/Adiós/Hola), 8, 9, 10 y decenas/centenas.
+
 #### 3. TIEMPOS Y HORARIOS (12 señas)
 HORA, AHORA, HOY, MAÑANA, AYER, ESTA_SEMANA, ESTE_MES, ESTE_ANO, PRONTO, TARDE_RETRASO, DURACION, TIEMPO_LIBRE, DESCANSO, HORA_EXTRA
+
+**✅ Implementadas (Fase 1-2):** `HORA` (índice doblado sobre la muñeca), `AHORA` (índice apuntando abajo), `HOY` (dos L hacia abajo lado a lado), `MAÑANA` (índice ascendiendo junto a la cabeza), `AYER` (pulgar hacia atrás).
+**⏳ Pendientes:** ESTA_SEMANA, ESTE_MES, ESTE_ANO, PRONTO, TARDE_RETRASO, DURACION, TIEMPO_LIBRE, DESCANSO, HORA_EXTRA (mayoría basadas en movimiento/ubicación — requieren calibración con cámara).
 
 #### 4. PERSONAS Y CARGOS (20 señas)
 JEFE, SUPERVISOR, GERENTE, DIRECTOR, EMPLEADO, ASISTENTE, SECRETARIA, CLIENTE, PROVEEDOR, ENTREVISTADOR, CANDIDATO, COLEGAS, EQUIPO, RECURSOS_HUMANOS, CONTABILIDAD, VENTAS, MARKETING, LEGAL, IT_SISTEMAS
@@ -49,8 +59,13 @@ HABLAR, ESCUCHAR, REUNION, PARTICIPAR, OPINION, CONSENSO, DISCUSION, PRESENTACIO
 #### 6. TAREAS Y ACCIONES LABORALES (30+ señas)
 TRABAJAR, PRODUCIR, VENDER, COMPRAR_GESTO, SERVIR, ORGANIZAR, PLANIFICAR, EJECUTAR, SUPERVISAR, INSPECCIONAR, EVALUAR_GESTO, CALIFICAR, INVESTIGAR, ANALIZAR, ENVIAR_GESTO, RECIBIR_GESTO, TRANSFERIR_GESTO, COPIAR_GESTO, IMPRIMIR_GESTO, GUARDAR_GESTO, ELIMINAR_GESTO, CORREGIR, APROBAR_GESTO, RECHAZAR_GESTO, PRIORIZAR, ASIGNAR_GESTO, DELEGAR, COLABORAR, COORDINAR, LIDERAR, MOTIVAR_GESTO, RESOLVER_GESTO, SOLICITUD_GESTO, AUTORIZACION_GESTO
 
+**✅ Implementadas (Fase 1-3):** `TRABAJAR` (dos puños), `SUPERVISAR` (círculo al ojo), `APROBAR` (pulgares arriba), `ENVIAR` (bimanual), `RECHAZAR_GESTO` (mano abierta empujada hacia adelante), `RECIBIR_GESTO` (mano abierta traída al cuerpo).
+
 #### 7. OBJETOS Y TECNOLOGÍA (35+ señas)
 COMPUTADORA, TECLADO_GESTO, RATON_GESTO, MONITOR, TELEFONO_GESTO, IMPRESORA, ESCRITORIO, SILLA, ARCHIVERO, PAPEL_GESTO, BOLIGRAFO, CUADERNO, BORRADOR, CLIPS, CINTA_ADHESIVA, PEGAMENTO, REGLA, MARCADOR, RESALTADOR, SOBRES, SELLOS, PROYECTOR, PIZARRA, CAMARA, AUDIFONOS, MEMORIA_USB, CARGA_OR, BATERIA, NUBE_CLOUD, ENLACE, PDF_GESTO, HOJA_CALCULO, PROCESADOR_TEXTO, PRESENTACION_GESTO, DIAPOSITIVA, CHAT_GESTO, NOTIFICACION
+
+**✅ Implementadas (Fase 3):** `TECLADO_GESTO` (dos manos en posición de teclado con micro-movimiento de escritura), `TELEFONO_GESTO` (cubierta por `PULGAR_MEÑIQUE` = Llamar).
+**⏳ Pendientes:** el resto (mayoría objetos icónicos que requieren ubicación de cuerpo o pose tracking).
 
 #### 8. DOCUMENTOS Y TRÁMITES (20 señas)
 DOCUMENTO_GESTO, CONTRATO, FIRMA_GESTO, IDENTIFICACION, CURRICULUM, CARTA_GESTO, FACTURA, RECIBO_GESTO, PRESUPUESTO_GESTO, INFORME_FINANCIERO, NOMINA, CERTIFICADO, CONSTANCIA, FORMULARIO_GESTO, POLIZA, CONTRATO_COLECTIVO, LEGISLACION, REGLAMENTO, CODIGO_CONDUCTA, CONFIDENCIALIDAD, DERECHOS_AUTOR, PATENTE, MARCA_GESTO
@@ -67,11 +82,17 @@ ENVIAR_EMAIL, RECIBIR_EMAIL, ADJUNTAR, RESPONDER_EMAIL, REENVIO, BORRAR_EMAIL, C
 #### 12. EMERGENCIAS (10 señas)
 EMERGENCIA_GESTO, PELIGRO, SOCORRO, INCENDIO, EVACUACION, SALIDA_EMERGENCIA, EXTINTOR, BOTIQUIN, LESION, ACCIDENTE, RIESGO, BOMBERO, AMBULANCIA
 
+**✅ Implementadas (Fase 2):** `PELIGRO` (puño agitado de lado a lado), `EMERGENCIA_GESTO` (dos manos abiertas agitándose por encima del pecho).
+**⏳ Pendientes:** SOCORRO, INCENDIO, EVACUACION, SALIDA_EMERGENCIA, EXTINTOR, BOTIQUIN, LESION, ACCIDENTE, RIESGO, BOMBERO, AMBULANCIA.
+
 #### 13. SALUD Y BIENESTAR (10 señas)
 DOLOR_GESTO, DOLOR_CABEZA, DOLOR_ESPALDA, FATIGA, CANSANCIO, ENFERMO, MEDICINA, EJERCICIO, AGUA, ERGONOMIA
 
 #### 14. EMOCIONES (18 señas)
 FELICIDAD, TRISTEZA, ENOJO, PREOCUPACION, ORGULLO, FRUSTRACION, CONFUSION, SORPRESA, CALMA, NERVIOS, MOTIVACION_EMOCION, ENTUSIASMO, RESPETO_GESTO, CONFIANZA_GESTO, EMPATIA_GESTO, TOLERANCIA, SOLIDARIDAD, PROFESIONALISMO, RESPONSABILIDAD, LEALTAD
+
+**✅ Implementadas (Fase 3):** `FELICIDAD` (dos manos abiertas que ascienden desde el pecho).
+**⏳ Pendientes:** el resto (la mayoría dependen de expresión facial/ubicación — requieren pose tracking o FaceLandmarker).
 
 #### 15. LEXICO BINARUAL (12 señas)
 ORACION_GESTO, PARAR_GESTO, PAZ_GESTO, APLAUSO, AMOR_GESTO, REUNION_B, INFORME_B, PAUSA_B, APROBAR_B, ENVIAR_B, TRABAJAR_B, PEDIR_GESTO
