@@ -595,6 +595,35 @@ export class SignLanguageService {
         }
       }
 
+      // DONDE: mano abierta en HORIZONTAL (dedos al frente, palma abajo) que
+      // oscila de lado a lado a la altura del pecho. El discriminador principal
+      // es el MOVIMIENTO lateral (HOLA y NADA son estáticas); la orientación
+      // solo evita colisionar con ONDEO (Adiós: mano en vertical, dedos arriba).
+      // No se exige pulgar separado: si está pegado pero la mano oscila, es
+      // Dónde (el movimiento manda sobre Nada).
+      const abiertaD = [idx, mid, ring, pink].filter(Boolean).length >= 4;
+      const noVerticalD = Math.abs(lm[9].y - lm[0].y) < handSize * 0.8;
+      const aLaAlturaD = lm[0].y > 0.25 && lm[0].y < 0.75;
+      if (abiertaD && noVerticalD && aLaAlturaD) {
+        const xsD = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m)
+          .map(h => h.landmarks[0].x);
+        if (xsD.length >= 9) {
+          const meanXD = xsD.reduce((a, b) => a + b, 0) / xsD.length;
+          let crucesXD = 0;
+          for (let i = 1; i < xsD.length; i++) {
+            if ((xsD[i] - meanXD) * (xsD[i - 1] - meanXD) < 0) crucesXD++;
+          }
+          const spreadD = Math.max(...xsD) - Math.min(...xsD);
+          if ((crucesXD >= 2 && spreadD > handSize * 0.4) ||
+              spreadD > handSize * 0.9) {
+            return 'DONDE';
+          }
+        }
+      }
+
       // RECHAZAR_GESTO / RECIBIR_GESTO: mano abierta (3+ dedos) que se empuja
       // hacia adelante (z decrece = se acerca a la cámara) o se trae al cuerpo
       // (z crece). El eje de profundidad de MediaPipe da la dirección.
@@ -874,7 +903,12 @@ export const GESTO_PALABRA: Record<string, string> = {
   TECLADO_GESTO: 'Teclear',
   RECHAZAR_GESTO: 'Rechazar',
   RECIBIR_GESTO: 'Recibir',
-  FELICIDAD: 'Felicidad'
+  FELICIDAD: 'Felicidad',
+  // Fase 2 (Bloque A): preguntas y conectores — estáticas
+  QUE: 'Qué',
+  DONDE: 'Dónde',
+  TAMBIEN: 'También',
+  NADA: 'Nada'
 };
 
 function dist(a: Landmark, b: Landmark): number {
@@ -1110,17 +1144,25 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'PINZA';
   }
 
+  // VICTORIA (Adiós) es la V en vertical. TAMBIÉN usa la misma V en horizontal
+  // (configuración provisional LSC — calibrar en Fase 9). El umbral 0.9 admite
+  // V ligeramente inclinadas; Adiós exige dominancia vertical clara.
   if (idx && mid && !ring && !pink) {
-    return 'VICTORIA';
+    const dirV = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    return Math.abs(dirV.dx) > Math.abs(dirV.dy) * 0.9 ? 'TAMBIEN' : 'VICTORIA';
   }
 
-  // AHORA: índice extendido apuntando firmemente hacia abajo (el momento
-  // presente). Distinta de INDICE_ARRIBA por la dirección de la punta.
-  if (idx && !mid && !ring && !pink && !thumb && lm[8].y - lm[5].y > handSize * 1.1) {
-    return 'AHORA';
-  }
-
+  // Índice extendido y mano cerrada: la dirección de la punta discrimina
+  // QUE (¿Qué?, lateral — provisional a calibrar), AHORA (firme hacia abajo)
+  // e INDICE_ARRIBA (Atención, hacia arriba).
   if (idx && !mid && !ring && !pink && !thumb) {
+    const dirIdx = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    if (Math.abs(dirIdx.dx) > Math.abs(dirIdx.dy) * 1.2) {
+      return 'QUE';
+    }
+    if (dirIdx.dy > handSize * 1.1) {
+      return 'AHORA';
+    }
     return 'INDICE_ARRIBA';
   }
 
@@ -1140,8 +1182,20 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'TRES_DEDOS';
   }
 
-  if (idx && mid && ring && pink && !thumb) {
-    return 'CUATRO_DEDOS';
+  // NADA: mano plana en horizontal (dedos apuntando al frente) bajo el pecho.
+  // Admite el pulgar doblado O relajado pegado a la palma; si el pulgar está
+  // separado se interpreta como Hola (palma abierta). CUATRO_DEDOS (Necesito)
+  // se hace en vertical cerca de la cara.
+  if (idx && mid && ring && pink) {
+    const thumbTucked = !thumb || dist(lm[4], lm[9]) < handSize * 0.55;
+    if (thumbTucked) {
+      const manoHorizontal = Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.8 &&
+                             (lm[0].y + lm[9].y) / 2 > 0.5;
+      if (manoHorizontal) {
+        return 'NADA';
+      }
+      return 'CUATRO_DEDOS';
+    }
   }
 
   // HORA: mano plana con el índice doblado sobre la muñeca (lugar del reloj),
