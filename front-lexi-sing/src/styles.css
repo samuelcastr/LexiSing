@@ -1,0 +1,21 @@
+/* LexiSing - Estilos Globales */
+:root {
+  --primary: #6200ee;
+  --primary-light: #c4b5fd;
+  --secondary: #5eead4;
+  --background: #1a1a2e;
+  --surface: #16213e;
+  --text: #f8f8f8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+.card { background: var(--surface); border-radius: 12px; padding: 20px; margin: 10px; }
+button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+button:hover { opacity: 0.8; }
