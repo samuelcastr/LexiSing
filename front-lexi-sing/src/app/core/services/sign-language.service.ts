@@ -398,6 +398,12 @@ export class SignLanguageService {
     const ahora = Date.now();
     const dentroDeGrace = (ahora - this.ultimaVezAmbasManos) < GRACE_MS;
 
+    // Señales de movimiento con forma definida (Fase 2). Se evalúan ANTES del
+    // estático porque comparten configuración manual con señas estáticas
+    // (puño = Gracias, índice = Atención, pulgar = Sí/No, manos abiertas = Aplauso).
+    const gestoConMovimiento = this.evaluarMovimientoConForma(manos);
+    if (gestoConMovimiento) return gestoConMovimiento;
+
     if (manos.length === 2) {
       const left = manos.find(m => m.handedness === 'Left');
       const right = manos.find(m => m.handedness === 'Right');
@@ -422,6 +428,217 @@ export class SignLanguageService {
 
     const gestoMovimiento = this.detectarMovimiento(manos);
     if (gestoMovimiento) return gestoMovimiento;
+
+    return null;
+  }
+
+  private evaluarMovimientoConForma(manos: ManoDetectada[]): string | null {
+    if (this.landmarkHistory.length < 6) {
+      return null;
+    }
+
+    // EMERGENCIA_GESTO: ambas manos abiertas agitándose en la parte alta del
+    // encuadre (por encima del pecho). Distinto de APLAUSO/ORACION (juntas) y
+    // de PARAR (media distancia) por la altura y la sacudida vertical.
+    if (manos.length === 2) {
+      const izquierda = manos.find(m => m.handedness === 'Left');
+      const derecha = manos.find(m => m.handedness === 'Right');
+      if (izquierda && derecha) {
+        const lmI = izquierda.landmarks;
+        const lmD = derecha.landmarks;
+        const abiertaIzq = fingerExtended(lmI, 8, 6) && fingerExtended(lmI, 12, 10) &&
+                           fingerExtended(lmI, 16, 14) && fingerExtended(lmI, 20, 18);
+        const abiertaDer = fingerExtended(lmD, 8, 6) && fingerExtended(lmD, 12, 10) &&
+                           fingerExtended(lmD, 16, 14) && fingerExtended(lmD, 20, 18);
+        const altas = lmI[0].y < 0.42 && lmD[0].y < 0.42;
+        if (abiertaIzq && abiertaDer && altas) {
+          const sacudidaVertical = (handedness: string): boolean => {
+            const h = this.landmarkHistory
+              .slice(-8)
+              .map(frame => frame.find(m => m.handedness === handedness))
+              .filter((m): m is ManoDetectada => !!m);
+            if (h.length < 5) return false;
+            const ys = h.map(x => x.landmarks[0].y);
+            const mean = ys.reduce((a, b) => a + b, 0) / ys.length;
+            let cruces = 0;
+            for (let i = 1; i < ys.length; i++) {
+              if ((ys[i] - mean) * (ys[i - 1] - mean) < 0) cruces++;
+            }
+            return cruces >= 2;
+          };
+          if (sacudidaVertical('Left') || sacudidaVertical('Right')) {
+            return 'EMERGENCIA_GESTO';
+          }
+        }
+      }
+    }
+
+    // TECLADO_GESTO: ambas manos abiertas en posición de teclado — separadas
+    // horizontalmente, a la misma altura, con micro-movimiento vertical de
+    // escritura. Distinto de EMERGENCIA (manos altas) y de PARAR (estáticas).
+    if (manos.length === 2) {
+      const izquierdaT = manos.find(m => m.handedness === 'Left');
+      const derechaT = manos.find(m => m.handedness === 'Right');
+      if (izquierdaT && derechaT) {
+        const lmIT = izquierdaT.landmarks;
+        const lmDT = derechaT.landmarks;
+        const abiertasT = fingerExtended(lmIT, 8, 6) && fingerExtended(lmIT, 12, 10) &&
+                          fingerExtended(lmIT, 16, 14) && fingerExtended(lmIT, 20, 18) &&
+                          fingerExtended(lmDT, 8, 6) && fingerExtended(lmDT, 12, 10) &&
+                          fingerExtended(lmDT, 16, 14) && fingerExtended(lmDT, 20, 18);
+        const pecho = lmIT[0].y > 0.42 && lmDT[0].y > 0.42;
+        const mismaAltura = Math.abs(lmIT[0].y - lmDT[0].y) < 0.14;
+        const xGapT = Math.abs(lmIT[0].x - lmDT[0].x);
+        const separadas = xGapT > 0.2 && xGapT < 0.55;
+        if (abiertasT && pecho && mismaAltura && separadas) {
+          const temblorTecleo = (handedness: string): boolean => {
+            const h = this.landmarkHistory
+              .slice(-8)
+              .map(frame => frame.find(m => m.handedness === handedness))
+              .filter((m): m is ManoDetectada => !!m);
+            if (h.length < 5) return false;
+            const ys = h.map(x => x.landmarks[8].y);
+            const rango = Math.max(...ys) - Math.min(...ys);
+            return rango > 0.01 && rango < 0.09;
+          };
+          if (temblorTecleo('Left') && temblorTecleo('Right')) {
+            return 'TECLADO_GESTO';
+          }
+        }
+      }
+    }
+
+    // FELICIDAD: ambas manos abiertas, separadas, que ascienden desde el pecho
+    // con entusiasmo. Distinta de EMERGENCIA (oscilación sobre la cabeza)
+    // porque arranca a la altura del pecho y sube de forma sostenida.
+    if (manos.length === 2) {
+      const izquierdaF = manos.find(m => m.handedness === 'Left');
+      const derechaF = manos.find(m => m.handedness === 'Right');
+      if (izquierdaF && derechaF) {
+        const lmIF = izquierdaF.landmarks;
+        const lmDF = derechaF.landmarks;
+        const abiertasF = fingerExtended(lmIF, 8, 6) && fingerExtended(lmIF, 12, 10) &&
+                          fingerExtended(lmIF, 16, 14) && fingerExtended(lmIF, 20, 18) &&
+                          fingerExtended(lmDF, 8, 6) && fingerExtended(lmDF, 12, 10) &&
+                          fingerExtended(lmDF, 16, 14) && fingerExtended(lmDF, 20, 18);
+        const separadasF = Math.abs(lmIF[0].x - lmDF[0].x) > 0.15;
+        if (abiertasF && separadasF) {
+          const subeF = (handedness: string): boolean => {
+            const h = this.landmarkHistory
+              .slice(-8)
+              .map(frame => frame.find(m => m.handedness === handedness))
+              .filter((m): m is ManoDetectada => !!m);
+            if (h.length < 5) return false;
+            const ys = h.map(x => x.landmarks[0].y);
+            const arranca = ys[0] > 0.45;
+            const sube = ys[0] - ys[ys.length - 1] > 0.06;
+            return arranca && sube;
+          };
+          if (subeF('Left') && subeF('Right')) {
+            return 'FELICIDAD';
+          }
+        }
+      }
+    }
+
+    for (const mano of manos) {
+      const lm = mano.landmarks;
+      const historial = this.landmarkHistory
+        .slice(-8)
+        .map(frame => frame.find(m => m.handedness === mano.handedness))
+        .filter((m): m is ManoDetectada => !!m);
+      if (historial.length < 5) continue;
+
+      const handSize = dist(lm[0], lm[9]);
+      const idx = fingerExtended(lm, 8, 6);
+      const mid = fingerExtended(lm, 12, 10);
+      const ring = fingerExtended(lm, 16, 14);
+      const pink = fingerExtended(lm, 20, 18);
+      const thumb = thumbExtended(lm);
+
+      // PELIGRO: puño cerrado agitándose de lado a lado frente al pecho.
+      // Comparte forma con PUÑO_CERRADO (Gracias), se distingue por la
+      // oscilación lateral de la muñeca.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const xs = historial.map(h => h.landmarks[0].x);
+        const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
+        let crucesX = 0;
+        for (let i = 1; i < xs.length; i++) {
+          if ((xs[i] - meanX) * (xs[i - 1] - meanX) < 0) crucesX++;
+        }
+        const spread = Math.max(...xs) - Math.min(...xs);
+        if (crucesX >= 2 && spread > handSize * 0.5) {
+          return 'PELIGRO';
+        }
+      }
+
+      // MAÑANA: índice extendido (solo) que asciende junto a la cabeza.
+      // Comparte forma con INDICE_ARRIBA (Atención), se distingue por el
+      // desplazamiento vertical ascendente desde una posición baja o media.
+      if (idx && !mid && !ring && !pink && !thumb && lm[0].y > 0.35) {
+        const ys = historial.map(h => h.landmarks[0].y);
+        const subida = ys[0] - ys[ys.length - 1];
+        if (subida > handSize * 0.6) {
+          return 'MAÑANA';
+        }
+      }
+
+      // AYER: pulgar extendido (solo) desplazándose hacia atrás sobre el hombro.
+      // Comparte forma con PULGAR_ARRIBA/ABAJO (Sí/No), se distingue por el
+      // retroceso lateral marcado de la muñeca (direcciones ignoradas por el
+      // espejo de la cámara).
+      if (thumb && !idx && !mid && !ring && !pink && lm[0].y > 0.45) {
+        const xs = historial.map(h => h.landmarks[0].x);
+        const retroceso = Math.abs(xs[xs.length - 1] - xs[0]);
+        if (retroceso > handSize * 0.8) {
+          return 'AYER';
+        }
+      }
+
+      // DONDE: mano abierta en HORIZONTAL (dedos al frente, palma abajo) que
+      // oscila de lado a lado a la altura del pecho. El discriminador principal
+      // es el MOVIMIENTO lateral (HOLA y NADA son estáticas); la orientación
+      // solo evita colisionar con ONDEO (Adiós: mano en vertical, dedos arriba).
+      // No se exige pulgar separado: si está pegado pero la mano oscila, es
+      // Dónde (el movimiento manda sobre Nada).
+      const abiertaD = [idx, mid, ring, pink].filter(Boolean).length >= 4;
+      const noVerticalD = Math.abs(lm[9].y - lm[0].y) < handSize * 0.8;
+      const aLaAlturaD = lm[0].y > 0.25 && lm[0].y < 0.75;
+      if (abiertaD && noVerticalD && aLaAlturaD) {
+        const xsD = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m)
+          .map(h => h.landmarks[0].x);
+        if (xsD.length >= 9) {
+          const meanXD = xsD.reduce((a, b) => a + b, 0) / xsD.length;
+          let crucesXD = 0;
+          for (let i = 1; i < xsD.length; i++) {
+            if ((xsD[i] - meanXD) * (xsD[i - 1] - meanXD) < 0) crucesXD++;
+          }
+          const spreadD = Math.max(...xsD) - Math.min(...xsD);
+          if ((crucesXD >= 2 && spreadD > handSize * 0.4) ||
+              spreadD > handSize * 0.9) {
+            return 'DONDE';
+          }
+        }
+      }
+
+      // RECHAZAR_GESTO / RECIBIR_GESTO: mano abierta (3+ dedos) que se empuja
+      // hacia adelante (z decrece = se acerca a la cámara) o se trae al cuerpo
+      // (z crece). El eje de profundidad de MediaPipe da la dirección.
+      const abiertaMov = [idx, mid, ring, pink].filter(Boolean).length >= 3;
+      if (abiertaMov) {
+        const zs = historial.map(h => h.landmarks[9].z);
+        const avanceZ = zs[zs.length - 1] - zs[0];
+        if (avanceZ < -0.08) {
+          return 'RECHAZAR_GESTO';
+        }
+        if (avanceZ > 0.08) {
+          return 'RECIBIR_GESTO';
+        }
+      }
+    }
 
     return null;
   }
@@ -670,7 +887,28 @@ export const GESTO_PALABRA: Record<string, string> = {
   APROBAR: 'Aprobar',
   ENVIAR: 'Enviar',
   TRABAJAR: 'Trabajar',
-  PEDIR: 'Pedir'
+  PEDIR: 'Pedir',
+  // Fase 1: números y tiempos (CM distintivas, sin colisiones)
+  NUMERO_7: 'Siete',
+  HORA: 'Hora',
+  AHORA: 'Ahora',
+  HOY: 'Hoy',
+  SUPERVISAR: 'Supervisar',
+  // Fase 2: emergencias y tiempos con movimiento (requieren historial de frames)
+  PELIGRO: 'Peligro',
+  EMERGENCIA_GESTO: 'Emergencia',
+  MAÑANA: 'Mañana',
+  AYER: 'Ayer',
+  // Fase 3: tareas, tecnología y emociones con movimiento
+  TECLADO_GESTO: 'Teclear',
+  RECHAZAR_GESTO: 'Rechazar',
+  RECIBIR_GESTO: 'Recibir',
+  FELICIDAD: 'Felicidad',
+  // Fase 2 (Bloque A): preguntas y conectores — estáticas
+  QUE: 'Qué',
+  DONDE: 'Dónde',
+  TAMBIEN: 'También',
+  NADA: 'Nada'
 };
 
 function dist(a: Landmark, b: Landmark): number {
@@ -883,19 +1121,48 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'TE_QUIERO';
   }
 
+  // NUMERO_7: yemas del pulgar, índice y medio juntas (pico de tres dedos),
+  // anular y meñique doblados. Distinta de PINZA (dos yemas) y de OK_SIGN
+  // (anular extendido).
+  if (thumb && idx && mid && !ring && !pink &&
+      fingerTipsTouching(4, 8, lm, 0.32) && fingerTipsTouching(4, 12, lm, 0.32)) {
+    return 'NUMERO_7';
+  }
+
   if (thumbIndexPinch && idx && mid && ring && !pink) {
     return 'OK_SIGN';
+  }
+
+  // SUPERVISAR: círculo con pulgar e índice llevado a la altura del ojo
+  // (vigilar/monitorear). PINZA tiene la misma forma pero a nivel del pecho;
+  // la altura de la muñeca discrimina.
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink && (lm[0].y + lm[9].y) / 2 < 0.45) {
+    return 'SUPERVISAR';
   }
 
   if (thumbIndexPinch && !idx && !mid && !ring && !pink) {
     return 'PINZA';
   }
 
+  // VICTORIA (Adiós) es la V en vertical. TAMBIÉN usa la misma V en horizontal
+  // (configuración provisional LSC — calibrar en Fase 9). El umbral 0.9 admite
+  // V ligeramente inclinadas; Adiós exige dominancia vertical clara.
   if (idx && mid && !ring && !pink) {
-    return 'VICTORIA';
+    const dirV = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    return Math.abs(dirV.dx) > Math.abs(dirV.dy) * 0.9 ? 'TAMBIEN' : 'VICTORIA';
   }
 
+  // Índice extendido y mano cerrada: la dirección de la punta discrimina
+  // QUE (¿Qué?, lateral — provisional a calibrar), AHORA (firme hacia abajo)
+  // e INDICE_ARRIBA (Atención, hacia arriba).
   if (idx && !mid && !ring && !pink && !thumb) {
+    const dirIdx = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    if (Math.abs(dirIdx.dx) > Math.abs(dirIdx.dy) * 1.2) {
+      return 'QUE';
+    }
+    if (dirIdx.dy > handSize * 1.1) {
+      return 'AHORA';
+    }
     return 'INDICE_ARRIBA';
   }
 
@@ -915,8 +1182,27 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'TRES_DEDOS';
   }
 
-  if (idx && mid && ring && pink && !thumb) {
-    return 'CUATRO_DEDOS';
+  // NADA: mano plana en horizontal (dedos apuntando al frente) bajo el pecho.
+  // Admite el pulgar doblado O relajado pegado a la palma; si el pulgar está
+  // separado se interpreta como Hola (palma abierta). CUATRO_DEDOS (Necesito)
+  // se hace en vertical cerca de la cara.
+  if (idx && mid && ring && pink) {
+    const thumbTucked = !thumb || dist(lm[4], lm[9]) < handSize * 0.55;
+    if (thumbTucked) {
+      const manoHorizontal = Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.8 &&
+                             (lm[0].y + lm[9].y) / 2 > 0.5;
+      if (manoHorizontal) {
+        return 'NADA';
+      }
+      return 'CUATRO_DEDOS';
+    }
+  }
+
+  // HORA: mano plana con el índice doblado sobre la muñeca (lugar del reloj),
+  // medio, anular y meñique extendidos. Distinta de CUATRO_DEDOS (índice
+  // extendido) por la posición de la yema del índice junto a la muñeca.
+  if (!idx && mid && ring && pink && !thumb && dist(lm[8], lm[0]) < handSize * 0.55) {
+    return 'HORA';
   }
 
   if (thumb && idx && !mid && !ring && !pink) {
@@ -1028,6 +1314,20 @@ function evaluarGestoBimanual(left: Landmark[], right: Landmark[]): string | nul
     const xGap = Math.abs(left[6].x - right[6].x);
     if (yGap > 0.12 && xGap < 0.12) {
       return 'PAUSA';
+    }
+  }
+
+  // HOY: ambas manos en L (pulgar + índice extendidos, demás doblados) apuntando
+  // hacia abajo, una junto a la otra a la misma altura (el momento presente).
+  // Distinta de PAUSA (índices opuestos en vertical) y de CORAZON (puntas tocándose).
+  const lLshape = lThumb && lIdx && !lMid && !lRing && !lPink;
+  const rLshape = rThumb && rIdx && !rMid && !rRing && !rPink;
+  if (lLshape && rLshape && !handsClose) {
+    const down = left[8].y - left[0].y > 0 && right[8].y - right[0].y > 0;
+    const sameRow = Math.abs(left[0].y - right[0].y) < 0.12;
+    const apart = Math.abs(left[0].x - right[0].x);
+    if (down && sameRow && apart > 0.06 && apart < 0.4) {
+      return 'HOY';
     }
   }
 
