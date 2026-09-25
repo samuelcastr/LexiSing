@@ -35,7 +35,7 @@
 | **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 61 |
 | **C** | TIEMPO Y FRECUENCIA | 30 | 22 |
 | **C2** | CALENDARIO: DÍAS Y MESES | 19 | 0 |
-| **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 5 |
+| **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 15 |
 | **E** | FRASES-GESTO DE CONVERSACIÓN | 22 | 0 |
 | **F** | PRESENTACIONES, IDENTIDAD, PERSONAS Y CARGOS | 35 | 1 |
 | **G** | REUNIONES Y COOPERACIÓN | 32 | 3 |
@@ -48,7 +48,7 @@
 | **N** | SALUDOS, CORTESÍA Y LÉXICO FUNDACIONAL | 34 | 21 |
 | **P** | SITUACIONES LABORALES Y RR.HH. | 25 | 0 |
 | **O** | DACTILOLOGÍA LSC (27 letras) | 27 | 27 |
-| **TOTAL** | | **582** | **168** |
+| **TOTAL** | | **582** | **178** |
 
 ---
 
@@ -242,24 +242,24 @@
 | LISTO | Listo | 🖐️ | ✅ |
 | PREPARADO | Preparado | 🖐️ | ✅ |
 | DISPONIBLE | Disponible | 🖐️ | ✅ |
-| OCUPADO | Ocupado | 🖐️ | ⏳ |
+| OCUPADO | Ocupado | 🖐️ | ✅ |
 | FACIL | Fácil | 💫 | ⏳ |
 | DIFICIL | Difícil | 💫 | ⏳ |
-| BUENO | Bueno | 🖐️ | ⏳ |
-| MALO | Malo | 🖐️ | ⏳ |
+| BUENO | Bueno | 🖐️ | ✅ |
+| MALO | Malo | 🖐️ | ✅ |
 | NUEVO | Nuevo | 💫 | ⏳ |
 | VIEJO | Viejo | 💫 | ⏳ |
 | GRANDE | Grande | ✌️ | ⏳ |
 | PEQUEÑO | Pequeño | ✌️ | ⏳ |
-| MAS | Más | 🖐️ | ⏳ |
-| MENOS | Menos | 🖐️ | ⏳ |
+| MAS | Más | 🖐️ | ✅ |
+| MENOS | Menos | 🖐️ | ✅ |
 | IGUAL | Igual | ✌️ | ⏳ |
 | DIFERENTE | Diferente | ✌️ | ⏳ |
-| COMPLETO | Completo | 🖐️ | ⏳ |
-| VACIO | Vacío | 🖐️ | ⏳ |
-| CORRECTO | Correcto | 🖐️ | ⏳ |
-| INCORRECTO | Incorrecto | 🖐️ | ⏳ |
-| IMPORTANTE | Importante | 🖐️ | ⏳ |
+| COMPLETO | Completo | 🖐️ | ✅ |
+| VACIO | Vacío | 🖐️ | ✅ |
+| CORRECTO | Correcto | 🖐️ | ✅ |
+| INCORRECTO | Incorrecto | 🖐️ | ✅ |
+| IMPORTANTE | Importante | 🖐️ | ✅ |
 | URGENTE | Urgente | 💫 | ⏳ |
 | NECESARIO | Necesario | 🖐️ | ⏳ |
 | DISPONIBLE_NO | No disponible | 🖐️ | ⏳ |
@@ -727,7 +727,7 @@
 |---|---|---|
 | 0 | Fundación: recuperación + Fases 1–3 de señas (13 nuevas) | ✅ |
 | 1 | Documentar catálogo conversacional (este doc) | ✅ |
-| 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | 🟡 en curso — una mano: 15/38 (A one-hand ✅; lotes 8-9) |
+| 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | 🟡 en curso — una mano: 25/38 (lotes 8-10) |
 | 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-7: 72 señas ✅ (una mano 💫/🖐️ cerrado; ✌️ → Fase 4, 🧍 → Fase 6) |
 | 4 | Bloque G (reuniones) + E (frases) — bimanuales ✌️ | ⏳ |
 | 5 | Bloque M (números) + C2 (días/meses) — secuencia | ⏳ |
