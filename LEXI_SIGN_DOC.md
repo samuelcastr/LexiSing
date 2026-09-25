@@ -10,7 +10,7 @@
 | Métrica | Valor |
 |---|---|
 | Catálogo documentado | **582 señas** |
-| Implementadas en código | **75 IDs únicos** (50 en GESTO_PALABRA + 25 letras en evaluarLetra) |
+| Implementadas en código | **136 IDs únicos** (109 en GESTO_PALABRA + 27 letras en evaluarLetra) |
 | Reclamo histórico de la doc | ~400+ (era aspiracional; número realizable = 235–250 tras todas las fases) |
 
 **Leyenda de viabilidad técnica:**
@@ -31,11 +31,11 @@
 
 | Bloque | Contenido | Señas | Implementadas |
 |---|---|---|---|
-| **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 4 |
-| **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 6 |
-| **C** | TIEMPO Y FRECUENCIA | 30 | 5 |
+| **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 19 |
+| **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 61 |
+| **C** | TIEMPO Y FRECUENCIA | 30 | 22 |
 | **C2** | CALENDARIO: DÍAS Y MESES | 19 | 0 |
-| **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 0 |
+| **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 23 |
 | **E** | FRASES-GESTO DE CONVERSACIÓN | 22 | 0 |
 | **F** | PRESENTACIONES, IDENTIDAD, PERSONAS Y CARGOS | 35 | 1 |
 | **G** | REUNIONES Y COOPERACIÓN | 32 | 3 |
@@ -48,7 +48,7 @@
 | **N** | SALUDOS, CORTESÍA Y LÉXICO FUNDACIONAL | 34 | 21 |
 | **P** | SITUACIONES LABORALES Y RR.HH. | 25 | 0 |
 | **O** | DACTILOLOGÍA LSC (27 letras) | 27 | 27 |
-| **TOTAL** | | **582** | **75** |
+| **TOTAL** | | **582** | **186** |
 
 ---
 
@@ -57,122 +57,122 @@
 | ID | Significado | Tipo | Estado |
 |---|---|---|---|
 | QUE | Qué | 🖐️ | ✅ |
-| QUIEN | Quién | 🖐️ | ⏳ |
+| QUIEN | Quién | 🖐️ | ✅ |
 | DONDE | Dónde | 💫 | ✅ |
-| CUANDO | Cuándo | 🖐️ | ⏳ |
-| POR_QUE | Por qué | 🖐️ | ⏳ |
-| COMO | Cómo | 🖐️ | ⏳ |
-| CUANTO | Cuánto | 🖐️ | ⏳ |
-| CUAL | Cuál | 🖐️ | ⏳ |
-| PARA_QUE | Para qué | 🖐️ | ⏳ |
+| CUANDO | Cuándo | 🖐️ | ✅ |
+| POR_QUE | Por qué | 🖐️ | ✅ |
+| COMO | Cómo | 🖐️ | ✅ |
+| CUANTO | Cuánto | 🖐️ | ✅ |
+| CUAL | Cuál | 🖐️ | ✅ |
+| PARA_QUE | Para qué | 🖐️ | ✅ |
 | NADA | Nada | 🖐️ | ✅ |
-| TODO | Todo | 🖐️ | ⏳ |
-| ALGO | Algo | 🖐️ | ⏳ |
-| NADIE | Nadie | 🖐️ | ⏳ |
+| TODO | Todo | 🖐️ | ✅ |
+| ALGO | Algo | 🖐️ | ✅ |
+| NADIE | Nadie | 🖐️ | ✅ |
 | TAMBIEN | También | 🖐️ | ✅ |
-| TAMPOCO | Tampoco | 🖐️ | ⏳ |
+| TAMPOCO | Tampoco | 🖐️ | ✅ |
 | AQUI | Aquí | 🧍 | ⏳ |
 | ALLA | Allá | 🧍 | ⏳ |
-| CERCA | Cerca | 🖐️ | ⏳ |
-| LEJOS | Lejos | 🖐️ | ⏳ |
+| CERCA | Cerca | 🖐️ | ✅ |
+| LEJOS | Lejos | 🖐️ | ✅ |
 | ARRIBA | Arriba | 🧍 | ⏳ |
 | ABAJO | Abajo | 🧍 | ⏳ |
 | ADENTRO | Adentro | 🧍 | ⏳ |
 | AFUERA | Afuera | 🧍 | ⏳ |
-| ANTES | Antes | 💫 | ⏳ |
-| DESPUES | Después | 💫 | ⏳ |
+| ANTES | Antes | 💫 | ✅ |
+| DESPUES | Después | 💫 | ✅ |
 | NO_ENTENDER | No entender | 😊 | ⏳ |
 
 ## ✨ BLOQUE B — VERBOS DE ACCIÓN COTIDIANA
 
 | ID | Significado | Tipo | Estado |
 |---|---|---|---|
-| IR | Ir | 💫 | ⏳ |
-| VENIR | Venir | 🖐️ | ⏳ |
-| LLEGAR | Llegar | 💫 | ⏳ |
-| SALIR | Salir | 💫 | ⏳ |
-| ENTRAR | Entrar | 💫 | ⏳ |
-| QUERER | Querer | 🖐️ | ⏳ |
-| PODER | Poder | 🖐️ | ⏳ |
-| DEBER | Deber | 🖐️ | ⏳ |
-| TENER | Tener | 🖐️ | ⏳ |
-| HACER | Hacer | 🖐️ | ⏳ |
+| IR | Ir | 💫 | ✅ |
+| VENIR | Venir | 🖐️ | ✅ |
+| LLEGAR | Llegar | 💫 | ✅ |
+| SALIR | Salir | 💫 | ✅ |
+| ENTRAR | Entrar | 💫 | ✅ |
+| QUERER | Querer | 🖐️ | ✅ |
+| PODER | Poder | 🖐️ | ✅ |
+| DEBER | Deber | 🖐️ | ✅ |
+| TENER | Tener | 🖐️ | ✅ |
+| HACER | Hacer | 🖐️ | ✅ |
 | AYUDAR | Ayudar | ✌️ | ⏳ |
 | ESPERAR | Esperar | ✌️ | ⏳ |
-| BUSCAR | Buscar | 💫 | ⏳ |
-| ENCONTRAR | Encontrar | 💫 | ⏳ |
-| TRAER | Traer | 💫 | ⏳ |
-| LLEVAR | Llevar | 💫 | ⏳ |
+| BUSCAR | Buscar | 💫 | ✅ |
+| ENCONTRAR | Encontrar | 💫 | ✅ |
+| TRAER | Traer | 💫 | ✅ |
+| LLEVAR | Llevar | 💫 | ✅ |
 | DAR | Dar | ✌️ | ⏳ |
-| TOMAR | Tomar | 🖐️ | ⏳ |
+| TOMAR | Tomar | 🖐️ | ✅ |
 | DEJAR | Dejar | ✌️ | ⏳ |
-| EMPEZAR | Empezar | 💫 | ⏳ |
-| TERMINAR | Terminar | 💫 | ⏳ |
-| CONTINUAR | Continuar | 💫 | ⏳ |
-| REPETIR | Repetir | 💫 | ⏳ |
-| INTENTAR | Intentar | 💫 | ⏳ |
-| LOGRAR | Lograr | 🖐️ | ⏳ |
-| CONSEGUIR | Conseguir | 💫 | ⏳ |
-| PREGUNTAR | Preguntar | 💫 | ⏳ |
-| RESPONDER | Responder | 💫 | ⏳ |
+| EMPEZAR | Empezar | 💫 | ✅ |
+| TERMINAR | Terminar | 💫 | ✅ |
+| CONTINUAR | Continuar | 💫 | ✅ |
+| REPETIR | Repetir | 💫 | ✅ |
+| INTENTAR | Intentar | 💫 | ✅ |
+| LOGRAR | Lograr | 🖐️ | ✅ |
+| CONSEGUIR | Conseguir | 💫 | ✅ |
+| PREGUNTAR | Preguntar | 💫 | ✅ |
+| RESPONDER | Responder | 💫 | ✅ |
 | EXPLICAR | Explicar | ✌️ | ⏳ |
 | ENSEÑAR | Enseñar | ✌️ | ⏳ |
-| APRENDER | Aprender | 💫 | ⏳ |
-| ENTENDER | Entender | 🖐️ | ⏳ |
-| SABER | Saber | 🖐️ | ⏳ |
+| APRENDER | Aprender | 💫 | ✅ |
+| ENTENDER | Entender | 🖐️ | ✅ |
+| SABER | Saber | 🖐️ | ✅ |
 | MOSTRAR | Mostrar | ✌️ | ⏳ |
 | MIRAR | Mirar | 🧍 | ⏳ |
-| LEER | Leer | 💫 | ⏳ |
-| ESCRIBIR | Escribir | 💫 | ⏳ |
-| HABLAR | Hablar | 💫 | ⏳ |
+| LEER | Leer | 💫 | ✅ |
+| ESCRIBIR | Escribir | 💫 | ✅ |
+| HABLAR | Hablar | 💫 | ✅ |
 | ESCUCHAR | Escuchar | 🧍 | ⏳ |
-| AVISAR | Avisar | 🖐️ | ⏳ |
+| AVISAR | Avisar | 🖐️ | ✅ |
 | INFORMAR | Informar | ✌️ | ⏳ |
-| CONFIRMAR | Confirmar | 🖐️ | ⏳ |
+| CONFIRMAR | Confirmar | 🖐️ | ✅ |
 | CANCELAR | Cancelar | ✌️ | ⏳ |
-| CAMBIAR | Cambiar | 💫 | ⏳ |
-| MEJORAR | Mejorar | 💫 | ⏳ |
-| REPARAR | Reparar | 💫 | ⏳ |
+| CAMBIAR | Cambiar | 💫 | ✅ |
+| MEJORAR | Mejorar | 💫 | ✅ |
+| REPARAR | Reparar | 💫 | ✅ |
 | TRABAJAR | Trabajar | ✌️ | ✅ |
 | SUPERVISAR | Supervisar | 🖐️ | ✅ |
 | ENVIAR | Enviar | ✌️ | ✅ |
 | PEDIR | Pedir | ✌️ | ✅ |
 | RECHAZAR_GESTO | Rechazar | 💫 | ✅ |
 | RECIBIR_GESTO | Recibir | 💫 | ✅ |
-| PRODUCIR | Producir | 💫 | ⏳ |
-| VENDER | Vender | 💫 | ⏳ |
+| PRODUCIR | Producir | 💫 | ✅ |
+| VENDER | Vender | 💫 | ✅ |
 | COMPRAR_GESTO | Comprar | ✌️ | ⏳ |
 | SERVIR | Servir | ✌️ | ⏳ |
 | ORGANIZAR | Organizar | ✌️ | ⏳ |
 | PLANIFICAR | Planificar | ✌️ | ⏳ |
-| EJECUTAR | Ejecutar | 💫 | ⏳ |
+| EJECUTAR | Ejecutar | 💫 | ✅ |
 | INSPECCIONAR | Inspeccionar | 🧍 | ⏳ |
 | EVALUAR_GESTO | Evaluar | 🧍 | ⏳ |
-| CALIFICAR | Calificar | 🖐️ | ⏳ |
-| INVESTIGAR | Investigar | 💫 | ⏳ |
-| ANALIZAR | Analizar | 💫 | ⏳ |
-| TRANSFERIR_GESTO | Transferir | 💫 | ⏳ |
+| CALIFICAR | Calificar | 🖐️ | ✅ |
+| INVESTIGAR | Investigar | 💫 | ✅ |
+| ANALIZAR | Analizar | 💫 | ✅ |
+| TRANSFERIR_GESTO | Transferir | 💫 | ✅ |
 | COPIAR_GESTO | Copiar | ✌️ | ⏳ |
-| IMPRIMIR_GESTO | Imprimir | 💫 | ⏳ |
-| GUARDAR_GESTO | Guardar | 💫 | ⏳ |
-| ELIMINAR_GESTO | Eliminar | 💫 | ⏳ |
-| CORREGIR | Corregir | 💫 | ⏳ |
-| PRIORIZAR | Priorizar | 🖐️ | ⏳ |
+| IMPRIMIR_GESTO | Imprimir | 💫 | ✅ |
+| GUARDAR_GESTO | Guardar | 💫 | ✅ |
+| ELIMINAR_GESTO | Eliminar | 💫 | ✅ |
+| CORREGIR | Corregir | 💫 | ✅ |
+| PRIORIZAR | Priorizar | 🖐️ | ✅ |
 | ASIGNAR_GESTO | Asignar | ✌️ | ⏳ |
 | DELEGAR | Delegar | ✌️ | ⏳ |
 | COLABORAR | Colaborar | ✌️ | ⏳ |
 | COORDINAR | Coordinar | ✌️ | ⏳ |
 | LIDERAR | Liderar | 🧍 | ⏳ |
 | MOTIVAR_GESTO | Motivar | 🧍 | ⏳ |
-| RESOLVER_GESTO | Resolver | 💫 | ⏳ |
-| SOLICITUD_GESTO | Solicitar | 💫 | ⏳ |
-| AUTORIZACION_GESTO | Autorizar | 🖐️ | ⏳ |
-| CONSULTAR | Consultar | 💫 | ⏳ |
-| ACTUALIZAR | Actualizar | 💫 | ⏳ |
-| REGISTRAR | Registrar | 💫 | ⏳ |
-| VERIFICAR | Verificar | 🖐️ | ⏳ |
+| RESOLVER_GESTO | Resolver | 💫 | ✅ |
+| SOLICITUD_GESTO | Solicitar | 💫 | ✅ |
+| AUTORIZACION_GESTO | Autorizar | 🖐️ | ✅ |
+| CONSULTAR | Consultar | 💫 | ✅ |
+| ACTUALIZAR | Actualizar | 💫 | ✅ |
+| REGISTRAR | Registrar | 💫 | ✅ |
+| VERIFICAR | Verificar | 🖐️ | ✅ |
 | AGENDAR | Agendar | ✌️ | ⏳ |
-| ALMACENAR | Almacenar | 💫 | ⏳ |
+| ALMACENAR | Almacenar | 💫 | ✅ |
 
 ## ✨ BLOQUE C — TIEMPO Y FRECUENCIA
 
@@ -183,27 +183,27 @@
 | HOY | Hoy | ✌️ | ✅ |
 | MAÑANA | Mañana | 💫 | ✅ |
 | AYER | Ayer | 💫 | ✅ |
-| TEMPRANO | Temprano | 💫 | ⏳ |
-| TARDE | Tarde | 💫 | ⏳ |
-| PUNTUAL | Puntual | 🖐️ | ⏳ |
-| TARDE_RETRASO | Retraso | 💫 | ⏳ |
-| RAPIDO | Rápido | 💫 | ⏳ |
-| LENTO | Lento | 💫 | ⏳ |
-| SIEMPRE | Siempre | 💫 | ⏳ |
-| NUNCA | Nunca | 💫 | ⏳ |
-| A_VECES | A veces | 💫 | ⏳ |
+| TEMPRANO | Temprano | 💫 | ✅ |
+| TARDE | Tarde | 💫 | ✅ |
+| PUNTUAL | Puntual | 🖐️ | ✅ |
+| TARDE_RETRASO | Retraso | 💫 | ✅ |
+| RAPIDO | Rápido | 💫 | ✅ |
+| LENTO | Lento | 💫 | ✅ |
+| SIEMPRE | Siempre | 💫 | ✅ |
+| NUNCA | Nunca | 💫 | ✅ |
+| A_VECES | A veces | 💫 | ✅ |
 | CADA_DIA | Cada día | ✌️ | ⏳ |
 | PROXIMO | Próximo | 🧍 | ⏳ |
-| PASADO | Pasado | 💫 | ⏳ |
-| ESTA_SEMANA | Esta semana | 💫 | ⏳ |
-| ESTE_MES | Este mes | 💫 | ⏳ |
-| ESTE_ANO | Este año | 💫 | ⏳ |
-| DURACION | Duración | 💫 | ⏳ |
+| PASADO | Pasado | 💫 | ✅ |
+| ESTA_SEMANA | Esta semana | 💫 | ✅ |
+| ESTE_MES | Este mes | 💫 | ✅ |
+| ESTE_ANO | Este año | 💫 | ✅ |
+| DURACION | Duración | 💫 | ✅ |
 | TIEMPO_LIBRE | Tiempo libre | ✌️ | ⏳ |
-| DESCANSO | Descanso | 💫 | ⏳ |
-| HORA_EXTRA | Hora extra | 💫 | ⏳ |
+| DESCANSO | Descanso | 💫 | ✅ |
+| HORA_EXTRA | Hora extra | 💫 | ✅ |
 | FIN_DE_SEMANA | Fin de semana | ✌️ | ⏳ |
-| ALMUERZO | Almuerzo | 🖐️ | ⏳ |
+| ALMUERZO | Almuerzo | 🖐️ | ✅ |
 | VACACIONES | Vacaciones | 🧍 | ⏳ |
 | MADRUGADA | Madrugada | 🧍 | ⏳ |
 | MEDIODIA | Mediodía | 🧍 | ⏳ |
@@ -237,33 +237,33 @@
 
 | ID | Significado | Tipo | Estado |
 |---|---|---|---|
-| BIEN | Bien | 🖐️ | ⏳ |
-| MAL | Mal | 🖐️ | ⏳ |
-| LISTO | Listo | 🖐️ | ⏳ |
-| PREPARADO | Preparado | 🖐️ | ⏳ |
-| DISPONIBLE | Disponible | 🖐️ | ⏳ |
-| OCUPADO | Ocupado | 🖐️ | ⏳ |
-| FACIL | Fácil | 💫 | ⏳ |
-| DIFICIL | Difícil | 💫 | ⏳ |
-| BUENO | Bueno | 🖐️ | ⏳ |
-| MALO | Malo | 🖐️ | ⏳ |
-| NUEVO | Nuevo | 💫 | ⏳ |
-| VIEJO | Viejo | 💫 | ⏳ |
+| BIEN | Bien | 🖐️ | ✅ |
+| MAL | Mal | 🖐️ | ✅ |
+| LISTO | Listo | 🖐️ | ✅ |
+| PREPARADO | Preparado | 🖐️ | ✅ |
+| DISPONIBLE | Disponible | 🖐️ | ✅ |
+| OCUPADO | Ocupado | 🖐️ | ✅ |
+| FACIL | Fácil | 💫 | ✅ |
+| DIFICIL | Difícil | 💫 | ✅ |
+| BUENO | Bueno | 🖐️ | ✅ |
+| MALO | Malo | 🖐️ | ✅ |
+| NUEVO | Nuevo | 💫 | ✅ |
+| VIEJO | Viejo | 💫 | ✅ |
 | GRANDE | Grande | ✌️ | ⏳ |
 | PEQUEÑO | Pequeño | ✌️ | ⏳ |
-| MAS | Más | 🖐️ | ⏳ |
-| MENOS | Menos | 🖐️ | ⏳ |
+| MAS | Más | 🖐️ | ✅ |
+| MENOS | Menos | 🖐️ | ✅ |
 | IGUAL | Igual | ✌️ | ⏳ |
 | DIFERENTE | Diferente | ✌️ | ⏳ |
-| COMPLETO | Completo | 🖐️ | ⏳ |
-| VACIO | Vacío | 🖐️ | ⏳ |
-| CORRECTO | Correcto | 🖐️ | ⏳ |
-| INCORRECTO | Incorrecto | 🖐️ | ⏳ |
-| IMPORTANTE | Importante | 🖐️ | ⏳ |
-| URGENTE | Urgente | 💫 | ⏳ |
-| NECESARIO | Necesario | 🖐️ | ⏳ |
-| DISPONIBLE_NO | No disponible | 🖐️ | ⏳ |
-| PRECISO | Preciso | 🖐️ | ⏳ |
+| COMPLETO | Completo | 🖐️ | ✅ |
+| VACIO | Vacío | 🖐️ | ✅ |
+| CORRECTO | Correcto | 🖐️ | ✅ |
+| INCORRECTO | Incorrecto | 🖐️ | ✅ |
+| IMPORTANTE | Importante | 🖐️ | ✅ |
+| URGENTE | Urgente | 💫 | ✅ |
+| NECESARIO | Necesario | 🖐️ | ✅ |
+| DISPONIBLE_NO | No disponible | 🖐️ | ✅ |
+| PRECISO | Preciso | 🖐️ | ✅ |
 
 ## ✨ BLOQUE E — FRASES-GESTO DE CONVERSACIÓN
 
@@ -319,7 +319,7 @@
 | EMPLEADO | Empleado | 🧍 | ⏳ |
 | ASISTENTE | Asistente | 🧍 | ⏳ |
 | SECRETARIA | Secretaria | 🧍 | ⏳ |
-| CLIENTE | Cliente | 🖐️ | ✅ |
+| CLIENTE | Cliente | 🖐️ | ⏳ |
 | PROVEEDOR | Proveedor | 🧍 | ⏳ |
 | ENTREVISTADOR | Entrevistador | 🧍 | ⏳ |
 | CANDIDATO | Candidato | 🧍 | ⏳ |
@@ -727,8 +727,8 @@
 |---|---|---|
 | 0 | Fundación: recuperación + Fases 1–3 de señas (13 nuevas) | ✅ |
 | 1 | Documentar catálogo conversacional (este doc) | ✅ |
-| 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | ⏳ |
-| 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | ⏳ |
+| 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | ✅ una mano 38/38 (lotes 8-11); restan ✌️/🧍/😊 → Fases 4, 6-7 |
+| 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-7: 72 señas ✅ (una mano 💫/🖐️ cerrado; ✌️ → Fase 4, 🧍 → Fase 6) |
 | 4 | Bloque G (reuniones) + E (frases) — bimanuales ✌️ | ⏳ |
 | 5 | Bloque M (números) + C2 (días/meses) — secuencia | ⏳ |
 | 6 | Pose Landmarker — Bloque J (ubicaciones) + F (personas) 🧍 | ⏳ |

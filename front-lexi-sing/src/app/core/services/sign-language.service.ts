@@ -555,6 +555,177 @@ export class SignLanguageService {
       const ring = fingerExtended(lm, 16, 14);
       const pink = fingerExtended(lm, 20, 18);
       const thumb = thumbExtended(lm);
+      const thumbIndexPinch = thumbIndexClose(lm);
+
+      // TRAER: puño que se TRAE al cuerpo (z>0.05) TERMINANDO ARRIBA (y<0.55, al
+      // pecho). GUARDAR termina abajo (y>0.55, "cajón").
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const zsTr = historial.map(h => h.landmarks[9].z);
+        const ysTr = historial.map(h => h.landmarks[0].y);
+        if (zsTr[zsTr.length - 1] - zsTr[0] > 0.05 && ysTr[ysTr.length - 1] < 0.55) {
+          return 'TRAER';
+        }
+      }
+
+      // GUARDAR_GESTO: puño cerrado que se acerca al cuerpo (z crece) TERMINANDO
+      // ABAJO (y>0.55, "guardar en el cajón"). ENTRAR se acerca a cualquier
+      // altura; el final bajo discrimina.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const zsG = historial.map(h => h.landmarks[9].z);
+        const ysG = historial.map(h => h.landmarks[0].y);
+        const avanceZG = zsG[zsG.length - 1] - zsG[0];
+        if (avanceZG > 0.05 && ysG[ysG.length - 1] > 0.55) {
+          return 'GUARDAR_GESTO';
+        }
+      }
+
+      // SALIR / ENTRAR: puño cerrado que se aleja (z decrece, hacia la cámara)
+      // o se acerca (z crece, hacia el cuerpo). Misma forma de PUÑO_CERRADO
+      // (Gracias) y PELIGRO (agitado lateral); aquí el movimiento es en
+      // PROFUNDIDAD, no lateral.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const zs = historial.map(h => h.landmarks[9].z);
+        const avanceZ = zs[zs.length - 1] - zs[0];
+        if (avanceZ < -0.07) {
+          return 'SALIR';
+        }
+        if (avanceZ > 0.07) {
+          return 'ENTRAR';
+        }
+      }
+
+      // REPARAR: puño cerrado que golpea DOS veces hacia adelante (martillazo
+      // doble en profundidad). SALIR/ENTRAR son pulsos únicos (net z grande).
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const histR = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m);
+        if (histR.length >= 9) {
+          const zsR = histR.map(h => h.landmarks[9].z);
+          const meanR = zsR.reduce((a, b) => a + b, 0) / zsR.length;
+          let crucesR = 0;
+          for (let i = 1; i < zsR.length; i++) {
+            if ((zsR[i] - meanR) * (zsR[i - 1] - meanR) < 0) crucesR++;
+          }
+          if (crucesR >= 2) {
+            return 'REPARAR';
+          }
+        }
+      }
+
+      // EMPEZAR: puño cerrado que golpea UNA vez hacia abajo (descenso brusco,
+      // sin rebote). Distinto de PELIGRO (lateral), REPETIR (rebote vertical
+      // pequeño) y SALIR/ENTRAR (movimiento en profundidad).
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const ysE = historial.map(h => h.landmarks[0].y);
+        const meanYE = ysE.reduce((a, b) => a + b, 0) / ysE.length;
+        let crucesYE = 0;
+        for (let i = 1; i < ysE.length; i++) {
+          if ((ysE[i] - meanYE) * (ysE[i - 1] - meanYE) < 0) crucesYE++;
+        }
+        if (ysE[ysE.length - 1] - ysE[0] > handSize * 1.0 && crucesYE < 2) {
+          return 'EMPEZAR';
+        }
+      }
+
+      // ALMACENAR: puño cerrado que DESCIENDE con deriva LATERAL marcada
+      // (ubicar en un estante bajo). AUTORIZACION sella en recto (rango X
+      // pequeño); aquí el desplazamiento lateral discrimina.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const xsAL2 = historial.map(h => h.landmarks[0].x);
+        const ysAL2 = historial.map(h => h.landmarks[0].y);
+        const rangoXAL = Math.max(...xsAL2) - Math.min(...xsAL2);
+        const descensoAL = ysAL2[ysAL2.length - 1] - ysAL2[0];
+        if (descensoAL > handSize * 0.5 && rangoXAL > handSize * 0.4) {
+          return 'ALMACENAR';
+        }
+      }
+
+      // AUTORIZACION_GESTO: puño cerrado que DESCIENDE con amplitud MEDIA
+      // (estampar un sello de aprobación). EMPEZAR golpea más profundo
+      // (>1.0 handSize) y REPETIR rebota.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const ysAU = historial.map(h => h.landmarks[0].y);
+        const descensoAU = ysAU[ysAU.length - 1] - ysAU[0];
+        if (descensoAU > handSize * 0.3 && descensoAU < handSize * 0.85) {
+          return 'AUTORIZACION_GESTO';
+        }
+      }
+
+      // REPETIR: puño cerrado que REBOTA en vertical (dos o más cruces con
+      // amplitud pequeña). Distinto de EMPEZAR (un golpe grande) y de PELIGRO
+      // (oscilación lateral).
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const ysR = historial.map(h => h.landmarks[0].y);
+        const meanYR = ysR.reduce((a, b) => a + b, 0) / ysR.length;
+        let crucesYR = 0;
+        for (let i = 1; i < ysR.length; i++) {
+          if ((ysR[i] - meanYR) * (ysR[i - 1] - meanYR) < 0) crucesYR++;
+        }
+        const rangoYR = Math.max(...ysR) - Math.min(...ysR);
+        if (crucesYR >= 2 && rangoYR < handSize * 1.0) {
+          return 'REPETIR';
+        }
+      }
+
+      // RESOLVER_GESTO: puño cerrado que SUBE con golpe seco (ascenso marcado,
+      // "resolver/solución"). MAÑANA sube con el índice y MEJORAR con el
+      // pulgar; aquí la forma es el puño.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const ysRS = historial.map(h => h.landmarks[0].y);
+        if (ysRS[0] - ysRS[ysRS.length - 1] > handSize * 0.6) {
+          return 'RESOLVER_GESTO';
+        }
+      }
+
+      // LLEVAR: puño barriendo UNA vez en lateral con amplitud MEDIA (0.5-1.0
+      // handSize, llevar algo al costado). NUNCA barre más amplio (>1.0) y
+      // PELIGRO oscila.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const xsLv = historial.map(h => h.landmarks[0].x);
+        const meanLv = xsLv.reduce((a, b) => a + b, 0) / xsLv.length;
+        let crucesLv = 0;
+        for (let i = 1; i < xsLv.length; i++) {
+          if ((xsLv[i] - meanLv) * (xsLv[i - 1] - meanLv) < 0) crucesLv++;
+        }
+        const rangoXLv = Math.max(...xsLv) - Math.min(...xsLv);
+        if (rangoXLv > handSize * 0.5 && rangoXLv < handSize * 1.0 && crucesLv < 2) {
+          return 'LLEVAR';
+        }
+      }
+
+      // NUNCA: puño cerrado barriendo UNA vez en lateral con amplitud grande
+      // (negación enfática). PELIGRO oscila (cruces>=2) y EMPEZAR golpea abajo.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const xsNC = historial.map(h => h.landmarks[0].x);
+        const ysNC = historial.map(h => h.landmarks[0].y);
+        const meanNC = xsNC.reduce((a, b) => a + b, 0) / xsNC.length;
+        let crucesNC = 0;
+        for (let i = 1; i < xsNC.length; i++) {
+          if ((xsNC[i] - meanNC) * (xsNC[i - 1] - meanNC) < 0) crucesNC++;
+        }
+        if (Math.max(...xsNC) - Math.min(...xsNC) > handSize * 1.0 &&
+            crucesNC < 2 && Math.max(...ysNC) - Math.min(...ysNC) < handSize * 0.5) {
+          return 'NUNCA';
+        }
+      }
+
+      // VIEJO: PUÑO cerrado con MICRO-oscilación lateral (crucesX≥2 pero
+      // spread < 0.4 handSize, "temblor"). PELIGRO agita más amplio (>0.5) y
+      // la señal de puño de LLEVAR/NUNCA se mueve en pasadas, no oscila.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const xsVi = historial.map(h => h.landmarks[0].x);
+        const meanXVi = xsVi.reduce((a, b) => a + b, 0) / xsVi.length;
+        let crucesXVi = 0;
+        for (let i = 1; i < xsVi.length; i++) {
+          if ((xsVi[i] - meanXVi) * (xsVi[i - 1] - meanXVi) < 0) crucesXVi++;
+        }
+        const spreadVi = Math.max(...xsVi) - Math.min(...xsVi);
+        if (crucesXVi >= 2 && spreadVi < handSize * 0.4) {
+          return 'VIEJO';
+        }
+      }
 
       // PELIGRO: puño cerrado agitándose de lado a lado frente al pecho.
       // Comparte forma con PUÑO_CERRADO (Gracias), se distingue por la
@@ -595,6 +766,687 @@ export class SignLanguageService {
         }
       }
 
+      // MEJORAR: pulgar arriba (forma de Sí) que ASCIENDE de forma marcada
+      // (las cosas van mejorando). "Sí" es estático; el ascenso discrimina.
+      if (thumb && !idx && !mid && !ring && !pink) {
+        const ysMJ = historial.map(h => h.landmarks[0].y);
+        if (ysMJ[0] - ysMJ[ysMJ.length - 1] > handSize * 0.7) {
+          return 'MEJORAR';
+        }
+      }
+
+      // CONSULTAR: pulgar y meñique extendidos (forma de Llamar) VIBRANDO en
+      // lateral: "consultar por teléfono". Llamar es estático; aquí hay micro
+      // oscilación.
+      if (thumb && !idx && !mid && !ring && pink) {
+        const xsCS = historial.map(h => h.landmarks[0].x);
+        const meanCS = xsCS.reduce((a, b) => a + b, 0) / xsCS.length;
+        let crucesCS = 0;
+        for (let i = 1; i < xsCS.length; i++) {
+          if ((xsCS[i] - meanCS) * (xsCS[i - 1] - meanCS) < 0) crucesCS++;
+        }
+        if (crucesCS >= 3 &&
+            Math.max(...xsCS) - Math.min(...xsCS) < handSize * 0.5) {
+          return 'CONSULTAR';
+        }
+      }
+
+      // ESCRIBIR: pinza pulgar-índice GARABATEANDO (micro oscilación de la
+      // muñeca). PINZA/Supervisar/Puntual son estáticas; el movimiento pequeño
+      // discrimina.
+      if (thumbIndexPinch && !idx && !mid && !ring && !pink) {
+        const xsES = historial.map(h => h.landmarks[0].x);
+        const ysES = historial.map(h => h.landmarks[0].y);
+        const rangoXES = Math.max(...xsES) - Math.min(...xsES);
+        const rangoYES = Math.max(...ysES) - Math.min(...ysES);
+        const crucesES = (arr: number[]) => {
+          const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+          let c = 0;
+          for (let i = 1; i < arr.length; i++) {
+            if ((arr[i] - mean) * (arr[i - 1] - mean) < 0) c++;
+          }
+          return c;
+        };
+        if ((crucesES(xsES) >= 2 || crucesES(ysES) >= 2) &&
+            rangoXES < handSize * 0.5 && rangoYES < handSize * 0.5) {
+          return 'ESCRIBIR';
+        }
+      }
+
+      // REGISTRAR: pinza pulgar-índice que DESCIENDE trazando una línea de
+      // anotación (un solo trazo, sin garabatear). ESCRIBIR oscila.
+      if (thumbIndexPinch && !idx && !mid && !ring && !pink) {
+        const ysRG = historial.map(h => h.landmarks[0].y);
+        if (ysRG[ysRG.length - 1] - ysRG[0] > handSize * 0.6) {
+          return 'REGISTRAR';
+        }
+      }
+
+      // ESTA_SEMANA: TRES dedos (índice+medio+anular) en una pasada HORIZONTAL
+      // única (cruces<2, la semana que avanza). INTENTAR vibra (cruces≥2).
+      if (idx && mid && ring && !pink && !thumb) {
+        const xsSem = historial.map(h => h.landmarks[0].x);
+        const ysSem = historial.map(h => h.landmarks[0].y);
+        const meanXSem = xsSem.reduce((a, b) => a + b, 0) / xsSem.length;
+        let crucesXSem = 0;
+        for (let i = 1; i < xsSem.length; i++) {
+          if ((xsSem[i] - meanXSem) * (xsSem[i - 1] - meanXSem) < 0) crucesXSem++;
+        }
+        const rangoXSem = Math.max(...xsSem) - Math.min(...xsSem);
+        if (crucesXSem < 2 && rangoXSem > handSize * 0.5 && rangoXSem < handSize * 1.2 &&
+            Math.max(...ysSem) - Math.min(...ysSem) < handSize * 0.4) {
+          return 'ESTA_SEMANA';
+        }
+      }
+
+      // ESTE_MES: TRES dedos en una pasada DIAGONAL (descenso con deriva
+      // lateral, "el mes que pasa"). ESTA_SEMANA es horizontal (rangoY<0.4).
+      if (idx && mid && ring && !pink && !thumb) {
+        const xsMes = historial.map(h => h.landmarks[0].x);
+        const ysMes = historial.map(h => h.landmarks[0].y);
+        const meanXMes = xsMes.reduce((a, b) => a + b, 0) / xsMes.length;
+        let crucesXMes = 0;
+        for (let i = 1; i < xsMes.length; i++) {
+          if ((xsMes[i] - meanXMes) * (xsMes[i - 1] - meanXMes) < 0) crucesXMes++;
+        }
+        const rangoXMes = Math.max(...xsMes) - Math.min(...xsMes);
+        const rangoYMes = Math.max(...ysMes) - Math.min(...ysMes);
+        if (crucesXMes < 2 && rangoXMes > handSize * 0.4 &&
+            rangoYMes >= handSize * 0.4 && rangoYMes < handSize * 0.8) {
+          return 'ESTE_MES';
+        }
+      }
+
+      // ESTE_ANO: TRES dedos trazando un CÍRCULO (cruces en x y en y, el año
+      // que da la vuelta). INTENTAR vibra solo en x; aquí hay ciclo completo.
+      if (idx && mid && ring && !pink && !thumb) {
+        const xsAno = historial.map(h => h.landmarks[0].x);
+        const ysAno = historial.map(h => h.landmarks[0].y);
+        const meanXAno = xsAno.reduce((a, b) => a + b, 0) / xsAno.length;
+        const meanYAno = ysAno.reduce((a, b) => a + b, 0) / ysAno.length;
+        let crucesXAno = 0, crucesYAno = 0;
+        for (let i = 1; i < xsAno.length; i++) {
+          if ((xsAno[i] - meanXAno) * (xsAno[i - 1] - meanXAno) < 0) crucesXAno++;
+          if ((ysAno[i] - meanYAno) * (ysAno[i - 1] - meanYAno) < 0) crucesYAno++;
+        }
+        if (crucesXAno >= 2 && crucesYAno >= 2 &&
+            Math.max(...xsAno) - Math.min(...xsAno) > handSize * 0.4) {
+          return 'ESTE_ANO';
+        }
+      }
+
+      // INTENTAR: índice+medio+anular extendidos (sin pulgar ni meñique)
+      // oscilando en lateral con amplitud pequeña (probar/ensayar). TRES_DEDOS
+      // (Por favor) es estático; el movimiento discrimina.
+      if (idx && mid && ring && !pink && !thumb) {
+        const xsT = historial.map(h => h.landmarks[0].x);
+        const meanT = xsT.reduce((a, b) => a + b, 0) / xsT.length;
+        let crucesT = 0;
+        for (let i = 1; i < xsT.length; i++) {
+          if ((xsT[i] - meanT) * (xsT[i - 1] - meanT) < 0) crucesT++;
+        }
+        const rangoT = Math.max(...xsT) - Math.min(...xsT);
+        if (crucesT >= 2 && rangoT > handSize * 0.3 && rangoT < handSize * 1.0) {
+          return 'INTENTAR';
+        }
+      }
+
+      // PRODUCIR: índice+medio+anular (sin pulgar) descendiendo en UN golpe
+      // firme (producir/ensamblar). EJECUTAR baja en dos pasos y EMPEZAR usa
+      // el puño; aquí es un golpe seco con la forma de tres dedos.
+      if (idx && mid && ring && !pink && !thumb) {
+        const ysPD = historial.map(h => h.landmarks[0].y);
+        const meanPD = ysPD.reduce((a, b) => a + b, 0) / ysPD.length;
+        let crucesPD = 0;
+        for (let i = 1; i < ysPD.length; i++) {
+          if ((ysPD[i] - meanPD) * (ysPD[i - 1] - meanPD) < 0) crucesPD++;
+        }
+        if (ysPD[ysPD.length - 1] - ysPD[0] > handSize * 0.6 && crucesPD < 2) {
+          return 'PRODUCIR';
+        }
+      }
+
+      // CORREGIR: V (índice y medio) APUNTANDO ABAJO que baja en ZIGZAG AMPLIO
+      // (rango ≥ 0.6, tachar/corregir). ANALIZAR vibra con amplitud pequeña
+      // (<0.6); aquí el vaivén es más marcado.
+      if (idx && mid && !ring && !pink && !thumb) {
+        const dirCg = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+        if (Math.abs(dirCg.dy) > Math.abs(dirCg.dx) * 0.9) {
+          const xsCG = historial.map(h => h.landmarks[0].x);
+          const ysCG = historial.map(h => h.landmarks[0].y);
+          const meanCG = xsCG.reduce((a, b) => a + b, 0) / xsCG.length;
+          let crucesCG = 0;
+          for (let i = 1; i < xsCG.length; i++) {
+            if ((xsCG[i] - meanCG) * (xsCG[i - 1] - meanCG) < 0) crucesCG++;
+          }
+          if (crucesCG >= 2 &&
+              Math.max(...xsCG) - Math.min(...xsCG) >= handSize * 0.6 &&
+              ysCG[ysCG.length - 1] - ysCG[0] > handSize * 0.4) {
+            return 'CORREGIR';
+          }
+        }
+      }
+
+      // ANALIZAR: V (índice y medio separados) APUNTANDO HACIA ABAJO que vibra
+      // en lateral (analizar en detalle). RÁPIDO vibra sin importar la
+      // orientación; aquí la punta domina hacia abajo.
+      if (idx && mid && !ring && !pink && !thumb) {
+        const dirAn = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+        if (Math.abs(dirAn.dy) > Math.abs(dirAn.dx) * 0.9) {
+          const xsAN = historial.map(h => h.landmarks[0].x);
+          const meanAN = xsAN.reduce((a, b) => a + b, 0) / xsAN.length;
+          let crucesAN = 0;
+          for (let i = 1; i < xsAN.length; i++) {
+            if ((xsAN[i] - meanAN) * (xsAN[i - 1] - meanAN) < 0) crucesAN++;
+          }
+          if (crucesAN >= 2 &&
+              Math.max(...xsAN) - Math.min(...xsAN) < handSize * 0.6) {
+            return 'ANALIZAR';
+          }
+        }
+      }
+
+      // RAPIDO: V (índice y medio separados) VIBRANDO rápido en lateral con
+      // pequeña amplitud. Adiós/También usan la misma V en estático; aquí el
+      // movimiento discrimina.
+      if (idx && mid && !ring && !pink && !thumb) {
+        const xsRD = historial.map(h => h.landmarks[0].x);
+        const meanRD = xsRD.reduce((a, b) => a + b, 0) / xsRD.length;
+        let crucesRD = 0;
+        for (let i = 1; i < xsRD.length; i++) {
+          if ((xsRD[i] - meanRD) * (xsRD[i - 1] - meanRD) < 0) crucesRD++;
+        }
+        const rangoRD = Math.max(...xsRD) - Math.min(...xsRD);
+        if (crucesRD >= 3 && rangoRD < handSize * 0.7) {
+          return 'RAPIDO';
+        }
+      }
+
+      // LENTO: mano abierta (3+ dedos) que se desliza en horizontal DESPACIO
+      // (una pasada sin regreso, amplitud media). Dónde/Rápido oscilan;
+      // aquí no hay cruces y la mano no desciende.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const xsLN = historial.map(h => h.landmarks[0].x);
+        const ysLN = historial.map(h => h.landmarks[0].y);
+        const rangoXLN = Math.max(...xsLN) - Math.min(...xsLN);
+        const rangoYLN = Math.max(...ysLN) - Math.min(...ysLN);
+        if (rangoXLN > handSize * 0.3 && rangoXLN < handSize * 0.9 &&
+            rangoYLN < handSize * 0.4) {
+          return 'LENTO';
+        }
+      }
+
+      // INVESTIGAR: índice APUNTANDO HACIA ABAJO (punta bajo la muñeca) trazando
+      // círculos con la mano baja (y≥0.4, "escarbar sobre la mesa"). BUSCAR y
+      // SIEMPRE circulan con el índice al frente; la orientación discrimina.
+      if (idx && !mid && !ring && !pink && !thumb && lm[0].y >= 0.4) {
+        const dirIn = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+        if (dirIn.dy > Math.abs(dirIn.dx) * 0.9) {
+          const histIN = this.landmarkHistory
+            .slice(-14)
+            .map(frame => frame.find(m => m.handedness === mano.handedness))
+            .filter((m): m is ManoDetectada => !!m);
+          if (histIN.length >= 9) {
+            const xsIN = histIN.map(h => h.landmarks[0].x);
+            const ysIN = histIN.map(h => h.landmarks[0].y);
+            const crucesIN = (arr: number[]) => {
+              const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+              let c = 0;
+              for (let i = 1; i < arr.length; i++) {
+                if ((arr[i] - mean) * (arr[i - 1] - mean) < 0) c++;
+              }
+              return c;
+            };
+            if (crucesIN(xsIN) >= 2 && crucesIN(ysIN) >= 2) {
+              return 'INVESTIGAR';
+            }
+          }
+        }
+      }
+
+      // BUSCAR: índice solo extendido trazando un movimiento CIRCULAR frente a la
+      // cara (oscila en x y en y). Distinto de QUE (estático), de MAÑANA
+      // (sube) y de IR (barrido lateral unilateral).
+      if (idx && !mid && !ring && !pink && !thumb && lm[0].y < 0.6) {
+        const histB = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m);
+        if (histB.length >= 9) {
+          const xsB = histB.map(h => h.landmarks[0].x);
+          const ysB = histB.map(h => h.landmarks[0].y);
+          const cruces = (arr: number[]) => {
+            const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+            let c = 0;
+            for (let i = 1; i < arr.length; i++) {
+              if ((arr[i] - mean) * (arr[i - 1] - mean) < 0) c++;
+            }
+            return c;
+          };
+          if (cruces(xsB) >= 2 && cruces(ysB) >= 2) {
+            return 'BUSCAR';
+          }
+        }
+      }
+
+      // PREGUNTAR: índice solo extendido VIBRANDO rápido en lateral (micro
+      // oscilación, pequeña amplitud). Distinto de BUSCAR (circular), de IR
+      // (barrido amplio) y de QUE (estático).
+      if (idx && !mid && !ring && !pink && !thumb) {
+        const xsP = historial.map(h => h.landmarks[0].x);
+        const ysP = historial.map(h => h.landmarks[0].y);
+        const crucesP = (arr: number[]) => {
+          const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+          let c = 0;
+          for (let i = 1; i < arr.length; i++) {
+            if ((arr[i] - mean) * (arr[i - 1] - mean) < 0) c++;
+          }
+          return c;
+        };
+        const rangoXP = Math.max(...xsP) - Math.min(...xsP);
+        if (crucesP(xsP) >= 3 && rangoXP < handSize * 0.6 && crucesP(ysP) < 3) {
+          return 'PREGUNTAR';
+        }
+      }
+
+      // SIEMPRE: índice solo trazando un CÍRCULO a la altura del pecho
+      // (y>0.55). BUSCAR hace el círculo frente a la cara (y<0.6) y se evalúa
+      // antes, así que aquí queda el círculo bajo.
+      if (idx && !mid && !ring && !pink && !thumb && lm[0].y > 0.55) {
+        const histS = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m);
+        if (histS.length >= 9) {
+          const xsS = histS.map(h => h.landmarks[0].x);
+          const ysS = histS.map(h => h.landmarks[0].y);
+          const crucesS = (arr: number[]) => {
+            const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+            let c = 0;
+            for (let i = 1; i < arr.length; i++) {
+              if ((arr[i] - mean) * (arr[i - 1] - mean) < 0) c++;
+            }
+            return c;
+          };
+          if (crucesS(xsS) >= 2 && crucesS(ysS) >= 2) {
+            return 'SIEMPRE';
+          }
+        }
+      }
+
+      // IR: índice solo extendido que se desplaza en HORIZONTAL (excursión
+      // lateral grande y sostenida, sin circular). Distinto de QUE (estático,
+      // sin movimiento sustancial).
+      if (idx && !mid && !ring && !pink && !thumb) {
+        const xsI = historial.map(h => h.landmarks[0].x);
+        const ysI = historial.map(h => h.landmarks[0].y);
+        const rangeYI = Math.max(...ysI) - Math.min(...ysI);
+        if (Math.max(...xsI) - Math.min(...xsI) > handSize * 1.1 &&
+            rangeYI < handSize * 0.6) {
+          return 'IR';
+        }
+      }
+
+      // RESPONDER: índice solo extendido que sale DESDE LA CARA descendiendo
+      // (la respuesta "sale" de la boca). Distinto de MAÑANA (asciende) y de
+      // IR (barrido lateral).
+      if (idx && !mid && !ring && !pink && !thumb) {
+        const ysRes = historial.map(h => h.landmarks[0].y);
+        if (ysRes[0] < 0.4 && ysRes[ysRes.length - 1] - ysRes[0] > handSize * 0.8) {
+          return 'RESPONDER';
+        }
+      }
+
+      // ANTES: MEÑIQUE extendido que RETROCEDE en lateral (una pasada, sin
+      // regreso). Ninguna otra regla de movimiento usa el meñique solo; las de
+      // puño y abierta no aplican a esta forma.
+      if (!idx && !mid && !ring && pink && !thumb) {
+        const xsAnt = historial.map(h => h.landmarks[0].x);
+        const retrocesoAnt = Math.max(...xsAnt) - Math.min(...xsAnt);
+        if (retrocesoAnt > handSize * 0.6 && retrocesoAnt < handSize * 1.2) {
+          return 'ANTES';
+        }
+      }
+
+      // TARDE_RETRASO: índice que BAJA en DOS micro-pasos (el reloj marcando el
+      // atraso, con descenso neto). A_VECES oscila en vertical sin bajar.
+      if (idx && !mid && !ring && !pink && !thumb) {
+        const ysRet = historial.map(h => h.landmarks[0].y);
+        const meanYRet = ysRet.reduce((a, b) => a + b, 0) / ysRet.length;
+        let crucesYRet = 0;
+        for (let i = 1; i < ysRet.length; i++) {
+          if ((ysRet[i] - meanYRet) * (ysRet[i - 1] - meanYRet) < 0) crucesYRet++;
+        }
+        if (crucesYRet >= 2 && ysRet[ysRet.length - 1] - ysRet[0] > handSize * 0.3 &&
+            ysRet[ysRet.length - 1] > 0.45) {
+          return 'TARDE_RETRASO';
+        }
+      }
+
+      // HORA_EXTRA: índice que da UN golpe corto descendente a la altura de la
+      // muñeca (marcar horas extra). AHORA es estático; aquí hay un trazo único
+      // que termina en la zona de la muñeca.
+      if (idx && !mid && !ring && !pink && !thumb) {
+        const ysHx = historial.map(h => h.landmarks[0].y);
+        const meanYHx = ysHx.reduce((a, b) => a + b, 0) / ysHx.length;
+        let crucesYHx = 0;
+        for (let i = 1; i < ysHx.length; i++) {
+          if ((ysHx[i] - meanYHx) * (ysHx[i - 1] - meanYHx) < 0) crucesYHx++;
+        }
+        const descHx = ysHx[ysHx.length - 1] - ysHx[0];
+        if (crucesYHx < 2 && descHx > handSize * 0.3 && descHx < handSize * 0.6 &&
+            ysHx[ysHx.length - 1] > 0.4 && ysHx[ysHx.length - 1] < 0.68) {
+          return 'HORA_EXTRA';
+        }
+      }
+
+      // FACIL: V (índice+medio, sin anular/meñique/pulgar) que DESCIENDE en
+      // una pasada suave y contenida (0.3-0.7 handSize, cruces<2, poco lateral).
+      // Ninguna regla previa mueve la forma V.
+      if (idx && mid && !ring && !pink && !thumb) {
+        const ysFa = historial.map(h => h.landmarks[0].y);
+        const xsFa = historial.map(h => h.landmarks[0].x);
+        const meanYFa = ysFa.reduce((a, b) => a + b, 0) / ysFa.length;
+        let crucesYFa = 0;
+        for (let i = 1; i < ysFa.length; i++) {
+          if ((ysFa[i] - meanYFa) * (ysFa[i - 1] - meanYFa) < 0) crucesYFa++;
+        }
+        const descensoFa = ysFa[ysFa.length - 1] - ysFa[0];
+        const rangoXFa = Math.max(...xsFa) - Math.min(...xsFa);
+        if (descensoFa > handSize * 0.3 && descensoFa < handSize * 0.7 &&
+            crucesYFa < 2 && rangoXFa < handSize * 0.4) {
+          return 'FACIL';
+        }
+      }
+      // DIFICIL: la misma V OSCILANDO en vertical (crucesY≥2, "se complica").
+      // FACIL es una pasada única; aquí hay insistencia.
+      if (idx && mid && !ring && !pink && !thumb) {
+        const ysDi = historial.map(h => h.landmarks[0].y);
+        const meanYDi = ysDi.reduce((a, b) => a + b, 0) / ysDi.length;
+        let crucesYDi = 0;
+        for (let i = 1; i < ysDi.length; i++) {
+          if ((ysDi[i] - meanYDi) * (ysDi[i - 1] - meanYDi) < 0) crucesYDi++;
+        }
+        const rangoYDi = Math.max(...ysDi) - Math.min(...ysDi);
+        if (crucesYDi >= 2 && rangoYDi < handSize * 0.6) {
+          return 'DIFICIL';
+        }
+      }
+
+      // A_VECES: índice solo que oscila en VERTICAL dos veces (ritmo de
+      // "a veces sí, a veces no"). MAÑANA asciende una vez; PREGUNTAR vibra
+      // en lateral.
+      if (idx && !mid && !ring && !pink && !thumb) {
+        const xsAV = historial.map(h => h.landmarks[0].x);
+        const ysAV = historial.map(h => h.landmarks[0].y);
+        const meanYAV = ysAV.reduce((a, b) => a + b, 0) / ysAV.length;
+        let crucesYAV = 0;
+        for (let i = 1; i < ysAV.length; i++) {
+          if ((ysAV[i] - meanYAV) * (ysAV[i - 1] - meanYAV) < 0) crucesYAV++;
+        }
+        if (crucesYAV >= 2 &&
+            Math.max(...xsAV) - Math.min(...xsAV) < handSize * 0.5) {
+          return 'A_VECES';
+        }
+      }
+
+      // DURACION: índice solo extendido que se ALEJA lentamente en profundidad
+      // (el tiempo "se alarga"). RECHAZAR/RECIBIR usan mano abierta.
+      if (idx && !mid && !ring && !pink && !thumb) {
+        const zsDR = historial.map(h => h.landmarks[9].z);
+        const avanceZDR = zsDR[zsDR.length - 1] - zsDR[0];
+        if (avanceZDR < -0.05) {
+          return 'DURACION';
+        }
+      }
+
+      // TRANSFERIR_GESTO: ÍNDICE+MEDIO+MEÑIQUE extendidos (sin anular ni
+      // pulgar) desplazándose en una pasada lateral (transferir/trasladar).
+      if (idx && mid && !ring && pink && !thumb) {
+        const xsTF = historial.map(h => h.landmarks[0].x);
+        const ysTF = historial.map(h => h.landmarks[0].y);
+        if (Math.max(...xsTF) - Math.min(...xsTF) > handSize * 0.8 &&
+            Math.max(...ysTF) - Math.min(...ysTF) < handSize * 0.5) {
+          return 'TRANSFERIR_GESTO';
+        }
+      }
+
+      // URGENTE: mano abierta (3+ dedos) que OSCILA en VERTICAL de forma
+      // contenida TERMINANDO en la banda baja/media (y final > 0.45, "pálpito
+      // de urgencia"). ALMUERZO va a la boca (termina alta <0.42) y además
+      // con recorrido amplio; aquí el ritmo es en su sitio, sin subir.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const ysUr = historial.map(h => h.landmarks[0].y);
+        const meanYUr = ysUr.reduce((a, b) => a + b, 0) / ysUr.length;
+        let crucesYUr = 0;
+        for (let i = 1; i < ysUr.length; i++) {
+          if ((ysUr[i] - meanYUr) * (ysUr[i - 1] - meanYUr) < 0) crucesYUr++;
+        }
+        const rangoYUr = Math.max(...ysUr) - Math.min(...ysUr);
+        if (crucesYUr >= 2 && rangoYUr < handSize * 0.8 &&
+            ysUr[ysUr.length - 1] > 0.45) {
+          return 'URGENTE';
+        }
+      }
+
+      // ALMUERZO: mano abierta (3+ dedos) que va DOS veces hacia la boca
+      // (comer), terminando en la parte alta del encuadre.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const ysAL = historial.map(h => h.landmarks[0].y);
+        const meanYAL = ysAL.reduce((a, b) => a + b, 0) / ysAL.length;
+        let crucesYAL = 0;
+        for (let i = 1; i < ysAL.length; i++) {
+          if ((ysAL[i] - meanYAL) * (ysAL[i - 1] - meanYAL) < 0) crucesYAL++;
+        }
+        if (crucesYAL >= 2 && ysAL[ysAL.length - 1] < 0.42) {
+          return 'ALMUERZO';
+        }
+      }
+
+      // NUEVO: mano abierta (3+ dedos) que ASCIENDE en recto con amplitud
+      // media (0.4-0.9 handSize) y sin deriva lateral (rangoX<0.4). PASADO
+      // curva lateral (rangoX≥0.4) y TEMPRANO sube más profundo (>0.9).
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const xsNu = historial.map(h => h.landmarks[0].x);
+        const ysNu = historial.map(h => h.landmarks[0].y);
+        const subidaNu = ysNu[0] - ysNu[ysNu.length - 1];
+        const rangoXNu = Math.max(...xsNu) - Math.min(...xsNu);
+        if (subidaNu > handSize * 0.4 && subidaNu < handSize * 0.9 &&
+            rangoXNu < handSize * 0.4) {
+          return 'NUEVO';
+        }
+      }
+
+      // PASADO: mano abierta (3+ dedos) que SUBE con deriva lateral marcada
+      // (rango X ≥ 0.4, pasar hacia atrás). TEMPRANO asciende en recto y más
+      // profundo (>0.9); aquí la subida es media con trayectoria curva.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const xsPas = historial.map(h => h.landmarks[0].x);
+        const ysPas = historial.map(h => h.landmarks[0].y);
+        const subPas = ysPas[0] - ysPas[ysPas.length - 1];
+        if (subPas > handSize * 0.4 && subPas < handSize * 0.9 &&
+            Math.max(...xsPas) - Math.min(...xsPas) > handSize * 0.4) {
+          return 'PASADO';
+        }
+      }
+
+      // TEMPRANO: mano abierta (3+ dedos) que ASCIENDE de forma marcada (el
+      // día que amanece). MAÑANA usa índice solo y LLEGAR/TARDE descienden.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const ysTP = historial.map(h => h.landmarks[0].y);
+        if (ysTP[0] - ysTP[ysTP.length - 1] > handSize * 0.9) {
+          return 'TEMPRANO';
+        }
+      }
+
+      // TARDE: mano abierta (3+ dedos) que DESCIENDE en diagonal con arco
+      // lateral (el sol bajando). LLEGAR baja en línea recta (rango X corto).
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const xsTD = historial.map(h => h.landmarks[0].x);
+        const ysTD = historial.map(h => h.landmarks[0].y);
+        const rangoXTD = Math.max(...xsTD) - Math.min(...xsTD);
+        if (ysTD[ysTD.length - 1] - ysTD[0] > handSize * 0.8 && rangoXTD > handSize * 0.4) {
+          return 'TARDE';
+        }
+      }
+
+      // DESCANSO: mano abierta (3+ dedos) que BAJA suave y corto (0.3-0.6 handSize,
+      // pausa). IMPRIMIR aplasta parecido pero pide terminar abajo (y>0.6);
+      // aquí el descenso es contenido.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const xsDes = historial.map(h => h.landmarks[0].x);
+        const ysDes = historial.map(h => h.landmarks[0].y);
+        const meanYDes = ysDes.reduce((a, b) => a + b, 0) / ysDes.length;
+        let crucesYDes = 0;
+        for (let i = 1; i < ysDes.length; i++) {
+          if ((ysDes[i] - meanYDes) * (ysDes[i - 1] - meanYDes) < 0) crucesYDes++;
+        }
+        const descDes = ysDes[ysDes.length - 1] - ysDes[0];
+        if (descDes > handSize * 0.3 && descDes < handSize * 0.6 &&
+            crucesYDes < 2 &&
+            Math.max(...xsDes) - Math.min(...xsDes) < handSize * 0.5 &&
+            ysDes[ysDes.length - 1] > 0.5) {
+          return 'DESCANSO';
+        }
+      }
+
+      // IMPRIMIR_GESTO: mano abierta (4 dedos, sin pulgar) que APLASTA hacia abajo
+      // (descenso medio y termina abajo y>0.6: "imprimir la hoja"). LLEGAR
+      // desciende más profundo (>0.9); aquí es un aplastado contenido.
+      if (idx && mid && ring && pink && !thumb) {
+        const xsIM = historial.map(h => h.landmarks[0].x);
+        const ysIM = historial.map(h => h.landmarks[0].y);
+        const meanIM = ysIM.reduce((a, b) => a + b, 0) / ysIM.length;
+        let crucesIM = 0;
+        for (let i = 1; i < ysIM.length; i++) {
+          if ((ysIM[i] - meanIM) * (ysIM[i - 1] - meanIM) < 0) crucesIM++;
+        }
+        const descensoIM = ysIM[ysIM.length - 1] - ysIM[0];
+        if (descensoIM > handSize * 0.5 && descensoIM < handSize * 0.9 &&
+            ysIM[ysIM.length - 1] > 0.6 && crucesIM < 2 &&
+            Math.max(...xsIM) - Math.min(...xsIM) < handSize * 0.4) {
+          return 'IMPRIMIR_GESTO';
+        }
+      }
+
+      // LLEGAR: mano abierta (3+ dedos) que DESCIENDE en línea recta (rango X
+      // corto) y se detiene (llegada/aterrizaje). Distinta de TARDE (arco
+      // lateral amplio), de DONDE (oscila en x) y de RECHAZAR/RECIBIR (z).
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const xsL2 = historial.map(h => h.landmarks[0].x);
+        const ysL2 = historial.map(h => h.landmarks[0].y);
+        const rangoXL2 = Math.max(...xsL2) - Math.min(...xsL2);
+        const desciende = ysL2[ysL2.length - 1] - ysL2[0];
+        if (desciende > handSize * 0.9 && rangoXL2 < handSize * 0.4) {
+          return 'LLEGAR';
+        }
+      }
+
+      // TERMINAR: mano abierta (3+ dedos) que BAJA mientras gira la palma (una
+      // rotación + descenso: "cerrar el asunto"). LEER gira sin bajar; el
+      // descenso discrimina.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const angsTm = historial.map(h => {
+          const lmH = h.landmarks;
+          return Math.atan2(lmH[9].y - lmH[0].y, lmH[9].x - lmH[0].x);
+        });
+        const meanTm = angsTm.reduce((a, b) => a + b, 0) / angsTm.length;
+        let crucesTm = 0;
+        for (let i = 1; i < angsTm.length; i++) {
+          if ((angsTm[i] - meanTm) * (angsTm[i - 1] - meanTm) < 0) crucesTm++;
+        }
+        const ysTm = historial.map(h => h.landmarks[0].y);
+        if (crucesTm === 1 && ysTm[ysTm.length - 1] - ysTm[0] > handSize * 0.4) {
+          return 'TERMINAR';
+        }
+      }
+
+      // LEER: mano abierta (3+ dedos) que gira la palma UNA vez (pasar la hoja).
+      // CAMBIAR rota dos o más veces; aquí hay exactamente un cruce.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const angsLR = historial.map(h => {
+          const lmH = h.landmarks;
+          return Math.atan2(lmH[9].y - lmH[0].y, lmH[9].x - lmH[0].x);
+        });
+        const meanLR = angsLR.reduce((a, b) => a + b, 0) / angsLR.length;
+        let crucesLR = 0;
+        for (let i = 1; i < angsLR.length; i++) {
+          if ((angsLR[i] - meanLR) * (angsLR[i - 1] - meanLR) < 0) crucesLR++;
+        }
+        if (crucesLR === 1) {
+          return 'LEER';
+        }
+      }
+
+      // CAMBIAR: rotación de la muñeca (palma arriba ↔ abajo) con mano abierta
+      // (3+ dedos): dos o más cruces del ángulo del antebrazo. Ninguna otra
+      // seña mide rotación pura.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const angsCB = historial.map(h => {
+          const lmH = h.landmarks;
+          return Math.atan2(lmH[9].y - lmH[0].y, lmH[9].x - lmH[0].x);
+        });
+        const meanCB = angsCB.reduce((a, b) => a + b, 0) / angsCB.length;
+        let crucesCB = 0;
+        for (let i = 1; i < angsCB.length; i++) {
+          if ((angsCB[i] - meanCB) * (angsCB[i - 1] - meanCB) < 0) crucesCB++;
+        }
+        if (crucesCB >= 2) {
+          return 'CAMBIAR';
+        }
+      }
+
+      // ACTUALIZAR: puño cerrado ROTANDO la muñeca dos o más veces (actualizar/
+      // renovar la versión). LEER/CAMBIAR rotan con mano abierta; aquí la
+      // forma es el puño.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const angsAC = historial.map(h => {
+          const lmH = h.landmarks;
+          return Math.atan2(lmH[9].y - lmH[0].y, lmH[9].x - lmH[0].x);
+        });
+        const meanAC = angsAC.reduce((a, b) => a + b, 0) / angsAC.length;
+        let crucesAC = 0;
+        for (let i = 1; i < angsAC.length; i++) {
+          if ((angsAC[i] - meanAC) * (angsAC[i - 1] - meanAC) < 0) crucesAC++;
+        }
+        if (crucesAC >= 2) {
+          return 'ACTUALIZAR';
+        }
+      }
+
+      // EJECUTAR: mano abierta (3+ dedos) que baja en DOS pasos hacia el pecho
+      // (ejecutar tareas por pasos). ALMUERZO acaba arriba; aquí termina abajo
+      // (y>0.45) con amplitud media.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const ysEJ = historial.map(h => h.landmarks[0].y);
+        const meanEJ = ysEJ.reduce((a, b) => a + b, 0) / ysEJ.length;
+        let crucesEJ = 0;
+        for (let i = 1; i < ysEJ.length; i++) {
+          if ((ysEJ[i] - meanEJ) * (ysEJ[i - 1] - meanEJ) < 0) crucesEJ++;
+        }
+        if (crucesEJ >= 2 && ysEJ[ysEJ.length - 1] > 0.45 &&
+            Math.max(...ysEJ) - Math.min(...ysEJ) < handSize * 1.0) {
+          return 'EJECUTAR';
+        }
+      }
+
+      // ELIMINAR_GESTO: mano abierta (4+ dedos) barriendo UNA vez en lateral por
+      // la parte ALTA (y<0.5, "borrar del aire"), amplitud media-grande.
+      // Dónde oscila o barre bajo; aquí es una pasada alta y seca.
+      if (idx && mid && ring && pink) {
+        const xsEL = historial.map(h => h.landmarks[0].x);
+        const ysEL = historial.map(h => h.landmarks[0].y);
+        const meanEL = xsEL.reduce((a, b) => a + b, 0) / xsEL.length;
+        let crucesEL = 0;
+        for (let i = 1; i < xsEL.length; i++) {
+          if ((xsEL[i] - meanEL) * (xsEL[i - 1] - meanEL) < 0) crucesEL++;
+        }
+        if (Math.max(...xsEL) - Math.min(...xsEL) > handSize * 0.7 &&
+            crucesEL < 2 && ysEL[0] < 0.5) {
+          return 'ELIMINAR_GESTO';
+        }
+      }
+
       // DONDE: mano abierta en HORIZONTAL (dedos al frente, palma abajo) que
       // oscila de lado a lado a la altura del pecho. El discriminador principal
       // es el MOVIMIENTO lateral (HOLA y NADA son estáticas); la orientación
@@ -621,6 +1473,141 @@ export class SignLanguageService {
               spreadD > handSize * 0.9) {
             return 'DONDE';
           }
+        }
+      }
+
+      // APRENDER: la mano pasa de ABIERTA (4+ dedos) a CERRADA (puño) dentro de
+      // la ventana (tomar el conocimiento). Ninguna otra seña combina ambos
+      // extremos en el mismo trazo.
+      {
+        const histA = this.landmarkHistory
+          .slice(-12)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m);
+        if (histA.length >= 8) {
+          const cuentaExt = (h: ManoDetectada) =>
+            [fingerExtended(h.landmarks, 8, 6), fingerExtended(h.landmarks, 12, 10),
+             fingerExtended(h.landmarks, 16, 14), fingerExtended(h.landmarks, 20, 18)]
+              .filter(Boolean).length;
+          const serieA = histA.map(cuentaExt);
+          if (serieA[0] >= 4 && serieA[serieA.length - 1] <= 1) {
+            return 'APRENDER';
+          }
+        }
+      }
+
+      // HABLAR: mano abierta (3+ dedos) junto a la BOCA (y<0.45) con doble pulso
+      // en profundidad (hablar). CONTINUAR hace z-pulsos a cualquier altura;
+      // aquí la mano queda alta.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3 && lm[0].y < 0.45) {
+        const histHB = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m);
+        if (histHB.length >= 9) {
+          const zsHB = histHB.map(h => h.landmarks[9].z);
+          const meanHB = zsHB.reduce((a, b) => a + b, 0) / zsHB.length;
+          let crucesHB = 0;
+          for (let i = 1; i < zsHB.length; i++) {
+            if ((zsHB[i] - meanHB) * (zsHB[i - 1] - meanHB) < 0) crucesHB++;
+          }
+          if (crucesHB >= 2) {
+            return 'HABLAR';
+          }
+        }
+      }
+
+      // SOLICITUD_GESTO: mano abierta (3+ dedos) que tira HACIA EL CUERPO en dos
+      // tirones (cruces z≥2 con avance neto hacia adentro: "pedir favor").
+      // CONTINUAR impulsa hacia adelante; aquí el neto va hacia el cuerpo.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const histS2 = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m);
+        if (histS2.length >= 9) {
+          const zsS2 = histS2.map(h => h.landmarks[9].z);
+          const meanS2 = zsS2.reduce((a, b) => a + b, 0) / zsS2.length;
+          let crucesS2 = 0;
+          for (let i = 1; i < zsS2.length; i++) {
+            if ((zsS2[i] - meanS2) * (zsS2[i - 1] - meanS2) < 0) crucesS2++;
+          }
+          if (crucesS2 >= 2 && zsS2[zsS2.length - 1] - zsS2[0] > 0.02) {
+            return 'SOLICITUD_GESTO';
+          }
+        }
+      }
+
+      // CONTINUAR: mano abierta dando DOS pulsos hacia adelante (doble cruce en
+      // profundidad z). RECHAZAR/RECIBIR son pulsos únicos.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const histC = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m);
+        if (histC.length >= 9) {
+          const zsC = histC.map(h => h.landmarks[9].z);
+          const meanC = zsC.reduce((a, b) => a + b, 0) / zsC.length;
+          let crucesC = 0;
+          for (let i = 1; i < zsC.length; i++) {
+            if ((zsC[i] - meanC) * (zsC[i - 1] - meanC) < 0) crucesC++;
+          }
+          if (crucesC >= 2) {
+            return 'CONTINUAR';
+          }
+        }
+      }
+
+      // CONSEGUIR: mano abierta que SE CIERRA mientras se acerca al cuerpo
+      // (atrapar el logro: los dedos se pliegan y la muñeca vuelve en z).
+      // TOMAR solo cierra; aquí además hay tiraje de profundidad.
+      {
+        const cerrC = historial.map(h => {
+          const l = h.landmarks;
+          return [8, 12, 16, 20].filter(i => dist(l[i], l[0]) > handSize * 0.9).length;
+        });
+        const zsC2 = historial.map(h => h.landmarks[9].z);
+        if (cerrC[0] >= 3 && cerrC[cerrC.length - 1] <= 1 &&
+            Math.max(...zsC2) - zsC2[zsC2.length - 1] > 0.04) {
+          return 'CONSEGUIR';
+        }
+      }
+
+      // TOMAR: mano que SE CIERRA (3+ dedos extendidos al inicio y ≤1 al
+      // final: agarrar/recoger algo). Ninguna otra seña mide el cierre de la
+      // mano.
+      {
+        const cerrT = historial.map(h => {
+          const l = h.landmarks;
+          return [8, 12, 16, 20].filter(i => dist(l[i], l[0]) > handSize * 0.9).length;
+        });
+        if (cerrT[0] >= 3 && cerrT[cerrT.length - 1] <= 1) {
+          return 'TOMAR';
+        }
+      }
+
+      // ENCONTRAR: mano que SE ABRE (puño → abierta: dedos extendidos crecen
+      // ≥2, "encontrar/descubrir"). TOMAR es el cierre; aquí es la apertura.
+      {
+        const abrE = historial.map(h => {
+          const l = h.landmarks;
+          return [8, 12, 16, 20].filter(i => dist(l[i], l[0]) > handSize * 0.9).length;
+        });
+        if (abrE[0] <= 1 && abrE[abrE.length - 1] >= 3) {
+          return 'ENCONTRAR';
+        }
+      }
+
+      // DESPUES: mano abierta (3+ dedos) que se ALEJA hacia adelante con un
+      // avance contenida (-0.05 a -0.14) TERMINANDO BAJO (y>0.55). RECHAZAR
+      // empuja fuerte (z<-0.08) a cualquier altura; aquí el final bajo en la
+      // trayectoria a media distancia discrimina. (Provisional LSC.)
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const zsDes = historial.map(h => h.landmarks[9].z);
+        const ysDes = historial.map(h => h.landmarks[0].y);
+        const avanceZDes = zsDes[zsDes.length - 1] - zsDes[0];
+        if (avanceZDes < -0.05 && avanceZDes > -0.14 && ysDes[ysDes.length - 1] > 0.55) {
+          return 'DESPUES';
         }
       }
 
@@ -882,7 +1869,6 @@ export const GESTO_PALABRA: Record<string, string> = {
   // Léxico empresarial (LSC)
   REUNION: 'Reunión',
   INFORME: 'Informe',
-  CLIENTE: 'Cliente',
   PAUSA: 'Pausa',
   APROBAR: 'Aprobar',
   ENVIAR: 'Enviar',
@@ -908,7 +1894,135 @@ export const GESTO_PALABRA: Record<string, string> = {
   QUE: 'Qué',
   DONDE: 'Dónde',
   TAMBIEN: 'También',
-  NADA: 'Nada'
+  NADA: 'Nada',
+
+  // Fase 3 - lote 1 (Bloque B: verbos de acción) — configs provisionales LSC
+  IR: 'Ir',
+  VENIR: 'Venir',
+  LLEGAR: 'Llegar',
+  SALIR: 'Salir',
+  ENTRAR: 'Entrar',
+  QUERER: 'Querer',
+  PODER: 'Poder',
+  DEBER: 'Deber',
+  TENER: 'Tener',
+  BUSCAR: 'Buscar',
+  LOGRAR: 'Lograr',
+  EMPEZAR: 'Empezar',
+  INTENTAR: 'Intentar',
+  REPETIR: 'Repetir',
+  CONTINUAR: 'Continuar',
+  PREGUNTAR: 'Preguntar',
+  RESPONDER: 'Responder',
+  APRENDER: 'Aprender',
+  ENTENDER: 'Entender',
+  SABER: 'Saber',
+  TEMPRANO: 'Temprano',
+  TARDE: 'Tarde',
+  PUNTUAL: 'Puntual',
+  RAPIDO: 'Rápido',
+  LENTO: 'Lento',
+  SIEMPRE: 'Siempre',
+  NUNCA: 'Nunca',
+  A_VECES: 'A veces',
+  DURACION: 'Duración',
+  ALMUERZO: 'Almuerzo',
+
+  // Fase 3 - lote 4 (Bloque B: más verbos/acción) — configs provisionales LSC
+  AVISAR: 'Avisar',
+  CONFIRMAR: 'Confirmar',
+  VERIFICAR: 'Verificar',
+  CALIFICAR: 'Calificar',
+  PRIORIZAR: 'Priorizar',
+  AUTORIZACION_GESTO: 'Autorizar',
+  CAMBIAR: 'Cambiar',
+  MEJORAR: 'Mejorar',
+  REPARAR: 'Reparar',
+  EJECUTAR: 'Ejecutar',
+
+  // Fase 3 - lote 5 (Bloque B: más verbos/acción) — configs provisionales LSC
+  LEER: 'Leer',
+  ESCRIBIR: 'Escribir',
+  HABLAR: 'Hablar',
+  CONSULTAR: 'Consultar',
+  TRANSFERIR_GESTO: 'Transferir',
+  ANALIZAR: 'Analizar',
+  REGISTRAR: 'Registrar',
+  GUARDAR_GESTO: 'Guardar',
+  VENDER: 'Vender',
+  ELIMINAR_GESTO: 'Eliminar',
+
+  // Fase 3 - lote 6 (Bloque B: últimos verbos de acción) — provisionales LSC
+  TOMAR: 'Tomar',
+  CONSEGUIR: 'Conseguir',
+  PRODUCIR: 'Producir',
+  INVESTIGAR: 'Investigar',
+  IMPRIMIR_GESTO: 'Imprimir',
+  CORREGIR: 'Corregir',
+  RESOLVER_GESTO: 'Resolver',
+  SOLICITUD_GESTO: 'Solicitar',
+  ACTUALIZAR: 'Actualizar',
+  ALMACENAR: 'Almacenar',
+
+  // Fase 3 - lote 7 (cierre de una mano: resto de B + C) — provisionales LSC
+  HACER: 'Hacer',
+  ENCONTRAR: 'Encontrar',
+  TRAER: 'Traer',
+  LLEVAR: 'Llevar',
+  TERMINAR: 'Terminar',
+  TARDE_RETRASO: 'Retraso',
+  PASADO: 'Pasado',
+  ESTA_SEMANA: 'Esta semana',
+  ESTE_MES: 'Este mes',
+  ESTE_ANO: 'Este año',
+  DESCANSO: 'Descanso',
+  HORA_EXTRA: 'Hora extra',
+
+  // Fase 2 - lote 8 (Bloque A, una mano) — provisionales LSC
+  QUIEN: 'Quién',
+  CUANDO: 'Cuándo',
+  POR_QUE: 'Por qué',
+  COMO: 'Cómo',
+  CUANTO: 'Cuánto',
+  CUAL: 'Cuál',
+  PARA_QUE: 'Para qué',
+  TODO: 'Todo',
+  ANTES: 'Antes',
+  DESPUES: 'Después',
+
+  // Fase 2 - lote 9 (A restante + primeros D) — provisionales LSC
+  ALGO: 'Algo',
+  NADIE: 'Nadie',
+  TAMPOCO: 'Tampoco',
+  CERCA: 'Cerca',
+  LEJOS: 'Lejos',
+  BIEN: 'Bien',
+  MAL: 'Mal',
+  LISTO: 'Listo',
+  PREPARADO: 'Preparado',
+  DISPONIBLE: 'Disponible',
+
+  // Fase 2 - lote 10 (D evaluativos, una mano) — provisionales LSC
+  OCUPADO: 'Ocupado',
+  BUENO: 'Bueno',
+  MALO: 'Malo',
+  MAS: 'Más',
+  MENOS: 'Menos',
+  COMPLETO: 'Completo',
+  VACIO: 'Vacío',
+  CORRECTO: 'Correcto',
+  INCORRECTO: 'Incorrecto',
+  IMPORTANTE: 'Importante',
+
+  // Fase 2 - lote 11 (cierre de una mano) — provisionales LSC
+  NECESARIO: 'Necesario',
+  DISPONIBLE_NO: 'No disponible',
+  PRECISO: 'Preciso',
+  FACIL: 'Fácil',
+  DIFICIL: 'Difícil',
+  NUEVO: 'Nuevo',
+  VIEJO: 'Viejo',
+  URGENTE: 'Urgente'
 };
 
 function dist(a: Landmark, b: Landmark): number {
@@ -1133,6 +2247,20 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'OK_SIGN';
   }
 
+  // DISPONIBLE: pinza pulgar-índice con la muñeca HORIZONTAL (mano tendida,
+  // "disponible") a media altura (y<0.6). La pinza vertical conserva
+  // Supervisar/Puntual/Pinza; DISPONIBLE_NO es la misma pinza BAJA (>0.6).
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9 &&
+      (lm[0].y + lm[9].y) / 2 < 0.6) {
+    return 'DISPONIBLE';
+  }
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9 &&
+      (lm[0].y + lm[9].y) / 2 >= 0.6) {
+    return 'DISPONIBLE_NO';
+  }
+
   // SUPERVISAR: círculo con pulgar e índice llevado a la altura del ojo
   // (vigilar/monitorear). PINZA tiene la misma forma pero a nivel del pecho;
   // la altura de la muñeca discrimina.
@@ -1140,8 +2268,83 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'SUPERVISAR';
   }
 
+  // CORRECTO: pinza pulgar-índice VERTICAL con la muñeca en la banda media
+  // ALTA (0.45-0.52, "exacto"). PINZA conserva 0.52-0.6 y PUNTUAL baja (>0.6).
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink &&
+      (lm[0].y + lm[9].y) / 2 >= 0.45 && (lm[0].y + lm[9].y) / 2 < 0.52) {
+    return 'CORRECTO';
+  }
+
+  // PRECISO: pinza vertical en la banda media-baja (0.6-0.68, "con precisión,
+  // firme junto al reloj"). PUNTUAL queda para la banda más profunda (>0.68).
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink &&
+      (lm[0].y + lm[9].y) / 2 >= 0.6 && (lm[0].y + lm[9].y) / 2 < 0.68) {
+    return 'PRECISO';
+  }
+  // PUNTUAL: pinza de pulgar-índice a la altura BAJA (junto al reloj, y>0.68).
+  // SUPERVISAR es la pinza alta (y<0.45), PINZA la del pecho y PRECISO la
+  // banda 0.6-0.68.
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink && (lm[0].y + lm[9].y) / 2 >= 0.68) {
+    return 'PUNTUAL';
+  }
+
   if (thumbIndexPinch && !idx && !mid && !ring && !pink) {
     return 'PINZA';
+  }
+
+  // ENTENDER: índice y medio juntos (misma forma de QUERER) tocando la SIEN —
+  // la muñeca alta discrimina frente a Querer (frente al pecho).
+  if (idx && mid && !ring && !pink && lm[0].y < 0.4 &&
+      fingerTipsTouching(8, 12, lm, 0.45) &&
+      !fingerTipsTouching(4, 8, lm, 0.3)) {
+    return 'ENTENDER';
+  }
+
+  // QUERER: índice y medio extendidos CON LAS PUNTAS JUNTAS frente al pecho
+  // (no es la V de Adiós/También, cuyas puntas van separadas). El pulgar no
+  // debe rozar la punta del índice (ese caso es NUMERO_7, evaluado antes).
+  if (idx && mid && !ring && !pink &&
+      fingerTipsTouching(8, 12, lm, 0.45) &&
+      !fingerTipsTouching(4, 8, lm, 0.3)) {
+    return 'QUERER';
+  }
+
+  // VERIFICAR: V (índice y medio separados) HORIZONTAL y en la parte ALTA del
+  // encuadre (revisar con la mirada). Adiós/También se hacen más abajo; el
+  // ángulo horizontal + la altitud discriminan.
+  if (idx && mid && !ring && !pink && (lm[0].y + lm[9].y) / 2 < 0.35) {
+    const dirVer = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    if (Math.abs(dirVer.dx) > Math.abs(dirVer.dy) * 0.9) {
+      return 'VERIFICAR';
+    }
+  }
+
+  // TAMPOCO: V en DIAGONAL (ni horizontal ni vertical dominante). VICTORIA es
+  // vertical y TAMBIEN horizontal; el ángulo intermedio expresa negación.
+  // (Provisional LSC, calibrar en Fase 9.)
+  if (idx && mid && !ring && !pink) {
+    const dirTp = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    if (Math.abs(dirTp.dx) < Math.abs(dirTp.dy) * 0.9 &&
+        Math.abs(dirTp.dy) < Math.abs(dirTp.dx) * 0.9) {
+      return 'TAMPOCO';
+    }
+  }
+
+  // BUENO: V vertical APUNTANDO ARRIBA y mano BAJA (y>0.5). VICTORIA conserva
+  // la V arriba/media; el ángulo vertical + la altura discrimina.
+  if (idx && mid && !ring && !pink) {
+    const dirB = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    if (Math.abs(dirB.dy) > Math.abs(dirB.dx) * 0.9 && dirB.dy < 0 &&
+        (lm[0].y + lm[9].y) / 2 > 0.5) {
+      return 'BUENO';
+    }
+  }
+  // INCORRECTO: V vertical APUNTANDO HACIA ABAJO (rechazo).
+  if (idx && mid && !ring && !pink) {
+    const dirIc = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    if (Math.abs(dirIc.dy) > Math.abs(dirIc.dx) * 0.9 && dirIc.dy > 0) {
+      return 'INCORRECTO';
+    }
   }
 
   // VICTORIA (Adiós) es la V en vertical. TAMBIÉN usa la misma V en horizontal
@@ -1154,14 +2357,26 @@ export function evaluarGesto(lm: Landmark[]): string | null {
 
   // Índice extendido y mano cerrada: la dirección de la punta discrimina
   // QUE (¿Qué?, lateral — provisional a calibrar), AHORA (firme hacia abajo)
-  // e INDICE_ARRIBA (Atención, hacia arriba).
+  // e INDICE_ARRIBA (Atención, hacia arriba). En lateral, la altura separa
+  // MAS (alzado) de MENOS (bajo) y QUE (banda media).
   if (idx && !mid && !ring && !pink && !thumb) {
     const dirIdx = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
     if (Math.abs(dirIdx.dx) > Math.abs(dirIdx.dy) * 1.2) {
+      if (lm[0].y < 0.4) {
+        return 'MAS';
+      }
+      if (lm[0].y > 0.6) {
+        return 'MENOS';
+      }
       return 'QUE';
     }
     if (dirIdx.dy > handSize * 1.1) {
       return 'AHORA';
+    }
+    // NECESARIO: índice hacia arriba con la mano MUY ALTA (y<0.35, alzado
+    // para pedir algo). INDICE_ARRIBA (Atención) conserva media/baja.
+    if (lm[0].y < 0.35) {
+      return 'NECESARIO';
     }
     return 'INDICE_ARRIBA';
   }
@@ -1180,6 +2395,39 @@ export function evaluarGesto(lm: Landmark[]): string | null {
 
   if (idx && mid && ring && !pink && !thumb) {
     return 'TRES_DEDOS';
+  }
+
+  // IMPORTANTE: cuatro dedos sin pulgar en HORIZONTAL con la muñeca ALTA
+  // (y<0.45, "los cuatro al frente"). PREPARADO ocupa la banda media.
+  if (idx && mid && ring && pink && !thumb &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.8 &&
+      (lm[0].y + lm[9].y) / 2 < 0.45) {
+    return 'IMPORTANTE';
+  }
+
+  // VACIO: cuatro dedos sin pulgar en VERTICAL con la muñeca BAJA (y>0.55,
+  // "mano vacía hacia abajo"). CUATRO_DEDOS se hace a media altura.
+  if (idx && mid && ring && pink && !thumb &&
+      Math.abs(lm[9].y - lm[0].y) > Math.abs(lm[9].x - lm[0].x) * 0.8 &&
+      (lm[0].y + lm[9].y) / 2 > 0.55) {
+    return 'VACIO';
+  }
+
+  // LISTO: cuatro dedos sin pulgar en VERTICAL con la muñeca ALTA (y<0.36,
+  // "todo listo, mano alzada"). CUATRO_DEDOS se hace a media altura y NADA
+  // horizontal y baja; la combinación de orientación y altura discrimina.
+  if (idx && mid && ring && pink && !thumb &&
+      Math.abs(lm[9].y - lm[0].y) > Math.abs(lm[9].x - lm[0].x) * 0.8 &&
+      (lm[0].y + lm[9].y) / 2 < 0.36) {
+    return 'LISTO';
+  }
+
+  // PREPARADO: cuatro dedos sin pulgar en HORIZONTAL con la muñeca media
+  // (0.45-0.55, "listo y dispuesto"); NADA lo hace más abajo (>0.55).
+  if (idx && mid && ring && pink && !thumb &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.8 &&
+      (lm[0].y + lm[9].y) / 2 >= 0.45 && (lm[0].y + lm[9].y) / 2 < 0.55) {
+    return 'PREPARADO';
   }
 
   // NADA: mano plana en horizontal (dedos apuntando al frente) bajo el pecho.
@@ -1212,8 +2460,136 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     }
   }
 
+  // PODER: únicamente el dedo MEDIO extendido (índice, anular, meñique y
+  // pulgar cerrados). Forma única que no choca con ninguna regla existente.
+  if (!idx && mid && !ring && !pink && !thumb) {
+    return 'PODER';
+  }
+
+  // DEBER: MEDIO y ANULAR extendidos (índice, meñique y pulgar cerrados).
+  if (!idx && mid && ring && !pink && !thumb) {
+    return 'DEBER';
+  }
+
+  // TENER: ANULAR y MEÑIQUE extendidos (índice, medio y pulgar cerrados).
+  if (!idx && !mid && ring && pink && !thumb) {
+    return 'TENER';
+  }
+
+  // VENIR: ÍNDICE y MEÑIQUE extendidos sin pulgar (forma de "cuernos").
+  if (idx && !mid && !ring && pink && !thumb) {
+    return 'VENIR';
+  }
+
+  // LOGRAR: MEDIO+ANULAR+MEÑIQUE extendidos con pulgar extendido e ÍNDICE
+  // doblado (forma de "llave/candado"). HORA no lleva pulgar.
+  if (!idx && mid && ring && pink && thumb && dist(lm[8], lm[0]) < handSize * 0.5) {
+    return 'LOGRAR';
+  }
+
+  // CONFIRMAR: MEDIO y MEÑIQUE extendidos (índice, anular y pulgar cerrados).
+  // Forma única: ningún otro gesto combina esos dos dedos.
+  if (!idx && mid && !ring && pink && !thumb) {
+    return 'CONFIRMAR';
+  }
+
+  // CALIFICAR: PULGAR+ÍNDICE+MEDIO+ANULAR extendidos (meñique cerrado, sin
+  // pinza). No choca con PALMA (necesita meñique) ni OK_SIGN (pinza).
+  if (thumb && idx && mid && ring && !pink && !thumbIndexClose(lm)) {
+    return 'CALIFICAR';
+  }
+
+  // PRIORIZAR: ÍNDICE y ANULAR extendidos (medio, meñique y pulgar cerrados):
+  // "primer dedo y tercero" = dar primer lugar.
+  if (idx && !mid && ring && !pink && !thumb) {
+    return 'PRIORIZAR';
+  }
+
+  // VENDER: PULGAR y MEDIO extendidos (índice, anular y meñique cerrados).
+  // Forma única: ningún otro gesto combina esos dos dedos.
+  if (thumb && !idx && mid && !ring && !pink) {
+    return 'VENDER';
+  }
+
+  // HACER: PULGAR y ANULAR extendidos (índice, medio y meñique cerrados).
+  // LETRA_L ocupa pulgar+índice; el anular diferencia la forma de "hacer".
+  // (Provisional LSC, calibrar en Fase 9.)
+  if (thumb && !idx && !mid && ring && !pink) {
+    return 'HACER';
+  }
+
+  // Fase 2 - Bloque A (preguntas): formas de una mano exclusivas PROVISIONALES
+  // LSC (calibrar en Fase 9). Cada combinación de dedos es única del catálogo.
+  // QUIEN: pulgar+anular+meñique ("ventana" hacia el interlocutor).
+  if (thumb && !idx && !mid && ring && pink) {
+    return 'QUIEN';
+  }
+  // CUANDO: índice+medio+meñique (tres puntas de pregunta, sin pulgar).
+  if (idx && mid && !ring && pink && !thumb) {
+    return 'CUANDO';
+  }
+  // POR_QUE: índice+anular+meñique (sin medio ni pulgar).
+  if (idx && !mid && ring && pink && !thumb) {
+    return 'POR_QUE';
+  }
+  // COMO: pulgar+medio+meñique.
+  if (thumb && !idx && mid && !ring && pink) {
+    return 'COMO';
+  }
+  // CUANTO: pulgar+índice+anular (sin medio ni meñique).
+  if (thumb && idx && !mid && ring && !pink) {
+    return 'CUANTO';
+  }
+  // CUAL: pulgar+medio+anular (sin índice ni meñique).
+  if (thumb && !idx && mid && ring && !pink) {
+    return 'CUAL';
+  }
+  // PARA_QUE: pulgar+índice+anular+meñique (sin medio, "cuatro abiertos").
+  if (thumb && idx && !mid && ring && pink) {
+    return 'PARA_QUE';
+  }
+  // TODO: medio+anular+meñique sin pulgar ni índice ("todo lo que queda").
+  if (!idx && mid && ring && pink && !thumb) {
+    return 'TODO';
+  }
+
+  // Fase 2 - lote 9 (A restantes + primeros D) — provisionales LSC.
+  // ALGO: pulgar+índice+medio+meñique (sin anular) — forma exclusiva.
+  if (thumb && idx && mid && !ring && pink) {
+    return 'ALGO';
+  }
+  // BIEN: pulgar+medio+anular+meñique (sin índice). LOGRAR dobla ese índice
+  // hacia la palma; aquí el índice va cerrado y suelto.
+  if (thumb && !idx && mid && ring && pink) {
+    return 'BIEN';
+  }
+  // NADIE: únicamente el ANULAR extendido ("quedarse sin dedos").
+  if (!idx && !mid && ring && !pink && !thumb) {
+    return 'NADIE';
+  }
+
+  // MALO: puño cerrado (sin dedos ni pulgar) con la muñeca HORIZONTAL
+  // ("puño aplastado, malo"). LETRA_O va vertical y PUÑO_CERRADO lo mismo.
+  if (extended === 0 && !thumb &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9) {
+    return 'MALO';
+  }
+
   if (!idx && !mid && !ring && !pink && !thumb && allTipsClose(lm, handSize)) {
     return 'LETRA_O';
+  }
+
+  // OCUPADO: pulgar solo con la muñeca HORIZONTAL ("pulgar al costado, mano
+  // ocupada"). El pulgar vertical conserva Sí/No/Atención.
+  if (thumb && !idx && !mid && !ring && !pink &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9) {
+    return 'OCUPADO';
+  }
+
+  // AVISAR: pulgar arriba con la mano MUY ALTA (y<0.35, levantada llamando la
+  // atención). "Sí" (pulgar arriba) se hace normalmente más abajo.
+  if (thumb && !idx && !mid && !ring && !pink && lm[4].y < lm[3].y && lm[4].y < 0.35) {
+    return 'AVISAR';
   }
 
   if (thumb && !idx && !mid && !ring && !pink) {
@@ -1221,6 +2597,35 @@ export function evaluarGesto(lm: Landmark[]): string | null {
       return 'NUMERO_6';
     }
     return lm[4].y < lm[3].y ? 'PULGAR_ARRIBA' : 'PULGAR_ABAJO';
+  }
+
+  // Fase 2 - lote 9 — banda de mano abierta (5 dedos): CERCA (mano a la cara),
+  // MAL (muñeca horizontal media) y LEJOS (mano baja).
+  // CERCA: mano abierta (5 dedos) con la muñeca en la zona de la cara.
+  if (extended >= 4 && thumb && lm[0].y >= 0.32 && lm[0].y < 0.45) {
+    return 'CERCA';
+  }
+  // MAL: mano abierta con la muñeca HORIZONTAL en banda media (palma abajo).
+  if (extended >= 4 && thumb && lm[0].y >= 0.45 && lm[0].y <= 0.62 &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9) {
+    return 'MAL';
+  }
+  // LEJOS: mano abierta con la muñeca muy baja y VERTICAL (alargada hacia allá).
+  if (extended >= 4 && thumb && lm[0].y > 0.62 &&
+      Math.abs(lm[9].y - lm[0].y) > Math.abs(lm[9].x - lm[0].x) * 0.8) {
+    return 'LEJOS';
+  }
+  // COMPLETO: mano abierta baja y HORIZONTAL ("todo en la mano, completo").
+  if (extended >= 4 && thumb && lm[0].y > 0.62 &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.8) {
+    return 'COMPLETO';
+  }
+
+  // SABER: mano abierta (4+ dedos) con la palma junto a la SIEN (muñeca en la
+  // parte alta del encuadre). PALMA_ABIERTA (Hola) se hace a la altura del
+  // pecho; la posición de la muñeca discrimina.
+  if (extended >= 4 && thumb && lm[0].y < 0.32) {
+    return 'SABER';
   }
 
   if (extended >= 4 && thumb) {
