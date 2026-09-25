@@ -31,11 +31,11 @@
 
 | Bloque | Contenido | Señas | Implementadas |
 |---|---|---|---|
-| **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 14 |
+| **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 19 |
 | **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 61 |
 | **C** | TIEMPO Y FRECUENCIA | 30 | 22 |
 | **C2** | CALENDARIO: DÍAS Y MESES | 19 | 0 |
-| **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 0 |
+| **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 5 |
 | **E** | FRASES-GESTO DE CONVERSACIÓN | 22 | 0 |
 | **F** | PRESENTACIONES, IDENTIDAD, PERSONAS Y CARGOS | 35 | 1 |
 | **G** | REUNIONES Y COOPERACIÓN | 32 | 3 |
@@ -48,7 +48,7 @@
 | **N** | SALUDOS, CORTESÍA Y LÉXICO FUNDACIONAL | 34 | 21 |
 | **P** | SITUACIONES LABORALES Y RR.HH. | 25 | 0 |
 | **O** | DACTILOLOGÍA LSC (27 letras) | 27 | 27 |
-| **TOTAL** | | **582** | **158** |
+| **TOTAL** | | **582** | **168** |
 
 ---
 
@@ -67,14 +67,14 @@
 | PARA_QUE | Para qué | 🖐️ | ✅ |
 | NADA | Nada | 🖐️ | ✅ |
 | TODO | Todo | 🖐️ | ✅ |
-| ALGO | Algo | 🖐️ | ⏳ |
-| NADIE | Nadie | 🖐️ | ⏳ |
+| ALGO | Algo | 🖐️ | ✅ |
+| NADIE | Nadie | 🖐️ | ✅ |
 | TAMBIEN | También | 🖐️ | ✅ |
-| TAMPOCO | Tampoco | 🖐️ | ⏳ |
+| TAMPOCO | Tampoco | 🖐️ | ✅ |
 | AQUI | Aquí | 🧍 | ⏳ |
 | ALLA | Allá | 🧍 | ⏳ |
-| CERCA | Cerca | 🖐️ | ⏳ |
-| LEJOS | Lejos | 🖐️ | ⏳ |
+| CERCA | Cerca | 🖐️ | ✅ |
+| LEJOS | Lejos | 🖐️ | ✅ |
 | ARRIBA | Arriba | 🧍 | ⏳ |
 | ABAJO | Abajo | 🧍 | ⏳ |
 | ADENTRO | Adentro | 🧍 | ⏳ |
@@ -237,11 +237,11 @@
 
 | ID | Significado | Tipo | Estado |
 |---|---|---|---|
-| BIEN | Bien | 🖐️ | ⏳ |
-| MAL | Mal | 🖐️ | ⏳ |
-| LISTO | Listo | 🖐️ | ⏳ |
-| PREPARADO | Preparado | 🖐️ | ⏳ |
-| DISPONIBLE | Disponible | 🖐️ | ⏳ |
+| BIEN | Bien | 🖐️ | ✅ |
+| MAL | Mal | 🖐️ | ✅ |
+| LISTO | Listo | 🖐️ | ✅ |
+| PREPARADO | Preparado | 🖐️ | ✅ |
+| DISPONIBLE | Disponible | 🖐️ | ✅ |
 | OCUPADO | Ocupado | 🖐️ | ⏳ |
 | FACIL | Fácil | 💫 | ⏳ |
 | DIFICIL | Difícil | 💫 | ⏳ |
@@ -727,7 +727,7 @@
 |---|---|---|
 | 0 | Fundación: recuperación + Fases 1–3 de señas (13 nuevas) | ✅ |
 | 1 | Documentar catálogo conversacional (este doc) | ✅ |
-| 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | 🟡 en curso — una mano: 10/38 (lote 8 ✅) |
+| 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | 🟡 en curso — una mano: 15/38 (A one-hand ✅; lotes 8-9) |
 | 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-7: 72 señas ✅ (una mano 💫/🖐️ cerrado; ✌️ → Fase 4, 🧍 → Fase 6) |
 | 4 | Bloque G (reuniones) + E (frases) — bimanuales ✌️ | ⏳ |
 | 5 | Bloque M (números) + C2 (días/meses) — secuencia | ⏳ |

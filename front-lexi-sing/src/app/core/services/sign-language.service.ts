@@ -1907,7 +1907,19 @@ export const GESTO_PALABRA: Record<string, string> = {
   PARA_QUE: 'Para qué',
   TODO: 'Todo',
   ANTES: 'Antes',
-  DESPUES: 'Después'
+  DESPUES: 'Después',
+
+  // Fase 2 - lote 9 (A restante + primeros D) — provisionales LSC
+  ALGO: 'Algo',
+  NADIE: 'Nadie',
+  TAMPOCO: 'Tampoco',
+  CERCA: 'Cerca',
+  LEJOS: 'Lejos',
+  BIEN: 'Bien',
+  MAL: 'Mal',
+  LISTO: 'Listo',
+  PREPARADO: 'Preparado',
+  DISPONIBLE: 'Disponible'
 };
 
 function dist(a: Landmark, b: Landmark): number {
@@ -2132,6 +2144,13 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'OK_SIGN';
   }
 
+  // DISPONIBLE: pinza pulgar-índice con la muñeca HORIZONTAL (mano tendida,
+  // "disponible"). La pinza en vertical conserva Supervisar/Puntual/Pinza.
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9) {
+    return 'DISPONIBLE';
+  }
+
   // SUPERVISAR: círculo con pulgar e índice llevado a la altura del ojo
   // (vigilar/monitorear). PINZA tiene la misma forma pero a nivel del pecho;
   // la altura de la muñeca discrimina.
@@ -2176,6 +2195,17 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     }
   }
 
+  // TAMPOCO: V en DIAGONAL (ni horizontal ni vertical dominante). VICTORIA es
+  // vertical y TAMBIEN horizontal; el ángulo intermedio expresa negación.
+  // (Provisional LSC, calibrar en Fase 9.)
+  if (idx && mid && !ring && !pink) {
+    const dirTp = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+    if (Math.abs(dirTp.dx) < Math.abs(dirTp.dy) * 0.9 &&
+        Math.abs(dirTp.dy) < Math.abs(dirTp.dx) * 0.9) {
+      return 'TAMPOCO';
+    }
+  }
+
   // VICTORIA (Adiós) es la V en vertical. TAMBIÉN usa la misma V en horizontal
   // (configuración provisional LSC — calibrar en Fase 9). El umbral 0.9 admite
   // V ligeramente inclinadas; Adiós exige dominancia vertical clara.
@@ -2212,6 +2242,23 @@ export function evaluarGesto(lm: Landmark[]): string | null {
 
   if (idx && mid && ring && !pink && !thumb) {
     return 'TRES_DEDOS';
+  }
+
+  // LISTO: cuatro dedos sin pulgar en VERTICAL con la muñeca ALTA (y<0.36,
+  // "todo listo, mano alzada"). CUATRO_DEDOS se hace a media altura y NADA
+  // horizontal y baja; la combinación de orientación y altura discrimina.
+  if (idx && mid && ring && pink && !thumb &&
+      Math.abs(lm[9].y - lm[0].y) > Math.abs(lm[9].x - lm[0].x) * 0.8 &&
+      (lm[0].y + lm[9].y) / 2 < 0.36) {
+    return 'LISTO';
+  }
+
+  // PREPARADO: cuatro dedos sin pulgar en HORIZONTAL con la muñeca media
+  // (0.45-0.55, "listo y dispuesto"); NADA lo hace más abajo (>0.55).
+  if (idx && mid && ring && pink && !thumb &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.8 &&
+      (lm[0].y + lm[9].y) / 2 >= 0.45 && (lm[0].y + lm[9].y) / 2 < 0.55) {
+    return 'PREPARADO';
   }
 
   // NADA: mano plana en horizontal (dedos apuntando al frente) bajo el pecho.
@@ -2337,6 +2384,21 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'TODO';
   }
 
+  // Fase 2 - lote 9 (A restantes + primeros D) — provisionales LSC.
+  // ALGO: pulgar+índice+medio+meñique (sin anular) — forma exclusiva.
+  if (thumb && idx && mid && !ring && pink) {
+    return 'ALGO';
+  }
+  // BIEN: pulgar+medio+anular+meñique (sin índice). LOGRAR dobla ese índice
+  // hacia la palma; aquí el índice va cerrado y suelto.
+  if (thumb && !idx && mid && ring && pink) {
+    return 'BIEN';
+  }
+  // NADIE: únicamente el ANULAR extendido ("quedarse sin dedos").
+  if (!idx && !mid && ring && !pink && !thumb) {
+    return 'NADIE';
+  }
+
   if (!idx && !mid && !ring && !pink && !thumb && allTipsClose(lm, handSize)) {
     return 'LETRA_O';
   }
@@ -2352,6 +2414,22 @@ export function evaluarGesto(lm: Landmark[]): string | null {
       return 'NUMERO_6';
     }
     return lm[4].y < lm[3].y ? 'PULGAR_ARRIBA' : 'PULGAR_ABAJO';
+  }
+
+  // Fase 2 - lote 9 — banda de mano abierta (5 dedos): CERCA (mano a la cara),
+  // MAL (muñeca horizontal media) y LEJOS (mano baja).
+  // CERCA: mano abierta (5 dedos) con la muñeca en la zona de la cara.
+  if (extended >= 4 && thumb && lm[0].y >= 0.32 && lm[0].y < 0.45) {
+    return 'CERCA';
+  }
+  // MAL: mano abierta con la muñeca HORIZONTAL en banda media (palma abajo).
+  if (extended >= 4 && thumb && lm[0].y >= 0.45 && lm[0].y <= 0.62 &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9) {
+    return 'MAL';
+  }
+  // LEJOS: mano abierta con la muñeca muy baja (y>0.62, alargada hacia allá).
+  if (extended >= 4 && thumb && lm[0].y > 0.62) {
+    return 'LEJOS';
   }
 
   // SABER: mano abierta (4+ dedos) con la palma junto a la SIEN (muñeca en la
