@@ -10,7 +10,7 @@
 | Métrica | Valor |
 |---|---|
 | Catálogo documentado | **582 señas** |
-| Implementadas en código | **125 IDs únicos** (100 en GESTO_PALABRA + 25 letras en evaluarLetra) |
+| Implementadas en código | **136 IDs únicos** (109 en GESTO_PALABRA + 27 letras en evaluarLetra) |
 | Reclamo histórico de la doc | ~400+ (era aspiracional; número realizable = 235–250 tras todas las fases) |
 
 **Leyenda de viabilidad técnica:**
@@ -32,7 +32,7 @@
 | Bloque | Contenido | Señas | Implementadas |
 |---|---|---|---|
 | **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 4 |
-| **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 46 |
+| **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 56 |
 | **C** | TIEMPO Y FRECUENCIA | 30 | 15 |
 | **C2** | CALENDARIO: DÍAS Y MESES | 19 | 0 |
 | **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 0 |
@@ -48,7 +48,7 @@
 | **N** | SALUDOS, CORTESÍA Y LÉXICO FUNDACIONAL | 34 | 21 |
 | **P** | SITUACIONES LABORALES Y RR.HH. | 25 | 0 |
 | **O** | DACTILOLOGÍA LSC (27 letras) | 27 | 27 |
-| **TOTAL** | | **582** | **125** |
+| **TOTAL** | | **582** | **136** |
 
 ---
 
@@ -104,7 +104,7 @@
 | TRAER | Traer | 💫 | ⏳ |
 | LLEVAR | Llevar | 💫 | ⏳ |
 | DAR | Dar | ✌️ | ⏳ |
-| TOMAR | Tomar | 🖐️ | ⏳ |
+| TOMAR | Tomar | 🖐️ | ✅ |
 | DEJAR | Dejar | ✌️ | ⏳ |
 | EMPEZAR | Empezar | 💫 | ✅ |
 | TERMINAR | Terminar | 💫 | ⏳ |
@@ -112,7 +112,7 @@
 | REPETIR | Repetir | 💫 | ✅ |
 | INTENTAR | Intentar | 💫 | ✅ |
 | LOGRAR | Lograr | 🖐️ | ✅ |
-| CONSEGUIR | Conseguir | 💫 | ⏳ |
+| CONSEGUIR | Conseguir | 💫 | ✅ |
 | PREGUNTAR | Preguntar | 💫 | ✅ |
 | RESPONDER | Responder | 💫 | ✅ |
 | EXPLICAR | Explicar | ✌️ | ⏳ |
@@ -139,7 +139,7 @@
 | PEDIR | Pedir | ✌️ | ✅ |
 | RECHAZAR_GESTO | Rechazar | 💫 | ✅ |
 | RECIBIR_GESTO | Recibir | 💫 | ✅ |
-| PRODUCIR | Producir | 💫 | ⏳ |
+| PRODUCIR | Producir | 💫 | ✅ |
 | VENDER | Vender | 💫 | ✅ |
 | COMPRAR_GESTO | Comprar | ✌️ | ⏳ |
 | SERVIR | Servir | ✌️ | ⏳ |
@@ -149,14 +149,14 @@
 | INSPECCIONAR | Inspeccionar | 🧍 | ⏳ |
 | EVALUAR_GESTO | Evaluar | 🧍 | ⏳ |
 | CALIFICAR | Calificar | 🖐️ | ✅ |
-| INVESTIGAR | Investigar | 💫 | ⏳ |
+| INVESTIGAR | Investigar | 💫 | ✅ |
 | ANALIZAR | Analizar | 💫 | ✅ |
 | TRANSFERIR_GESTO | Transferir | 💫 | ✅ |
 | COPIAR_GESTO | Copiar | ✌️ | ⏳ |
-| IMPRIMIR_GESTO | Imprimir | 💫 | ⏳ |
+| IMPRIMIR_GESTO | Imprimir | 💫 | ✅ |
 | GUARDAR_GESTO | Guardar | 💫 | ✅ |
 | ELIMINAR_GESTO | Eliminar | 💫 | ✅ |
-| CORREGIR | Corregir | 💫 | ⏳ |
+| CORREGIR | Corregir | 💫 | ✅ |
 | PRIORIZAR | Priorizar | 🖐️ | ✅ |
 | ASIGNAR_GESTO | Asignar | ✌️ | ⏳ |
 | DELEGAR | Delegar | ✌️ | ⏳ |
@@ -164,15 +164,15 @@
 | COORDINAR | Coordinar | ✌️ | ⏳ |
 | LIDERAR | Liderar | 🧍 | ⏳ |
 | MOTIVAR_GESTO | Motivar | 🧍 | ⏳ |
-| RESOLVER_GESTO | Resolver | 💫 | ⏳ |
-| SOLICITUD_GESTO | Solicitar | 💫 | ⏳ |
+| RESOLVER_GESTO | Resolver | 💫 | ✅ |
+| SOLICITUD_GESTO | Solicitar | 💫 | ✅ |
 | AUTORIZACION_GESTO | Autorizar | 🖐️ | ✅ |
 | CONSULTAR | Consultar | 💫 | ✅ |
-| ACTUALIZAR | Actualizar | 💫 | ⏳ |
+| ACTUALIZAR | Actualizar | 💫 | ✅ |
 | REGISTRAR | Registrar | 💫 | ✅ |
 | VERIFICAR | Verificar | 🖐️ | ✅ |
 | AGENDAR | Agendar | ✌️ | ⏳ |
-| ALMACENAR | Almacenar | 💫 | ⏳ |
+| ALMACENAR | Almacenar | 💫 | ✅ |
 
 ## ✨ BLOQUE C — TIEMPO Y FRECUENCIA
 
@@ -319,7 +319,7 @@
 | EMPLEADO | Empleado | 🧍 | ⏳ |
 | ASISTENTE | Asistente | 🧍 | ⏳ |
 | SECRETARIA | Secretaria | 🧍 | ⏳ |
-| CLIENTE | Cliente | 🖐️ | ✅ |
+| CLIENTE | Cliente | 🖐️ | ⏳ |
 | PROVEEDOR | Proveedor | 🧍 | ⏳ |
 | ENTREVISTADOR | Entrevistador | 🧍 | ⏳ |
 | CANDIDATO | Candidato | 🧍 | ⏳ |
@@ -728,7 +728,7 @@
 | 0 | Fundación: recuperación + Fases 1–3 de señas (13 nuevas) | ✅ |
 | 1 | Documentar catálogo conversacional (este doc) | ✅ |
 | 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | ⏳ |
-| 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-5: 50 señas ✅ |
+| 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-6: 60 señas ✅ |
 | 4 | Bloque G (reuniones) + E (frases) — bimanuales ✌️ | ⏳ |
 | 5 | Bloque M (números) + C2 (días/meses) — secuencia | ⏳ |
 | 6 | Pose Landmarker — Bloque J (ubicaciones) + F (personas) 🧍 | ⏳ |

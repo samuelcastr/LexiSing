@@ -618,6 +618,19 @@ export class SignLanguageService {
         }
       }
 
+      // ALMACENAR: puño cerrado que DESCIENDE con deriva LATERAL marcada
+      // (ubicar en un estante bajo). AUTORIZACION sella en recto (rango X
+      // pequeño); aquí el desplazamiento lateral discrimina.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const xsAL2 = historial.map(h => h.landmarks[0].x);
+        const ysAL2 = historial.map(h => h.landmarks[0].y);
+        const rangoXAL = Math.max(...xsAL2) - Math.min(...xsAL2);
+        const descensoAL = ysAL2[ysAL2.length - 1] - ysAL2[0];
+        if (descensoAL > handSize * 0.5 && rangoXAL > handSize * 0.4) {
+          return 'ALMACENAR';
+        }
+      }
+
       // AUTORIZACION_GESTO: puño cerrado que DESCIENDE con amplitud MEDIA
       // (estampar un sello de aprobación). EMPEZAR golpea más profundo
       // (>1.0 handSize) y REPETIR rebota.
@@ -642,6 +655,16 @@ export class SignLanguageService {
         const rangoYR = Math.max(...ysR) - Math.min(...ysR);
         if (crucesYR >= 2 && rangoYR < handSize * 1.0) {
           return 'REPETIR';
+        }
+      }
+
+      // RESOLVER_GESTO: puño cerrado que SUBE con golpe seco (ascenso marcado,
+      // "resolver/solución"). MAÑANA sube con el índice y MEJORAR con el
+      // pulgar; aquí la forma es el puño.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const ysRS = historial.map(h => h.landmarks[0].y);
+        if (ysRS[0] - ysRS[ysRS.length - 1] > handSize * 0.6) {
+          return 'RESOLVER_GESTO';
         }
       }
 
@@ -772,6 +795,42 @@ export class SignLanguageService {
         }
       }
 
+      // PRODUCIR: índice+medio+anular (sin pulgar) descendiendo en UN golpe
+      // firme (producir/ensamblar). EJECUTAR baja en dos pasos y EMPEZAR usa
+      // el puño; aquí es un golpe seco con la forma de tres dedos.
+      if (idx && mid && ring && !pink && !thumb) {
+        const ysPD = historial.map(h => h.landmarks[0].y);
+        const meanPD = ysPD.reduce((a, b) => a + b, 0) / ysPD.length;
+        let crucesPD = 0;
+        for (let i = 1; i < ysPD.length; i++) {
+          if ((ysPD[i] - meanPD) * (ysPD[i - 1] - meanPD) < 0) crucesPD++;
+        }
+        if (ysPD[ysPD.length - 1] - ysPD[0] > handSize * 0.6 && crucesPD < 2) {
+          return 'PRODUCIR';
+        }
+      }
+
+      // CORREGIR: V (índice y medio) APUNTANDO ABAJO que baja en ZIGZAG AMPLIO
+      // (rango ≥ 0.6, tachar/corregir). ANALIZAR vibra con amplitud pequeña
+      // (<0.6); aquí el vaivén es más marcado.
+      if (idx && mid && !ring && !pink && !thumb) {
+        const dirCg = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+        if (Math.abs(dirCg.dy) > Math.abs(dirCg.dx) * 0.9) {
+          const xsCG = historial.map(h => h.landmarks[0].x);
+          const ysCG = historial.map(h => h.landmarks[0].y);
+          const meanCG = xsCG.reduce((a, b) => a + b, 0) / xsCG.length;
+          let crucesCG = 0;
+          for (let i = 1; i < xsCG.length; i++) {
+            if ((xsCG[i] - meanCG) * (xsCG[i - 1] - meanCG) < 0) crucesCG++;
+          }
+          if (crucesCG >= 2 &&
+              Math.max(...xsCG) - Math.min(...xsCG) >= handSize * 0.6 &&
+              ysCG[ysCG.length - 1] - ysCG[0] > handSize * 0.4) {
+            return 'CORREGIR';
+          }
+        }
+      }
+
       // ANALIZAR: V (índice y medio separados) APUNTANDO HACIA ABAJO que vibra
       // en lateral (analizar en detalle). RÁPIDO vibra sin importar la
       // orientación; aquí la punta domina hacia abajo.
@@ -818,6 +877,34 @@ export class SignLanguageService {
         if (rangoXLN > handSize * 0.3 && rangoXLN < handSize * 0.9 &&
             rangoYLN < handSize * 0.4) {
           return 'LENTO';
+        }
+      }
+
+      // INVESTIGAR: índice APUNTANDO HACIA ABAJO (punta bajo la muñeca) trazando
+      // círculos con la mano baja (y≥0.4, "escarbar sobre la mesa"). BUSCAR y
+      // SIEMPRE circulan con el índice al frente; la orientación discrimina.
+      if (idx && !mid && !ring && !pink && !thumb && lm[0].y >= 0.4) {
+        const dirIn = { dx: lm[8].x - lm[5].x, dy: lm[8].y - lm[5].y };
+        if (dirIn.dy > Math.abs(dirIn.dx) * 0.9) {
+          const histIN = this.landmarkHistory
+            .slice(-14)
+            .map(frame => frame.find(m => m.handedness === mano.handedness))
+            .filter((m): m is ManoDetectada => !!m);
+          if (histIN.length >= 9) {
+            const xsIN = histIN.map(h => h.landmarks[0].x);
+            const ysIN = histIN.map(h => h.landmarks[0].y);
+            const crucesIN = (arr: number[]) => {
+              const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+              let c = 0;
+              for (let i = 1; i < arr.length; i++) {
+                if ((arr[i] - mean) * (arr[i - 1] - mean) < 0) c++;
+              }
+              return c;
+            };
+            if (crucesIN(xsIN) >= 2 && crucesIN(ysIN) >= 2) {
+              return 'INVESTIGAR';
+            }
+          }
         }
       }
 
@@ -986,6 +1073,25 @@ export class SignLanguageService {
         }
       }
 
+      // IMPRIMIR_GESTO: mano abierta (4 dedos, sin pulgar) que APLASTA hacia abajo
+      // (descenso medio y termina abajo y>0.6: "imprimir la hoja"). LLEGAR
+      // desciende más profundo (>0.9); aquí es un aplastado contenido.
+      if (idx && mid && ring && pink && !thumb) {
+        const xsIM = historial.map(h => h.landmarks[0].x);
+        const ysIM = historial.map(h => h.landmarks[0].y);
+        const meanIM = ysIM.reduce((a, b) => a + b, 0) / ysIM.length;
+        let crucesIM = 0;
+        for (let i = 1; i < ysIM.length; i++) {
+          if ((ysIM[i] - meanIM) * (ysIM[i - 1] - meanIM) < 0) crucesIM++;
+        }
+        const descensoIM = ysIM[ysIM.length - 1] - ysIM[0];
+        if (descensoIM > handSize * 0.5 && descensoIM < handSize * 0.9 &&
+            ysIM[ysIM.length - 1] > 0.6 && crucesIM < 2 &&
+            Math.max(...xsIM) - Math.min(...xsIM) < handSize * 0.4) {
+          return 'IMPRIMIR_GESTO';
+        }
+      }
+
       // LLEGAR: mano abierta (3+ dedos) que DESCIENDE en línea recta (rango X
       // corto) y se detiene (llegada/aterrizaje). Distinta de TARDE (arco
       // lateral amplio), de DONDE (oscila en x) y de RECHAZAR/RECIBIR (z).
@@ -1031,6 +1137,24 @@ export class SignLanguageService {
         }
         if (crucesCB >= 2) {
           return 'CAMBIAR';
+        }
+      }
+
+      // ACTUALIZAR: puño cerrado ROTANDO la muñeca dos o más veces (actualizar/
+      // renovar la versión). LEER/CAMBIAR rotan con mano abierta; aquí la
+      // forma es el puño.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const angsAC = historial.map(h => {
+          const lmH = h.landmarks;
+          return Math.atan2(lmH[9].y - lmH[0].y, lmH[9].x - lmH[0].x);
+        });
+        const meanAC = angsAC.reduce((a, b) => a + b, 0) / angsAC.length;
+        let crucesAC = 0;
+        for (let i = 1; i < angsAC.length; i++) {
+          if ((angsAC[i] - meanAC) * (angsAC[i - 1] - meanAC) < 0) crucesAC++;
+        }
+        if (crucesAC >= 2) {
+          return 'ACTUALIZAR';
         }
       }
 
@@ -1137,6 +1261,27 @@ export class SignLanguageService {
         }
       }
 
+      // SOLICITUD_GESTO: mano abierta (3+ dedos) que tira HACIA EL CUERPO en dos
+      // tirones (cruces z≥2 con avance neto hacia adentro: "pedir favor").
+      // CONTINUAR impulsa hacia adelante; aquí el neto va hacia el cuerpo.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const histS2 = this.landmarkHistory
+          .slice(-14)
+          .map(frame => frame.find(m => m.handedness === mano.handedness))
+          .filter((m): m is ManoDetectada => !!m);
+        if (histS2.length >= 9) {
+          const zsS2 = histS2.map(h => h.landmarks[9].z);
+          const meanS2 = zsS2.reduce((a, b) => a + b, 0) / zsS2.length;
+          let crucesS2 = 0;
+          for (let i = 1; i < zsS2.length; i++) {
+            if ((zsS2[i] - meanS2) * (zsS2[i - 1] - meanS2) < 0) crucesS2++;
+          }
+          if (crucesS2 >= 2 && zsS2[zsS2.length - 1] - zsS2[0] > 0.02) {
+            return 'SOLICITUD_GESTO';
+          }
+        }
+      }
+
       // CONTINUAR: mano abierta dando DOS pulsos hacia adelante (doble cruce en
       // profundidad z). RECHAZAR/RECIBIR son pulsos únicos.
       if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
@@ -1154,6 +1299,34 @@ export class SignLanguageService {
           if (crucesC >= 2) {
             return 'CONTINUAR';
           }
+        }
+      }
+
+      // CONSEGUIR: mano abierta que SE CIERRA mientras se acerca al cuerpo
+      // (atrapar el logro: los dedos se pliegan y la muñeca vuelve en z).
+      // TOMAR solo cierra; aquí además hay tiraje de profundidad.
+      {
+        const cerrC = historial.map(h => {
+          const l = h.landmarks;
+          return [8, 12, 16, 20].filter(i => dist(l[i], l[0]) > handSize * 0.9).length;
+        });
+        const zsC2 = historial.map(h => h.landmarks[9].z);
+        if (cerrC[0] >= 3 && cerrC[cerrC.length - 1] <= 1 &&
+            Math.max(...zsC2) - zsC2[zsC2.length - 1] > 0.04) {
+          return 'CONSEGUIR';
+        }
+      }
+
+      // TOMAR: mano que SE CIERRA (3+ dedos extendidos al inicio y ≤1 al
+      // final: agarrar/recoger algo). Ninguna otra seña mide el cierre de la
+      // mano.
+      {
+        const cerrT = historial.map(h => {
+          const l = h.landmarks;
+          return [8, 12, 16, 20].filter(i => dist(l[i], l[0]) > handSize * 0.9).length;
+        });
+        if (cerrT[0] >= 3 && cerrT[cerrT.length - 1] <= 1) {
+          return 'TOMAR';
         }
       }
 
@@ -1415,7 +1588,6 @@ export const GESTO_PALABRA: Record<string, string> = {
   // Léxico empresarial (LSC)
   REUNION: 'Reunión',
   INFORME: 'Informe',
-  CLIENTE: 'Cliente',
   PAUSA: 'Pausa',
   APROBAR: 'Aprobar',
   ENVIAR: 'Enviar',
@@ -1497,7 +1669,19 @@ export const GESTO_PALABRA: Record<string, string> = {
   REGISTRAR: 'Registrar',
   GUARDAR_GESTO: 'Guardar',
   VENDER: 'Vender',
-  ELIMINAR_GESTO: 'Eliminar'
+  ELIMINAR_GESTO: 'Eliminar',
+
+  // Fase 3 - lote 6 (Bloque B: últimos verbos de acción) — provisionales LSC
+  TOMAR: 'Tomar',
+  CONSEGUIR: 'Conseguir',
+  PRODUCIR: 'Producir',
+  INVESTIGAR: 'Investigar',
+  IMPRIMIR_GESTO: 'Imprimir',
+  CORREGIR: 'Corregir',
+  RESOLVER_GESTO: 'Resolver',
+  SOLICITUD_GESTO: 'Solicitar',
+  ACTUALIZAR: 'Actualizar',
+  ALMACENAR: 'Almacenar'
 };
 
 function dist(a: Landmark, b: Landmark): number {
