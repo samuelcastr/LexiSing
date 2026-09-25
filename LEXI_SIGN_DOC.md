@@ -10,7 +10,7 @@
 | Métrica | Valor |
 |---|---|
 | Catálogo documentado | **582 señas** |
-| Implementadas en código | **75 IDs únicos** (50 en GESTO_PALABRA + 25 letras en evaluarLetra) |
+| Implementadas en código | **105 IDs únicos** (80 en GESTO_PALABRA + 25 letras en evaluarLetra) |
 | Reclamo histórico de la doc | ~400+ (era aspiracional; número realizable = 235–250 tras todas las fases) |
 
 **Leyenda de viabilidad técnica:**
@@ -32,8 +32,8 @@
 | Bloque | Contenido | Señas | Implementadas |
 |---|---|---|---|
 | **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 4 |
-| **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 6 |
-| **C** | TIEMPO Y FRECUENCIA | 30 | 5 |
+| **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 26 |
+| **C** | TIEMPO Y FRECUENCIA | 30 | 15 |
 | **C2** | CALENDARIO: DÍAS Y MESES | 19 | 0 |
 | **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 0 |
 | **E** | FRASES-GESTO DE CONVERSACIÓN | 22 | 0 |
@@ -48,7 +48,7 @@
 | **N** | SALUDOS, CORTESÍA Y LÉXICO FUNDACIONAL | 34 | 21 |
 | **P** | SITUACIONES LABORALES Y RR.HH. | 25 | 0 |
 | **O** | DACTILOLOGÍA LSC (27 letras) | 27 | 27 |
-| **TOTAL** | | **582** | **75** |
+| **TOTAL** | | **582** | **105** |
 
 ---
 
@@ -87,39 +87,39 @@
 
 | ID | Significado | Tipo | Estado |
 |---|---|---|---|
-| IR | Ir | 💫 | ⏳ |
-| VENIR | Venir | 🖐️ | ⏳ |
-| LLEGAR | Llegar | 💫 | ⏳ |
-| SALIR | Salir | 💫 | ⏳ |
-| ENTRAR | Entrar | 💫 | ⏳ |
-| QUERER | Querer | 🖐️ | ⏳ |
-| PODER | Poder | 🖐️ | ⏳ |
-| DEBER | Deber | 🖐️ | ⏳ |
-| TENER | Tener | 🖐️ | ⏳ |
+| IR | Ir | 💫 | ✅ |
+| VENIR | Venir | 🖐️ | ✅ |
+| LLEGAR | Llegar | 💫 | ✅ |
+| SALIR | Salir | 💫 | ✅ |
+| ENTRAR | Entrar | 💫 | ✅ |
+| QUERER | Querer | 🖐️ | ✅ |
+| PODER | Poder | 🖐️ | ✅ |
+| DEBER | Deber | 🖐️ | ✅ |
+| TENER | Tener | 🖐️ | ✅ |
 | HACER | Hacer | 🖐️ | ⏳ |
 | AYUDAR | Ayudar | ✌️ | ⏳ |
 | ESPERAR | Esperar | ✌️ | ⏳ |
-| BUSCAR | Buscar | 💫 | ⏳ |
+| BUSCAR | Buscar | 💫 | ✅ |
 | ENCONTRAR | Encontrar | 💫 | ⏳ |
 | TRAER | Traer | 💫 | ⏳ |
 | LLEVAR | Llevar | 💫 | ⏳ |
 | DAR | Dar | ✌️ | ⏳ |
 | TOMAR | Tomar | 🖐️ | ⏳ |
 | DEJAR | Dejar | ✌️ | ⏳ |
-| EMPEZAR | Empezar | 💫 | ⏳ |
+| EMPEZAR | Empezar | 💫 | ✅ |
 | TERMINAR | Terminar | 💫 | ⏳ |
-| CONTINUAR | Continuar | 💫 | ⏳ |
-| REPETIR | Repetir | 💫 | ⏳ |
-| INTENTAR | Intentar | 💫 | ⏳ |
-| LOGRAR | Lograr | 🖐️ | ⏳ |
+| CONTINUAR | Continuar | 💫 | ✅ |
+| REPETIR | Repetir | 💫 | ✅ |
+| INTENTAR | Intentar | 💫 | ✅ |
+| LOGRAR | Lograr | 🖐️ | ✅ |
 | CONSEGUIR | Conseguir | 💫 | ⏳ |
-| PREGUNTAR | Preguntar | 💫 | ⏳ |
-| RESPONDER | Responder | 💫 | ⏳ |
+| PREGUNTAR | Preguntar | 💫 | ✅ |
+| RESPONDER | Responder | 💫 | ✅ |
 | EXPLICAR | Explicar | ✌️ | ⏳ |
 | ENSEÑAR | Enseñar | ✌️ | ⏳ |
-| APRENDER | Aprender | 💫 | ⏳ |
-| ENTENDER | Entender | 🖐️ | ⏳ |
-| SABER | Saber | 🖐️ | ⏳ |
+| APRENDER | Aprender | 💫 | ✅ |
+| ENTENDER | Entender | 🖐️ | ✅ |
+| SABER | Saber | 🖐️ | ✅ |
 | MOSTRAR | Mostrar | ✌️ | ⏳ |
 | MIRAR | Mirar | 🧍 | ⏳ |
 | LEER | Leer | 💫 | ⏳ |
@@ -183,27 +183,27 @@
 | HOY | Hoy | ✌️ | ✅ |
 | MAÑANA | Mañana | 💫 | ✅ |
 | AYER | Ayer | 💫 | ✅ |
-| TEMPRANO | Temprano | 💫 | ⏳ |
-| TARDE | Tarde | 💫 | ⏳ |
-| PUNTUAL | Puntual | 🖐️ | ⏳ |
+| TEMPRANO | Temprano | 💫 | ✅ |
+| TARDE | Tarde | 💫 | ✅ |
+| PUNTUAL | Puntual | 🖐️ | ✅ |
 | TARDE_RETRASO | Retraso | 💫 | ⏳ |
-| RAPIDO | Rápido | 💫 | ⏳ |
-| LENTO | Lento | 💫 | ⏳ |
-| SIEMPRE | Siempre | 💫 | ⏳ |
-| NUNCA | Nunca | 💫 | ⏳ |
-| A_VECES | A veces | 💫 | ⏳ |
+| RAPIDO | Rápido | 💫 | ✅ |
+| LENTO | Lento | 💫 | ✅ |
+| SIEMPRE | Siempre | 💫 | ✅ |
+| NUNCA | Nunca | 💫 | ✅ |
+| A_VECES | A veces | 💫 | ✅ |
 | CADA_DIA | Cada día | ✌️ | ⏳ |
 | PROXIMO | Próximo | 🧍 | ⏳ |
 | PASADO | Pasado | 💫 | ⏳ |
 | ESTA_SEMANA | Esta semana | 💫 | ⏳ |
 | ESTE_MES | Este mes | 💫 | ⏳ |
 | ESTE_ANO | Este año | 💫 | ⏳ |
-| DURACION | Duración | 💫 | ⏳ |
+| DURACION | Duración | 💫 | ✅ |
 | TIEMPO_LIBRE | Tiempo libre | ✌️ | ⏳ |
 | DESCANSO | Descanso | 💫 | ⏳ |
 | HORA_EXTRA | Hora extra | 💫 | ⏳ |
 | FIN_DE_SEMANA | Fin de semana | ✌️ | ⏳ |
-| ALMUERZO | Almuerzo | 🖐️ | ⏳ |
+| ALMUERZO | Almuerzo | 🖐️ | ✅ |
 | VACACIONES | Vacaciones | 🧍 | ⏳ |
 | MADRUGADA | Madrugada | 🧍 | ⏳ |
 | MEDIODIA | Mediodía | 🧍 | ⏳ |
@@ -728,7 +728,7 @@
 | 0 | Fundación: recuperación + Fases 1–3 de señas (13 nuevas) | ✅ |
 | 1 | Documentar catálogo conversacional (este doc) | ✅ |
 | 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | ⏳ |
-| 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | ⏳ |
+| 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-3: 30 señas ✅ |
 | 4 | Bloque G (reuniones) + E (frases) — bimanuales ✌️ | ⏳ |
 | 5 | Bloque M (números) + C2 (días/meses) — secuencia | ⏳ |
 | 6 | Pose Landmarker — Bloque J (ubicaciones) + F (personas) 🧍 | ⏳ |
