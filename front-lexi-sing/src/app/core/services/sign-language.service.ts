@@ -711,6 +711,22 @@ export class SignLanguageService {
         }
       }
 
+      // VIEJO: PUÑO cerrado con MICRO-oscilación lateral (crucesX≥2 pero
+      // spread < 0.4 handSize, "temblor"). PELIGRO agita más amplio (>0.5) y
+      // la señal de puño de LLEVAR/NUNCA se mueve en pasadas, no oscila.
+      if (!idx && !mid && !ring && !pink && !thumb) {
+        const xsVi = historial.map(h => h.landmarks[0].x);
+        const meanXVi = xsVi.reduce((a, b) => a + b, 0) / xsVi.length;
+        let crucesXVi = 0;
+        for (let i = 1; i < xsVi.length; i++) {
+          if ((xsVi[i] - meanXVi) * (xsVi[i - 1] - meanXVi) < 0) crucesXVi++;
+        }
+        const spreadVi = Math.max(...xsVi) - Math.min(...xsVi);
+        if (crucesXVi >= 2 && spreadVi < handSize * 0.4) {
+          return 'VIEJO';
+        }
+      }
+
       // PELIGRO: puño cerrado agitándose de lado a lado frente al pecho.
       // Comparte forma con PUÑO_CERRADO (Gracias), se distingue por la
       // oscilación lateral de la muñeca.
@@ -1124,6 +1140,39 @@ export class SignLanguageService {
         }
       }
 
+      // FACIL: V (índice+medio, sin anular/meñique/pulgar) que DESCIENDE en
+      // una pasada suave y contenida (0.3-0.7 handSize, cruces<2, poco lateral).
+      // Ninguna regla previa mueve la forma V.
+      if (idx && mid && !ring && !pink && !thumb) {
+        const ysFa = historial.map(h => h.landmarks[0].y);
+        const xsFa = historial.map(h => h.landmarks[0].x);
+        const meanYFa = ysFa.reduce((a, b) => a + b, 0) / ysFa.length;
+        let crucesYFa = 0;
+        for (let i = 1; i < ysFa.length; i++) {
+          if ((ysFa[i] - meanYFa) * (ysFa[i - 1] - meanYFa) < 0) crucesYFa++;
+        }
+        const descensoFa = ysFa[ysFa.length - 1] - ysFa[0];
+        const rangoXFa = Math.max(...xsFa) - Math.min(...xsFa);
+        if (descensoFa > handSize * 0.3 && descensoFa < handSize * 0.7 &&
+            crucesYFa < 2 && rangoXFa < handSize * 0.4) {
+          return 'FACIL';
+        }
+      }
+      // DIFICIL: la misma V OSCILANDO en vertical (crucesY≥2, "se complica").
+      // FACIL es una pasada única; aquí hay insistencia.
+      if (idx && mid && !ring && !pink && !thumb) {
+        const ysDi = historial.map(h => h.landmarks[0].y);
+        const meanYDi = ysDi.reduce((a, b) => a + b, 0) / ysDi.length;
+        let crucesYDi = 0;
+        for (let i = 1; i < ysDi.length; i++) {
+          if ((ysDi[i] - meanYDi) * (ysDi[i - 1] - meanYDi) < 0) crucesYDi++;
+        }
+        const rangoYDi = Math.max(...ysDi) - Math.min(...ysDi);
+        if (crucesYDi >= 2 && rangoYDi < handSize * 0.6) {
+          return 'DIFICIL';
+        }
+      }
+
       // A_VECES: índice solo que oscila en VERTICAL dos veces (ritmo de
       // "a veces sí, a veces no"). MAÑANA asciende una vez; PREGUNTAR vibra
       // en lateral.
@@ -1162,6 +1211,24 @@ export class SignLanguageService {
         }
       }
 
+      // URGENTE: mano abierta (3+ dedos) que OSCILA en VERTICAL de forma
+      // contenida TERMINANDO en la banda baja/media (y final > 0.45, "pálpito
+      // de urgencia"). ALMUERZO va a la boca (termina alta <0.42) y además
+      // con recorrido amplio; aquí el ritmo es en su sitio, sin subir.
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const ysUr = historial.map(h => h.landmarks[0].y);
+        const meanYUr = ysUr.reduce((a, b) => a + b, 0) / ysUr.length;
+        let crucesYUr = 0;
+        for (let i = 1; i < ysUr.length; i++) {
+          if ((ysUr[i] - meanYUr) * (ysUr[i - 1] - meanYUr) < 0) crucesYUr++;
+        }
+        const rangoYUr = Math.max(...ysUr) - Math.min(...ysUr);
+        if (crucesYUr >= 2 && rangoYUr < handSize * 0.8 &&
+            ysUr[ysUr.length - 1] > 0.45) {
+          return 'URGENTE';
+        }
+      }
+
       // ALMUERZO: mano abierta (3+ dedos) que va DOS veces hacia la boca
       // (comer), terminando en la parte alta del encuadre.
       if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
@@ -1173,6 +1240,20 @@ export class SignLanguageService {
         }
         if (crucesYAL >= 2 && ysAL[ysAL.length - 1] < 0.42) {
           return 'ALMUERZO';
+        }
+      }
+
+      // NUEVO: mano abierta (3+ dedos) que ASCIENDE en recto con amplitud
+      // media (0.4-0.9 handSize) y sin deriva lateral (rangoX<0.4). PASADO
+      // curva lateral (rangoX≥0.4) y TEMPRANO sube más profundo (>0.9).
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const xsNu = historial.map(h => h.landmarks[0].x);
+        const ysNu = historial.map(h => h.landmarks[0].y);
+        const subidaNu = ysNu[0] - ysNu[ysNu.length - 1];
+        const rangoXNu = Math.max(...xsNu) - Math.min(...xsNu);
+        if (subidaNu > handSize * 0.4 && subidaNu < handSize * 0.9 &&
+            rangoXNu < handSize * 0.4) {
+          return 'NUEVO';
         }
       }
 
@@ -1931,7 +2012,17 @@ export const GESTO_PALABRA: Record<string, string> = {
   VACIO: 'Vacío',
   CORRECTO: 'Correcto',
   INCORRECTO: 'Incorrecto',
-  IMPORTANTE: 'Importante'
+  IMPORTANTE: 'Importante',
+
+  // Fase 2 - lote 11 (cierre de una mano) — provisionales LSC
+  NECESARIO: 'Necesario',
+  DISPONIBLE_NO: 'No disponible',
+  PRECISO: 'Preciso',
+  FACIL: 'Fácil',
+  DIFICIL: 'Difícil',
+  NUEVO: 'Nuevo',
+  VIEJO: 'Viejo',
+  URGENTE: 'Urgente'
 };
 
 function dist(a: Landmark, b: Landmark): number {
@@ -2157,10 +2248,17 @@ export function evaluarGesto(lm: Landmark[]): string | null {
   }
 
   // DISPONIBLE: pinza pulgar-índice con la muñeca HORIZONTAL (mano tendida,
-  // "disponible"). La pinza en vertical conserva Supervisar/Puntual/Pinza.
+  // "disponible") a media altura (y<0.6). La pinza vertical conserva
+  // Supervisar/Puntual/Pinza; DISPONIBLE_NO es la misma pinza BAJA (>0.6).
   if (thumbIndexPinch && !idx && !mid && !ring && !pink &&
-      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9) {
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9 &&
+      (lm[0].y + lm[9].y) / 2 < 0.6) {
     return 'DISPONIBLE';
+  }
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink &&
+      Math.abs(lm[9].x - lm[0].x) > Math.abs(lm[9].y - lm[0].y) * 0.9 &&
+      (lm[0].y + lm[9].y) / 2 >= 0.6) {
+    return 'DISPONIBLE_NO';
   }
 
   // SUPERVISAR: círculo con pulgar e índice llevado a la altura del ojo
@@ -2177,9 +2275,16 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'CORRECTO';
   }
 
-  // PUNTUAL: pinza de pulgar-índice a la altura BAJA (junto al reloj, y>0.6).
-  // SUPERVISAR es la pinza alta (y<0.45) y PINZA la del pecho.
-  if (thumbIndexPinch && !idx && !mid && !ring && !pink && (lm[0].y + lm[9].y) / 2 > 0.6) {
+  // PRECISO: pinza vertical en la banda media-baja (0.6-0.68, "con precisión,
+  // firme junto al reloj"). PUNTUAL queda para la banda más profunda (>0.68).
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink &&
+      (lm[0].y + lm[9].y) / 2 >= 0.6 && (lm[0].y + lm[9].y) / 2 < 0.68) {
+    return 'PRECISO';
+  }
+  // PUNTUAL: pinza de pulgar-índice a la altura BAJA (junto al reloj, y>0.68).
+  // SUPERVISAR es la pinza alta (y<0.45), PINZA la del pecho y PRECISO la
+  // banda 0.6-0.68.
+  if (thumbIndexPinch && !idx && !mid && !ring && !pink && (lm[0].y + lm[9].y) / 2 >= 0.68) {
     return 'PUNTUAL';
   }
 
@@ -2267,6 +2372,11 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     }
     if (dirIdx.dy > handSize * 1.1) {
       return 'AHORA';
+    }
+    // NECESARIO: índice hacia arriba con la mano MUY ALTA (y<0.35, alzado
+    // para pedir algo). INDICE_ARRIBA (Atención) conserva media/baja.
+    if (lm[0].y < 0.35) {
+      return 'NECESARIO';
     }
     return 'INDICE_ARRIBA';
   }
