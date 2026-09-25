@@ -1081,6 +1081,17 @@ export class SignLanguageService {
         }
       }
 
+      // ANTES: MEÑIQUE extendido que RETROCEDE en lateral (una pasada, sin
+      // regreso). Ninguna otra regla de movimiento usa el meñique solo; las de
+      // puño y abierta no aplican a esta forma.
+      if (!idx && !mid && !ring && pink && !thumb) {
+        const xsAnt = historial.map(h => h.landmarks[0].x);
+        const retrocesoAnt = Math.max(...xsAnt) - Math.min(...xsAnt);
+        if (retrocesoAnt > handSize * 0.6 && retrocesoAnt < handSize * 1.2) {
+          return 'ANTES';
+        }
+      }
+
       // TARDE_RETRASO: índice que BAJA en DOS micro-pasos (el reloj marcando el
       // atraso, con descenso neto). A_VECES oscila en vertical sin bajar.
       if (idx && !mid && !ring && !pink && !thumb) {
@@ -1506,6 +1517,19 @@ export class SignLanguageService {
         }
       }
 
+      // DESPUES: mano abierta (3+ dedos) que se ALEJA hacia adelante con un
+      // avance contenida (-0.05 a -0.14) TERMINANDO BAJO (y>0.55). RECHAZAR
+      // empuja fuerte (z<-0.08) a cualquier altura; aquí el final bajo en la
+      // trayectoria a media distancia discrimina. (Provisional LSC.)
+      if ([idx, mid, ring, pink].filter(Boolean).length >= 3) {
+        const zsDes = historial.map(h => h.landmarks[9].z);
+        const ysDes = historial.map(h => h.landmarks[0].y);
+        const avanceZDes = zsDes[zsDes.length - 1] - zsDes[0];
+        if (avanceZDes < -0.05 && avanceZDes > -0.14 && ysDes[ysDes.length - 1] > 0.55) {
+          return 'DESPUES';
+        }
+      }
+
       // RECHAZAR_GESTO / RECIBIR_GESTO: mano abierta (3+ dedos) que se empuja
       // hacia adelante (z decrece = se acerca a la cámara) o se trae al cuerpo
       // (z crece). El eje de profundidad de MediaPipe da la dirección.
@@ -1871,7 +1895,19 @@ export const GESTO_PALABRA: Record<string, string> = {
   ESTE_MES: 'Este mes',
   ESTE_ANO: 'Este año',
   DESCANSO: 'Descanso',
-  HORA_EXTRA: 'Hora extra'
+  HORA_EXTRA: 'Hora extra',
+
+  // Fase 2 - lote 8 (Bloque A, una mano) — provisionales LSC
+  QUIEN: 'Quién',
+  CUANDO: 'Cuándo',
+  POR_QUE: 'Por qué',
+  COMO: 'Cómo',
+  CUANTO: 'Cuánto',
+  CUAL: 'Cuál',
+  PARA_QUE: 'Para qué',
+  TODO: 'Todo',
+  ANTES: 'Antes',
+  DESPUES: 'Después'
 };
 
 function dist(a: Landmark, b: Landmark): number {
@@ -2259,10 +2295,46 @@ export function evaluarGesto(lm: Landmark[]): string | null {
     return 'VENDER';
   }
 
-  // HACER: pulgar+índice extendidos, resto cerrado (forma de "L" = accionar/
-  // hacer). TE_QUIERO necesita el meñique; aquí van solo dos dedos.
-  if (thumb && idx && !mid && !ring && !pink) {
+  // HACER: PULGAR y ANULAR extendidos (índice, medio y meñique cerrados).
+  // LETRA_L ocupa pulgar+índice; el anular diferencia la forma de "hacer".
+  // (Provisional LSC, calibrar en Fase 9.)
+  if (thumb && !idx && !mid && ring && !pink) {
     return 'HACER';
+  }
+
+  // Fase 2 - Bloque A (preguntas): formas de una mano exclusivas PROVISIONALES
+  // LSC (calibrar en Fase 9). Cada combinación de dedos es única del catálogo.
+  // QUIEN: pulgar+anular+meñique ("ventana" hacia el interlocutor).
+  if (thumb && !idx && !mid && ring && pink) {
+    return 'QUIEN';
+  }
+  // CUANDO: índice+medio+meñique (tres puntas de pregunta, sin pulgar).
+  if (idx && mid && !ring && pink && !thumb) {
+    return 'CUANDO';
+  }
+  // POR_QUE: índice+anular+meñique (sin medio ni pulgar).
+  if (idx && !mid && ring && pink && !thumb) {
+    return 'POR_QUE';
+  }
+  // COMO: pulgar+medio+meñique.
+  if (thumb && !idx && mid && !ring && pink) {
+    return 'COMO';
+  }
+  // CUANTO: pulgar+índice+anular (sin medio ni meñique).
+  if (thumb && idx && !mid && ring && !pink) {
+    return 'CUANTO';
+  }
+  // CUAL: pulgar+medio+anular (sin índice ni meñique).
+  if (thumb && !idx && mid && ring && !pink) {
+    return 'CUAL';
+  }
+  // PARA_QUE: pulgar+índice+anular+meñique (sin medio, "cuatro abiertos").
+  if (thumb && idx && !mid && ring && pink) {
+    return 'PARA_QUE';
+  }
+  // TODO: medio+anular+meñique sin pulgar ni índice ("todo lo que queda").
+  if (!idx && mid && ring && pink && !thumb) {
+    return 'TODO';
   }
 
   if (!idx && !mid && !ring && !pink && !thumb && allTipsClose(lm, handSize)) {

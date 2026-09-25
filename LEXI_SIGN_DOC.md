@@ -31,7 +31,7 @@
 
 | Bloque | Contenido | Señas | Implementadas |
 |---|---|---|---|
-| **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 4 |
+| **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 14 |
 | **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 61 |
 | **C** | TIEMPO Y FRECUENCIA | 30 | 22 |
 | **C2** | CALENDARIO: DÍAS Y MESES | 19 | 0 |
@@ -48,7 +48,7 @@
 | **N** | SALUDOS, CORTESÍA Y LÉXICO FUNDACIONAL | 34 | 21 |
 | **P** | SITUACIONES LABORALES Y RR.HH. | 25 | 0 |
 | **O** | DACTILOLOGÍA LSC (27 letras) | 27 | 27 |
-| **TOTAL** | | **582** | **148** |
+| **TOTAL** | | **582** | **158** |
 
 ---
 
@@ -57,16 +57,16 @@
 | ID | Significado | Tipo | Estado |
 |---|---|---|---|
 | QUE | Qué | 🖐️ | ✅ |
-| QUIEN | Quién | 🖐️ | ⏳ |
+| QUIEN | Quién | 🖐️ | ✅ |
 | DONDE | Dónde | 💫 | ✅ |
-| CUANDO | Cuándo | 🖐️ | ⏳ |
-| POR_QUE | Por qué | 🖐️ | ⏳ |
-| COMO | Cómo | 🖐️ | ⏳ |
-| CUANTO | Cuánto | 🖐️ | ⏳ |
-| CUAL | Cuál | 🖐️ | ⏳ |
-| PARA_QUE | Para qué | 🖐️ | ⏳ |
+| CUANDO | Cuándo | 🖐️ | ✅ |
+| POR_QUE | Por qué | 🖐️ | ✅ |
+| COMO | Cómo | 🖐️ | ✅ |
+| CUANTO | Cuánto | 🖐️ | ✅ |
+| CUAL | Cuál | 🖐️ | ✅ |
+| PARA_QUE | Para qué | 🖐️ | ✅ |
 | NADA | Nada | 🖐️ | ✅ |
-| TODO | Todo | 🖐️ | ⏳ |
+| TODO | Todo | 🖐️ | ✅ |
 | ALGO | Algo | 🖐️ | ⏳ |
 | NADIE | Nadie | 🖐️ | ⏳ |
 | TAMBIEN | También | 🖐️ | ✅ |
@@ -79,8 +79,8 @@
 | ABAJO | Abajo | 🧍 | ⏳ |
 | ADENTRO | Adentro | 🧍 | ⏳ |
 | AFUERA | Afuera | 🧍 | ⏳ |
-| ANTES | Antes | 💫 | ⏳ |
-| DESPUES | Después | 💫 | ⏳ |
+| ANTES | Antes | 💫 | ✅ |
+| DESPUES | Después | 💫 | ✅ |
 | NO_ENTENDER | No entender | 😊 | ⏳ |
 
 ## ✨ BLOQUE B — VERBOS DE ACCIÓN COTIDIANA
@@ -727,7 +727,7 @@
 |---|---|---|
 | 0 | Fundación: recuperación + Fases 1–3 de señas (13 nuevas) | ✅ |
 | 1 | Documentar catálogo conversacional (este doc) | ✅ |
-| 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | ⏳ |
+| 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | 🟡 en curso — una mano: 10/38 (lote 8 ✅) |
 | 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-7: 72 señas ✅ (una mano 💫/🖐️ cerrado; ✌️ → Fase 4, 🧍 → Fase 6) |
 | 4 | Bloque G (reuniones) + E (frases) — bimanuales ✌️ | ⏳ |
 | 5 | Bloque M (números) + C2 (días/meses) — secuencia | ⏳ |
