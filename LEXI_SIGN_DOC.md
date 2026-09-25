@@ -32,8 +32,8 @@
 | Bloque | Contenido | Señas | Implementadas |
 |---|---|---|---|
 | **A** | PREGUNTAS Y CONECTORES DE CONVERSACIÓN | 26 | 4 |
-| **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 56 |
-| **C** | TIEMPO Y FRECUENCIA | 30 | 15 |
+| **B** | VERBOS DE ACCIÓN COTIDIANA | 86 | 61 |
+| **C** | TIEMPO Y FRECUENCIA | 30 | 22 |
 | **C2** | CALENDARIO: DÍAS Y MESES | 19 | 0 |
 | **D** | ADJETIVOS DE EVALUACIÓN Y ESTADO | 27 | 0 |
 | **E** | FRASES-GESTO DE CONVERSACIÓN | 22 | 0 |
@@ -48,7 +48,7 @@
 | **N** | SALUDOS, CORTESÍA Y LÉXICO FUNDACIONAL | 34 | 21 |
 | **P** | SITUACIONES LABORALES Y RR.HH. | 25 | 0 |
 | **O** | DACTILOLOGÍA LSC (27 letras) | 27 | 27 |
-| **TOTAL** | | **582** | **136** |
+| **TOTAL** | | **582** | **148** |
 
 ---
 
@@ -96,18 +96,18 @@
 | PODER | Poder | 🖐️ | ✅ |
 | DEBER | Deber | 🖐️ | ✅ |
 | TENER | Tener | 🖐️ | ✅ |
-| HACER | Hacer | 🖐️ | ⏳ |
+| HACER | Hacer | 🖐️ | ✅ |
 | AYUDAR | Ayudar | ✌️ | ⏳ |
 | ESPERAR | Esperar | ✌️ | ⏳ |
 | BUSCAR | Buscar | 💫 | ✅ |
-| ENCONTRAR | Encontrar | 💫 | ⏳ |
-| TRAER | Traer | 💫 | ⏳ |
-| LLEVAR | Llevar | 💫 | ⏳ |
+| ENCONTRAR | Encontrar | 💫 | ✅ |
+| TRAER | Traer | 💫 | ✅ |
+| LLEVAR | Llevar | 💫 | ✅ |
 | DAR | Dar | ✌️ | ⏳ |
 | TOMAR | Tomar | 🖐️ | ✅ |
 | DEJAR | Dejar | ✌️ | ⏳ |
 | EMPEZAR | Empezar | 💫 | ✅ |
-| TERMINAR | Terminar | 💫 | ⏳ |
+| TERMINAR | Terminar | 💫 | ✅ |
 | CONTINUAR | Continuar | 💫 | ✅ |
 | REPETIR | Repetir | 💫 | ✅ |
 | INTENTAR | Intentar | 💫 | ✅ |
@@ -186,7 +186,7 @@
 | TEMPRANO | Temprano | 💫 | ✅ |
 | TARDE | Tarde | 💫 | ✅ |
 | PUNTUAL | Puntual | 🖐️ | ✅ |
-| TARDE_RETRASO | Retraso | 💫 | ⏳ |
+| TARDE_RETRASO | Retraso | 💫 | ✅ |
 | RAPIDO | Rápido | 💫 | ✅ |
 | LENTO | Lento | 💫 | ✅ |
 | SIEMPRE | Siempre | 💫 | ✅ |
@@ -194,14 +194,14 @@
 | A_VECES | A veces | 💫 | ✅ |
 | CADA_DIA | Cada día | ✌️ | ⏳ |
 | PROXIMO | Próximo | 🧍 | ⏳ |
-| PASADO | Pasado | 💫 | ⏳ |
-| ESTA_SEMANA | Esta semana | 💫 | ⏳ |
-| ESTE_MES | Este mes | 💫 | ⏳ |
-| ESTE_ANO | Este año | 💫 | ⏳ |
+| PASADO | Pasado | 💫 | ✅ |
+| ESTA_SEMANA | Esta semana | 💫 | ✅ |
+| ESTE_MES | Este mes | 💫 | ✅ |
+| ESTE_ANO | Este año | 💫 | ✅ |
 | DURACION | Duración | 💫 | ✅ |
 | TIEMPO_LIBRE | Tiempo libre | ✌️ | ⏳ |
-| DESCANSO | Descanso | 💫 | ⏳ |
-| HORA_EXTRA | Hora extra | 💫 | ⏳ |
+| DESCANSO | Descanso | 💫 | ✅ |
+| HORA_EXTRA | Hora extra | 💫 | ✅ |
 | FIN_DE_SEMANA | Fin de semana | ✌️ | ⏳ |
 | ALMUERZO | Almuerzo | 🖐️ | ✅ |
 | VACACIONES | Vacaciones | 🧍 | ⏳ |
@@ -728,7 +728,7 @@
 | 0 | Fundación: recuperación + Fases 1–3 de señas (13 nuevas) | ✅ |
 | 1 | Documentar catálogo conversacional (este doc) | ✅ |
 | 2 | Bloque A (preguntas) + D (adjetivos) — estáticas 🖐️ | ⏳ |
-| 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-6: 60 señas ✅ |
+| 3 | Bloque B (verbos) + C (tiempo) — movimiento 💫 | 🟡 lotes 1-7: 72 señas ✅ (una mano 💫/🖐️ cerrado; ✌️ → Fase 4, 🧍 → Fase 6) |
 | 4 | Bloque G (reuniones) + E (frases) — bimanuales ✌️ | ⏳ |
 | 5 | Bloque M (números) + C2 (días/meses) — secuencia | ⏳ |
 | 6 | Pose Landmarker — Bloque J (ubicaciones) + F (personas) 🧍 | ⏳ |
